@@ -6326,7 +6326,7 @@ const submitForm = (formEl) => {
               ElMessage({
                 type: "error",
                 message:
-                  "密码的组成至少6位以上，要包含字母、数字、符号，例如：w-765223！",
+                  "密码的组成至少8位以上，要包含字母、数字、符号，例如：w-765223！",
               });
             }
           });
@@ -7564,7 +7564,7 @@ function toSystemHjws(item) {
     }
   }
   if (permission.value == true) {
-    window.open(item.url);
+    window.open(item.url + "?phone=" + params.username);
   } else {
     ElMessage.error("对不起，你无权访问系统！");
   }
@@ -8431,13 +8431,20 @@ function toSystem(item) {
           showClose: true,
           message: "正在开发中...",
         });
-      } else window.open(item.url);
+      } else if (item.systemId == "18" || item.systemId == "7" || item.systemId == "5") {
+        // 这三个系统目前url无登录参数
+        item.url = item.url + "?phone=" + params.username;
+        console.log("url:" + item.url);
+        window.open(item.url);
+      } else window.open(item.url + "&phone=" + params.username);
     }
 
     console.log(item.systemName);
-    if (item.systemId == "13")
+    if (item.systemId == "13") {
       //共享单车
+      gxdc.url += "&phone=" + params.username;
       window.open(gxdc.url);
+    }
     if (item.systemId == "16") {
       //诉易达
 
@@ -8446,7 +8453,7 @@ function toSystem(item) {
         // var sydUrl =
         //   "https://www.jncgsqbl.com/namespaces/1/categories/1?_user_login_token=";
         var sydUrl = "http://119.4.191.13:9580/#/login?token=";
-        sydUrl = sydUrl + token.value;
+        sydUrl = sydUrl + token.value + "&phone=" + params.username;
         syd.url = sydUrl;
         console.log(syd.url);
         window.open(syd.url);
@@ -8454,7 +8461,7 @@ function toSystem(item) {
     }
     if (item.systemId == "17" || item.systemId == "4") {
       getAiUrl().then((data) => {
-        aiUrl.value = data.message;
+        aiUrl.value = data.message + "&phone=" + params.username;
         console.log("22222", aiUrl.value);
         console.log("11111111", data, aiUrl);
         window.open(aiUrl.value);

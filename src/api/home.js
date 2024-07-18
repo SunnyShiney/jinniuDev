@@ -28,6 +28,25 @@ export function getLogin(user) {
         data: user
     })
 }
+export function sendSMS(tel) {
+    return request({
+        url:'/sms/send/' + tel,
+        method: 'get'
+    })
+}
+export function validateSMS(tel, code) {
+    return request({
+        url: '/sms/validate/' + tel + '/' + code,
+        method: 'get'
+    })
+}
+export function resetPasswordSMS(params) {
+    return request({
+        url: '/sms/changePwd',
+        method: 'post',
+        data: params
+    })
+}
 export function changePassword(password) {
     return request({
         url: '/auth/change_password',

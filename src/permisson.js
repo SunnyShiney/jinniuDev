@@ -10,6 +10,10 @@ router.beforeEach(async (to, from, next) => {
   //获取token
   const token = getToken();
   if (!token && to.path != "/login") {
+    // 忘记密码页面直接放行
+    if (to.path == "/forget-password") {
+      return next();
+    }
     const hash = window.location.hash;
 
    //免密登录处理url中的查询参数

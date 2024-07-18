@@ -13,6 +13,7 @@ import Yyxt from "@/views/yyxt/Yyxt.vue"
 import Cclj from "@/views/cclj/Cclj.vue"
 import Shlj from "@/views/shlj/Shlj.vue"
 import Map from "@/views/Map.vue"
+import ForgetPassword from "@/views/ForgetPassword.vue";
 import jkjm from "@/views/yyxt/components/Jkjm.vue"
 import Ggzp from "@/views/ggzp/Ggzp.vue"
 import Dept0 from "@/views/home/dept0.vue"
@@ -35,6 +36,7 @@ const routes = [
     component: Changepsw,
     name: Changepsw,
   },
+  { name: "forgetpassword", path: "/forget-password", component: ForgetPassword },
   { name: "home", path: "/home", component: Home, meta: { requestAuth: true } },
   { name: "map", path: "/map", component: Map, meta: { requestAuth: true } },
   { name: "dept0", path: "/dept0", component: Dept0 },

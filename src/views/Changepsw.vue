@@ -80,7 +80,7 @@ const login = () => {
       if (data.isValidPassword == "false") {
         ElMessage({
           message: h("p", null, [
-            h("span", null, "密码的组成至少6位以上，要包含字母、数字、符号，例如：w-765223"),
+            h("span", null, "密码的组成至少8位以上，要包含字母、数字、符号，例如：w-765223"),
           ]),
           type: "error",
         });
@@ -105,7 +105,7 @@ const login = () => {
             } else {
               ElMessage({
                 type: "error",
-                message: "密码的组成至少6位以上，要包含字母、数字、符号，例如：w-765223！",
+                message: "密码的组成至少8位以上，要包含字母、数字、符号，例如：w-765223！",
               });
             }
           });

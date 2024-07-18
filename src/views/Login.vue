@@ -24,6 +24,16 @@
         @change="changeRememberUser"
       />
       <div class="remember-password-text">记住密码</div>
+      <!-- <a href="#/forget-password" class="forget-password-text" >忘记密码？</a> -->
+      <el-button
+            class="forget-password-text"
+            plain
+            link
+            color="#ffffff"
+            @click="forgetPassword"
+            size="large"
+            >忘记密码？</el-button
+          >
       <el-button class="login-btn" type="primary" color="#0B9ED9" @click="login"
         >登录</el-button
       >
@@ -142,11 +152,15 @@ const login = () => {
       }
     } else {
       ElMessage({
-        message: h("p", null, [h("span", null, "用户名或者密码错误！")]),
+        message: h("p", null, [h("span", null, data.error_message)]),
         type: "error",
       });
     }
   });
+};
+
+const forgetPassword = () => {
+  router.push("/forget-password");
 };
 </script>
 
@@ -288,6 +302,17 @@ input[type="checkbox"]::after {
   position: absolute;
   top: 32.6vh;
   left: 8.2vw;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-family: PingFangSC-Regular;
+}
+
+.forget-password-text {
+  width: 5vw;
+  height: 1.9vh;
+  position: absolute;
+  top: 32.6vh;
+  left: 16.4vw;
   color: #ffffff;
   font-size: 0.875rem;
   font-family: PingFangSC-Regular;
