@@ -14,11 +14,11 @@
             <el-col :span="8">
               <!-- Update the button label based on countdown -->
               <el-button
-                :disabled="countdown > 0"
+                :disabled="countdown > 0 && !phoneNumberChanged"
                 @click="sendVerificationCode"
                 type="primary"
               >
-                {{ countdown > 0 ? countdown + "秒后重新发送" : "发送验证码" }}
+                {{ countdown > 0 && !phoneNumberChanged? countdown + "秒后重新发送" : "发送验证码" }}
               </el-button>
             </el-col>
           </el-row>
@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, h, reactive } from "vue";
+import { ref, h, reactive, watch } from "vue";
 import { params } from "@/store/store.js";
 import { sendSMS, validateSMS, resetPasswordSMS } from "@/api/home.js";
 import { ElMessage, ElDialog, tabBarProps, ElMessageBox } from "element-plus";
@@ -87,14 +87,22 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 const phoneNumber = ref("");
+const phoneNumberChanged = ref(false);
 const token = ref("");
 const verificationCode = ref("");
-const countdown = ref(0); // Add a ref for countdown
+const countdown = ref(0); 
 const changePasswordDialog = ref(false);
 const form = reactive({
   new_password: "",
   new_password_confirm: "",
 });
+
+watch(phoneNumber, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    phoneNumberChanged.value = true;
+  }
+});
+
 const validatePass = (rules, value, callback) => {
   if (value === "") {
     callback(new Error("请输入密码！"));
@@ -162,7 +170,7 @@ const submitForm = (formEl) => {
 };
 
 const sendVerificationCode = () => {
-  if (countdown.value === 0) {
+  if (countdown.value <= 0) {
     // Start the countdown at 60 seconds
     countdown.value = 60;
     const interval = setInterval(() => {
@@ -176,13 +184,14 @@ const sendVerificationCode = () => {
       console.log("sendVerificationCode: ", data);
       if (data.status == true) {
         console.log("发送成功");
+        phoneNumberChanged.value = false;
       } else {
         console.log("发送失败");
         ElMessage({
           message: h("p", null, [h("span", null, data.msg)]),
           type: "error",
         });
-        countdown.value = 0;
+        countdown.value = 1;
       }
     });
   }
