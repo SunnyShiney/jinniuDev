@@ -1014,6 +1014,7 @@ function show(system, id, url) {
           window.open(aiUrl.value);
         });
       }
+      uploadClickLog(system.systemName);
     }
   } else {
     ElMessage.error("对不起，你无权访问系统！");

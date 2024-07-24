@@ -1643,6 +1643,7 @@ function show(system, id, url) {
           window.open(url);
         }
       } //调度指挥
+      uploadClickLog(system.systemName);
     }
   } else {
     ElMessage.error("对不起，你无权访问系统！");

@@ -47,7 +47,7 @@ import router from "@/router";
 import { ref, onMounted, reactive, h } from "vue";
 import { ElMessage, ElDialog, tabBarProps } from "element-plus";
 import { params } from "@/store/store.js";
-import { getLogin } from "@/api/home.js";
+import { getLogin, uploadClickLog } from "@/api/home.js";
 
 // import { useCookies } from '@vueuse/integrations/useCookies'
 import { setToken ,setHwzyToken} from "@/composables/auth";
@@ -150,6 +150,7 @@ const login = () => {
         router.push({ name: "map" });
         localStorage.setItem("username", params.username);
       }
+      uploadClickLog("城市管家");
     } else {
       ElMessage({
         message: h("p", null, [h("span", null, data.error_message)]),

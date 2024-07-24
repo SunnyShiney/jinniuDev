@@ -641,6 +641,7 @@ function show(item) {
   }
   if (permission.value == true) {
     window.open(item.url);
+    uploadClickLog(item.systemName);
   } else {
     ElMessage.error("对不起，你无权访问系统！");
   }

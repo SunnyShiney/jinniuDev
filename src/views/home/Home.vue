@@ -3839,7 +3839,7 @@ import { useRouter } from "vue-router";
 import MainInfo from "@/views/home/components/MainInfo.vue";
 import ClassItem from "@/views/home/components/ClassItem.vue";
 import Header from "@/components/Header.vue";
-import { get, getDeptList, getSystemList, changePassword } from "@/api/home.js";
+import { get, getDeptList, getSystemList, changePassword, uploadClickLog } from "@/api/home.js";
 import { getToken, getMainSyd } from "@/api/syd";
 import { getTokenGxdc, getMainGxdc, getCompany } from "@/api/gxdc";
 import { params } from "@/store/store.js";
@@ -7565,6 +7565,7 @@ function toSystemHjws(item) {
   }
   if (permission.value == true) {
     window.open(item.url + "?phone=" + params.username);
+    uploadClickLog(item.systemName);
   } else {
     ElMessage.error("对不起，你无权访问系统！");
   }
@@ -8512,6 +8513,7 @@ function toSystem(item) {
         window.open(item.url);
       }
     } //调度指挥
+    uploadClickLog(item.systemName);
   } else {
     ElMessage.error("对不起，你无权访问系统！");
   }
