@@ -300,6 +300,16 @@
             plain
             link
             color="fff"
+            @click="showClickLog()"
+            size="large"
+            v-show="params.role == '管理员'"
+            >点击日志</el-button
+          >
+          <el-button
+            class="buttonToMap"
+            plain
+            link
+            color="fff"
             @click="changePermissonDialog = true"
             size="large"
             v-show="params.role == '管理员'"
@@ -3321,6 +3331,52 @@
         </div>
       </el-dialog>
 
+      <el-dialog
+        v-model="clickLogDialog"
+        title="用户点击日志"
+        align-center="true"
+        width="90%"
+        @close="handleClose"
+      >
+        <div style="font-size: 2rem">日志列表</div>
+        <el-table
+          :data="
+            clickLogList.slice(
+              (current_Page_clickLog - 1) * 10,
+              current_Page_clickLog * 10
+            )
+          "
+          size="large"
+          style="width: 100%"
+          :header-cell-style="{
+            'text-align': 'center',
+            'font-size': '1.5rem',
+            background: '#3B53A1 !important',
+            color: '#ffffff',
+            border: 'none !important',
+          }"
+          :cell-style="cellStyle"
+        >
+          <!-- 序号（应该可选才对-目前没有） -->
+
+          \
+          <el-table-column fixed="left" prop="realName" label="人员姓名" />
+          <el-table-column fixed="left" prop="phone" label="手机号" />
+          <el-table-column fixed="left" prop="subsystem" label="系统名称" />
+          <el-table-column fixed="left" prop="clickTime" label="点击时间" />
+        </el-table>
+        <div class="float-end" style="margin-bottom: 20px">
+          <el-pagination
+            background
+            layout="->,total, prev, pager, next, jumper"
+            :total="total_Records_clickLog"
+            :current-page="current_Page_clickLog"
+            :page-size="10"
+            @current-change="getClickLogApplication"
+          />
+        </div>
+      </el-dialog>
+
       <!-- //-----------------------------------------------------------------sunny 09/07 密码重设列表 -->
       <el-dialog
         v-model="changePermissonDialog"
@@ -3839,7 +3895,7 @@ import { useRouter } from "vue-router";
 import MainInfo from "@/views/home/components/MainInfo.vue";
 import ClassItem from "@/views/home/components/ClassItem.vue";
 import Header from "@/components/Header.vue";
-import { get, getDeptList, getSystemList, changePassword, uploadClickLog } from "@/api/home.js";
+import { get, getDeptList, getSystemList, changePassword, uploadClickLog, getClickLog } from "@/api/home.js";
 import { getToken, getMainSyd } from "@/api/syd";
 import { getTokenGxdc, getMainGxdc, getCompany } from "@/api/gxdc";
 import { params } from "@/store/store.js";
@@ -4576,6 +4632,7 @@ const permissionList = reactive([]);
 const showSuperAdmin = reactive([]);
 const permissonApplicationList = reactive([]);
 const resetPasswordList = reactive([]);
+const clickLogList = reactive([]);
 
 const loading = ref(true);
 const aplicationloading = ref(true);
@@ -4590,6 +4647,9 @@ let page_Count = 0;
 const total_Records_reset = ref(1000);
 let current_Page_reset = ref(1);
 let page_Count_reset = 0;
+const total_Records_clickLog = ref(1000);
+let current_Page_clickLog = ref(1);
+let page_Count_clickLog = 0;
 const permissionForm = ref(null);
 const handleEvent = ref(false);
 const peopleAdd = ref(false);
@@ -4671,6 +4731,38 @@ const ruleForm = reactive({
 });
 const permissonAlert = ref(false);
 
+const clickLogDialog = ref(false);
+const showClickLog = async () => {
+  try{
+    await getClickLogList(1);
+    clickLogDialog = true
+  } catch (error) {
+    console.log("showClickLog:  " + error);
+  }
+}
+const getClickLogList = (pageNum) => {
+  return getClickLog().then((data) => {
+    clickLogList.splice(0, clickLogList.length);
+    for (var key in data) {
+      var clickLog = {
+        realName: data[key].realName,
+        phone: data[key].phone,
+        subsystem: data[key].subsystem,
+        clickTime: data[key].clickTime,
+      };
+      clickLogList.push(clickLog);
+    }
+    console.log("clickLogList:" + clickLogList);
+    total_Records_clickLog.value = clickLogList.length;
+    page_Count_clickLog = parseInt(clickLogList.length) % 10;
+    current_Page_clickLog.value = pageNum;
+  });
+}
+const getClickLogApplication = (pageNum) => {
+  // 当前页
+  current_Page_clickLog.value = pageNum;
+};
+
 //-----------------------------------------------------------------sunny 090/07 密码重设列表
 const getResetPasswordList = (pageNum) => {
   axios({
@@ -4703,6 +4795,7 @@ const getResetPasswordApplication = (pageNum) => {
   // 当前页
   current_Page_reset.value = pageNum;
 };
+
 
 const resetPassword = (row) => {
   console.log("人员姓名：" + row.realName + "电话：" + row.telephone);
@@ -6362,6 +6455,7 @@ const form = reactive({
 const confirmChangePasswordVisible = ref(false);
 const changePermissonDialog = ref(false);
 const resetPasswordDialog = ref(false);
+
 const changePasswordDialog = ref(false);
 const echartInit_srzx = () => {
   document
