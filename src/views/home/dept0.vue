@@ -512,7 +512,7 @@ import { useRouter } from "vue-router";
 import MainInfo from "@/views/home/components/MainInfo.vue";
 import ClassItem from "@/views/home/components/ClassItem.vue";
 import Header from "@/components/Header.vue";
-import { get, getDeptList, getSystemList } from "@/api/home.js";
+import { get, getDeptList, getSystemList, uploadClickLog } from "@/api/home.js";
 import { getMainGarbage } from "@/api/garbage";
 import { getMainCclj, getSitesData } from "@/api/cclj.js";
 import { getMainHwzy } from "@/api/hwzy.js";
@@ -799,7 +799,9 @@ function show(item) {
     }
   }
   if (permission.value == true) {
-    window.open(item.url);
+    var realURL = item.url + "?phone=" + params.username;
+    console.log("realURL:  " + realURL);
+    window.open(realURL);
     uploadClickLog(item.systemName);
   } else {
     ElMessage.error("对不起，你无权访问系统！");

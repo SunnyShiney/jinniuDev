@@ -1001,7 +1001,7 @@ function show(system, id, url) {
       else if (id == "16")
         getToken().then((data) => {
           token.value = data;
-          var sydUrl = "http://119.4.191.13:9580/#/login?token=";
+          var sydUrl = "https://119.4.191.13:9580/#/login?token=";
           sydUrl = sydUrl + token.value;
           syd.url = sydUrl;
           console.log(syd.url);

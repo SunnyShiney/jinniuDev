@@ -4,7 +4,7 @@
     <!-- 商标栏-->
     <el-row>
       <!--商标-->
-      <el-col :span="11">
+      <el-col :span="10">
         <div>
           <el-page-header class="page-header" @back="goback" :icon="null">
             <!-- <template #icon>
@@ -21,14 +21,14 @@
         </div>
       </el-col>
       <!-- 时间 -->
-      <el-col :span="5" class="time">
+      <el-col :span="4" class="time">
         <slot name="time"></slot>
       </el-col>
-                  <el-col :span="3" class="warning">
+      <el-col :span="2" class="warning">
         <slot name="warning"></slot>
       </el-col>
       <!--用户信息-->
-      <el-col :span="5" class="userinfo">
+      <el-col :span="8" class="userinfo">
         <slot name="userinfo"></slot>
       </el-col>
     </el-row>
@@ -37,16 +37,16 @@
 
 <script setup>
 // 向父组件抛出事件，由父组件决定如何处理
-const emit = defineEmits(['back'])
+const emit = defineEmits(["back"]);
 function goback() {
-  emit('back');
+  emit("back");
 }
 </script>
 
 <style scoped>
 .header {
   font-size: 22px;
-  background-color: #004B8C;
+  background-color: #004b8c;
   color: #fff;
   height: 55px;
 }

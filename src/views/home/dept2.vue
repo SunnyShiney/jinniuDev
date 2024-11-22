@@ -598,6 +598,7 @@ const selfSystemPermisson = () => {
           systemPermisson.push("扬尘治理大数据协同管家");
           systemPermisson.push("数字化城市信息管家");
           systemPermisson.push("景观照明管家");
+          systemPermisson.push("照明管家（新）");
           systemPermisson.push("生活垃圾转运处理管家");
           systemPermisson.push("调度指挥管家");
           systemPermisson.push("垃圾全生命周期管家");
@@ -609,6 +610,7 @@ const selfSystemPermisson = () => {
         }
         if (roleList[key].system == "景观照明集中控制管家") {
           systemPermisson.push("景观照明管家");
+          systemPermisson.push("照明管家（新）");
         } else if (roleList[key].system == "垃圾全生命周期管家") {
           systemPermisson.push("垃圾全生命周期管家");
         } else if (roleList[key].system == "智慧公厕管家") {
@@ -640,7 +642,31 @@ function show(item) {
     }
   }
   if (permission.value == true) {
-    window.open(item.url);
+    //window.open(item.url);
+    if (
+      item.systemId != "13" &&
+      item.systemId != "16" &&
+      item.systemId != "17" &&
+      item.systemId != "4" &&
+      item.systemId != "12"
+    ) {
+      console.log(item.systemName);
+      if (item.url === "") {
+        ElMessage({
+          showClose: true,
+          message: "正在开发中...",
+        });
+      } else if (item.systemId == "19") {
+          item.url = item.url + "?iphone=" + params.username;
+          console.log("url:" + item.url);
+          window.open(item.url);
+      } else if (item.systemId == "18" || item.systemId == "7" || item.systemId == "5") {
+        // 这三个系统目前url无登录参数
+          item.url = item.url + "?phone=" + params.username;
+          console.log("url:" + item.url);
+          window.open(item.url);
+      } else window.open(item.url + "&phone=" + params.username);
+    }
     uploadClickLog(item.systemName);
   } else {
     ElMessage.error("对不起，你无权访问系统！");

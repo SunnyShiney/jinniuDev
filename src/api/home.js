@@ -53,9 +53,10 @@ export function uploadClickLog(system) {
         }
     });
 }
-export function getClickLog() {
+export function getClickLog(start, end, sys) {
+    let requestUrl = '/click-log/get?start=' + start + '&end=' + end;
     return request({
-        url: '/click-log/get',
+        url: requestUrl,
         method: 'get',
         headers: {
             Authorization: "Bearer" + params.token

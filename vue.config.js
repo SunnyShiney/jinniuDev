@@ -45,6 +45,22 @@ module.exports = defineConfig({
         },
       },
 
+      "/jgzm/light": {
+        target: "https://119.4.191.13:8091",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/jgzm/light": "", //将url中起始的'/api'替换成''，比如将/api/getDeptList替换成/getDeptList
+        },
+      },
+
+      "/youyan": {
+        target: "https://119.4.191.13:4585",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/youyan": "", //将url中起始的'/api'替换成''，比如将/api/getDeptList替换成/getDeptList
+        },
+      },
+
       "/diao": {
         //政务云
         // target: "http://175.153.176.27:17702/",
