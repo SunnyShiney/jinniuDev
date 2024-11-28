@@ -392,7 +392,7 @@ const tableData_jbgl = ref([]); //警报管理
 let myChart_ggzp1 = null;
 onBeforeUnmount(() => {
   if (myChart_ggzp1) {
-    window.removeEventListener("resize", myChart_ggzp1);
+    //window.removeEventListener("resize", myChart_ggzp1);
     myChart_ggzp1.dispose();
     myChart_ggzp1 = null;
   }
@@ -511,9 +511,9 @@ onMounted(() => {
     ],
   };
   // 监听窗口大小变化事件
-  window.addEventListener("resize", function () {
-    myChart_ggzp1.resize(); // 重新计算图表大小
-  });
+  // window.addEventListener("resize", function () {
+  //   myChart_ggzp1.resize(); // 重新计算图表大小
+  // });
   myChart_ggzp1.setOption(option_ggzp1);
   // }
   getMain().then((data) => {
