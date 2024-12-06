@@ -1633,9 +1633,9 @@ const changeSzcgChart = (page) => {
         ],
       };
       myChart_szcg.setOption(option2);
-      window.onresize = function () {
-        myChart_szcg.resize();
-      };
+      // window.onresize = function () {
+      //   myChart_szcg.resize();
+      // };
     });
   }
   if (currentPageSzcg.value === 2) {

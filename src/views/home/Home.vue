@@ -4983,7 +4983,7 @@ const getClickLogList = (sys, start, end, pageNum) => {
   } else if (sys == "网络理政管家") {
     realUrl = "/syd/prod-api/sys/logs?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
   } else if (sys == "景观照明管家") {
-    realUrl = "/jgzm/light/click-log/get?start=" + start + "&end=" + end + "&page=" + pageNum + "&page_size=10";
+    realUrl = "/jgzm/light/click-log/get/?start=" + start + "&end=" + end + "&page=" + pageNum + "&page_size=10";
   } else if (sys == "环卫作业运行管家") {
     realUrl = "/hw/api/logs/huanwei";
   } else if (sys == "垃圾全生命周期管家") {
@@ -7200,14 +7200,14 @@ onMounted(() => {
 });
 
 //让图表随着屏幕自适应
-window.addEventListener("resize", function () {
-  weeklyChart.resize();
-});
+// window.addEventListener("resize", function () {
+//   weeklyChart.resize();
+// });
 
 //页面跳转之前销毁图表
 onBeforeUnmount(() => {
   if (weeklyChart) {
-    window.removeEventListener("resize", weeklyChart);
+    //window.removeEventListener("resize", weeklyChart);
     weeklyChart.dispose();
     weeklyChart = null;
   }
