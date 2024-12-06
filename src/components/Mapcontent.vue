@@ -2415,7 +2415,7 @@ onMounted(() => {
         console.log("数据长度：" + data.length);
       totalRecords.value = data_total.length;
       pageCount = parseInt(data_total.length) % 10;
-      currentPage.value = pageNum;
+      // currentPage.value = pageNum;
     }
   });
 

@@ -2979,22 +2979,22 @@ function changeArea() {
   jinniuVisible.value = !jinniuVisible.value;
 }
 onBeforeMount(() => {
-  axios({
-    url: "/ddzh/auth/login",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: JSON.stringify({
-      phone: "18008061151",
-      password: "123456",
-    }),
-    method: "post",
-  }).then(function (resp) {
-    console.log(1, resp);
-    var data = resp.data.data;
-    token.value = data.tokenHead + data.token;
-    console.log("得到的token:" + token.value);
-  });
+  // axios({
+  //   url: "/ddzh/auth/login",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   data: JSON.stringify({
+  //     phone: "18008061151",
+  //     password: "123456",
+  //   }),
+  //   method: "post",
+  // }).then(function (resp) {
+  //   console.log(1, resp);
+  //   var data = resp.data.data;
+  //   token.value = data.tokenHead + data.token;
+  //   console.log("得到的token:" + token.value);
+  // });
   // getMapDataSzcg().then(data => {
   //   tableInfoSzcg.value = data
   //   // 请求各个子系统要显示的数据

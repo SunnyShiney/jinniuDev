@@ -217,7 +217,7 @@
             <div class="float-warningEnd">
               <el-pagination
                 background
-                layout="->,total, prev, pager, next, jumper"
+                layout="jumper ,total, prev, pager, next"
                 :total="warningTotalRecords"
                 :current-page="warningCurrentPage"
                 :page-size="5"
@@ -4967,10 +4967,11 @@ const showClickLog = async () => {
     console.log("showClickLog:  " + error);
   }
 };
+//获取点击列表
 const getClickLogList = (sys, start, end, pageNum) => {
   var realUrl = "";
   if (sys == "城市管家") {
-    realUrl = "/api/click-log/get?start=" + start + "&end=" + end;
+    realUrl = "/api/click-log/get?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
   } else if (sys == "餐饮油烟管家") {
     realUrl = "/youyan/external/GetAuditLog?token=jinniuqu&page=" + pageNum + "&limit=10&start=" + start + "&end=" + end;
   } else if (sys == "临街店铺管家") {
@@ -5024,7 +5025,8 @@ const getClickLogList = (sys, start, end, pageNum) => {
     if (sys != "城市管家") {
       console.log("clickLogList:" + JSON.stringify(resp, null, 2));
     }
-    var data = resp.data.data;
+    //列表数据
+    var data = resp.data.data.list;
     
     if (sys == "共享单车管家") {
       data = resp.data.result.data;
@@ -5032,6 +5034,8 @@ const getClickLogList = (sys, start, end, pageNum) => {
       data = resp.data.data.lists;
     } else if (sys == "网络理政管家") {
       data = resp.data.data.contentData;
+    } else if (sys == "城市管家"){
+      data = resp.data.data.list;
     }
     clickLogList.splice(0, clickLogList.length);
     for (var key in data) {
@@ -5063,7 +5067,11 @@ const getClickLogList = (sys, start, end, pageNum) => {
     } else if (sys == "景观照明管家") {
       total_Records_clickLog.value = resp.data.total;
       page_Count_clickLog = parseInt(resp.data.total) % 10;
+    }else if(sys == "城市管家"){
+      total_Records_clickLog.value = resp.data.data.total;
+      page_Count_clickLog = parseInt(resp.data.data.total) % 10;
     }
+
     if (clickLogList.length > (pageNum - 1) * 10) {
       logListView.splice(0, logListView.length, ...clickLogList.slice(
               (pageNum - 1) * 10,
@@ -5075,6 +5083,8 @@ const getClickLogList = (sys, start, end, pageNum) => {
     current_Page_clickLog.value = pageNum;
   });
 };
+
+//换页操作
 const getClickLogApplication = (pageNum) => {
   // 当前页
   current_Page_clickLog.value = pageNum;
@@ -5083,7 +5093,8 @@ const getClickLogApplication = (pageNum) => {
       selectedSys.value == "垃圾全生命周期管家" || 
       selectedSys.value == "餐厨收运管家" ||
       selectedSys.value == "网络理政管家" || 
-      selectedSys.value == "景观照明管家") {
+      selectedSys.value == "景观照明管家"||
+      selectedSys.value == "城市管家") {
     getClickLogList(selectedSys.value, logStart, logEnd, pageNum);
   } else {
     logListView.splice(0, logListView.length, ...clickLogList.slice(
