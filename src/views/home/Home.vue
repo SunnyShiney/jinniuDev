@@ -4970,18 +4970,18 @@ const showClickLog = async () => {
 const getClickLogList = (sys, start, end, pageNum) => {
   var realUrl = "";
   if (sys == "城市管家") {
-    realUrl = "/api/click-log/get?start=" + start + "&end=" + end;
+    realUrl = "/api/click-log/get?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
   } else if (sys == "餐饮油烟管家") {
     realUrl = "/youyan/external/GetAuditLog?token=jinniuqu&page=" + pageNum + "&limit=10&start=" + start + "&end=" + end;
   } else if (sys == "临街店铺管家") {
     realUrl = "/linjie/sign/GetAuditLog?token=jinniuqu&page=" + pageNum + "&limit=10&start=" + start + "&end=" + end;
   } else if (sys == "智慧公厕管家") {
-    realUrl = "/toilet/api/log-view/getLogHistory?start=" + start + "&end=" + end;
+    realUrl = "/toilet/api/log-view/getLogHistory?start=" + start + "&end=" + end + "&pageNum=" + pageNum + "&pageSize=10";
   } else if (sys == "共享单车管家") {
     realUrl = "/bicycle/admin/csgj/logs?page=" + pageNum + "&pageSize=10start=" + start + "&end=" + end + "&token=69883f88658aee26b22230df475e9a89";
   } else if (sys == "网络理政管家") {
     realUrl = "/syd/prod-api/sys/logs?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
-  } else if (sys == "景观照明管家") {
+  } else if (sys == "照明管家（新）") {
     realUrl = "/jgzm/light/click-log/get/?start=" + start + "&end=" + end + "&page=" + pageNum + "&page_size=10";
   } else if (sys == "环卫作业运行管家") {
     realUrl = "/hw/api/logs/huanwei";
@@ -5032,6 +5032,10 @@ const getClickLogList = (sys, start, end, pageNum) => {
       data = resp.data.data.lists;
     } else if (sys == "网络理政管家") {
       data = resp.data.data.contentData;
+    } else if (sys == "智慧公厕管家") {
+      data = resp.data.data.records;
+    } else if (sys == "城市管家") {
+      data = resp.data.data.list;
     }
     clickLogList.splice(0, clickLogList.length);
     for (var key in data) {
@@ -5060,9 +5064,15 @@ const getClickLogList = (sys, start, end, pageNum) => {
     }  else if (sys == "网络理政管家") {
       total_Records_clickLog.value = resp.data.data.totalSize;
       page_Count_clickLog = parseInt(resp.data.data.totalSize) % 10;
-    } else if (sys == "景观照明管家") {
+    } else if (sys == "照明管家（新）") {
       total_Records_clickLog.value = resp.data.total;
       page_Count_clickLog = parseInt(resp.data.total) % 10;
+    } else if (sys == "智慧公厕管家") {
+      total_Records_clickLog.value = resp.data.data.total;
+      page_Count_clickLog = parseInt(resp.data.data.total) % 10;
+    } else if (sys == "城市管家") {
+      total_Records_clickLog.value = resp.data.data.total;
+      page_Count_clickLog = parseInt(resp.data.data.total) % 10;
     }
     if (clickLogList.length > (pageNum - 1) * 10) {
       logListView.splice(0, logListView.length, ...clickLogList.slice(
@@ -5083,7 +5093,9 @@ const getClickLogApplication = (pageNum) => {
       selectedSys.value == "垃圾全生命周期管家" || 
       selectedSys.value == "餐厨收运管家" ||
       selectedSys.value == "网络理政管家" || 
-      selectedSys.value == "景观照明管家") {
+      selectedSys.value == "照明管家（新）" || 
+      selectedSys.value == "智慧公厕管家" ||
+      selectedSys.value == "城市管家") {
     getClickLogList(selectedSys.value, logStart, logEnd, pageNum);
   } else {
     logListView.splice(0, logListView.length, ...clickLogList.slice(
