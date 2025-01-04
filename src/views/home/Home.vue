@@ -5073,6 +5073,9 @@ const getClickLogList = (sys, start, end, pageNum) => {
     } else if (sys == "城市管家") {
       total_Records_clickLog.value = resp.data.data.total;
       page_Count_clickLog = parseInt(resp.data.data.total) % 10;
+    } else if (sys == "临街店铺管家" || sys == "餐饮油烟管家") {
+      total_Records_clickLog.value = resp.data.total;
+      page_Count_clickLog = parseInt(resp.data.total) % 10;
     }
     if (clickLogList.length > (pageNum - 1) * 10) {
       logListView.splice(0, logListView.length, ...clickLogList.slice(
@@ -5095,7 +5098,9 @@ const getClickLogApplication = (pageNum) => {
       selectedSys.value == "网络理政管家" || 
       selectedSys.value == "照明管家（新）" || 
       selectedSys.value == "智慧公厕管家" ||
-      selectedSys.value == "城市管家") {
+      selectedSys.value == "城市管家" ||
+      selectedSys.value == "临街店铺管家" ||
+      selectedSys.value == "餐饮油烟管家") {
     getClickLogList(selectedSys.value, logStart, logEnd, pageNum);
   } else {
     logListView.splice(0, logListView.length, ...clickLogList.slice(
