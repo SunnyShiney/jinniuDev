@@ -9485,7 +9485,7 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   flex-wrap: wrap;
   /*当屏幕尺寸变小时，各个子系统汇总模块自动换行*/
   justify-content: center;
-  background: url("/public/images/bg-box2.jpg") center;
+  background: url("/public/images/bg-box7.jpg") -30%;
 }
 
 .logo-title {
