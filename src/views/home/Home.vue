@@ -3541,6 +3541,14 @@
             :value="item.value"
           />
         </el-select>
+        <el-button
+          v-if = "selectedSys == '城市管家'"
+          type="primary"
+          size="large"
+          style="margin-left: 10px"
+          @click="exportExcelOfClickLog"
+        >打印报表</el-button
+        >
         <el-table
           :data="logListView"
           size="large"
@@ -4987,6 +4995,42 @@ const showClickLog = async () => {
   } catch (error) {
     console.log("showClickLog:  " + error);
   }
+};
+const exportExcelOfClickLog = () => {
+  var URL = "/api/click-log/excel?start=" + logStart + "&end=" + logEnd;
+  console.log("exportExcelOfClickLog URL: ", URL);
+
+  axios({
+    url: URL,
+    method: "get",
+    responseType: "blob",
+    headers: {
+      Authorization: "Bearer " + params.token,
+    },
+  }).then(function (res) {
+    if (res.status === 200) {
+      console.log("成功了！");
+      console.log("res body: ", res.data);
+      // 生成blob对象 定义下载格式
+      let blob = new Blob([res.data], { type: res.headers['content-type'] });
+      // 获取文件名
+      console.log("res.headers: ", res.headers);
+      // let contentDisposition = res.headers['content-disposition'];
+      // let filename = decodeURIComponent(contentDisposition.split("filename=")[1]);
+      let filename = logStart + "至" + logEnd + "城市管家点击日志.xlsx";
+      // 创建 a标签 执行下载
+      let downloadElement = document.createElement("a");
+      let href = window.URL.createObjectURL(blob); //创建下载的链接
+      downloadElement.href = href;
+      downloadElement.download = filename; //下载后文件名
+      document.body.appendChild(downloadElement); // 项目插入a元素
+      downloadElement.click(); //点击下载
+      document.body.removeChild(downloadElement); //下载完成移除元素
+      window.URL.revokeObjectURL(href); //释放blob对象
+    }
+  }).catch(function (error) {
+    console.error("下载失败：", error);
+  });
 };
 const getClickLogList = (sys, start, end, pageNum) => {
   var realUrl = "";
