@@ -2431,11 +2431,24 @@
                   <!-- <div style="padding: 5px; margin-top: 5%; padding-left: 8%"> -->
 
                   <ul class="infoList">
-                    <li
-                      v-for="item in item.data"
-                      style="font-size: 20px; padding: 5px"
-                    >
-                      {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+<!--                    <li-->
+<!--                      v-for="item in item.data"-->
+<!--                      style="font-size: 20px; padding: 5px"-->
+<!--                    >-->
+<!--                      {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>-->
+<!--                    </li>-->
+                    <!-- 显示固定的值 -->
+                    <li style="font-size: 20px; padding: 5px">
+                      集中控制设备：287台
+                    </li>
+                    <li style="font-size: 20px; padding: 5px">
+                      视频监控设备：36台
+                    </li>
+                    <li style="font-size: 20px; padding: 5px">
+                      亮灯楼宇：286栋
+                    </li>
+                    <li style="font-size: 20px; padding: 5px">
+                      亮灯桥梁及绿地：11处
                     </li>
                   </ul>
                   <el-popover
@@ -2502,25 +2515,33 @@
                           <div class="list_container">
                             <div class="list_title">@月电量统计（KWh）</div>
                             <div class="list_body">
-                              <li
-                                v-for="(
-                                  project, index
-                                ) in jgzm_month_consumption"
-                              >
-                                {{ project }}
-                              </li>
+<!--                              <li-->
+<!--                                v-for="(-->
+<!--                                  project, index-->
+<!--                                ) in jgzm_month_consumption"-->
+<!--                              >-->
+<!--                                {{ project }}-->
+<!--                              </li>-->
+                              <li>一品天下：2949</li>
+                              <li>城北体育中心：95</li>
+                              <li>枣子巷：1073</li>
+                              <li>一环路内透：675</li>
                             </div>
                           </div>
                           <div class="list_container">
                             <div class="list_title">@年电量统计（KWh）</div>
                             <div class="list_body">
-                              <li
-                                v-for="(
-                                  project, index
-                                ) in jgzm_year_consumption"
-                              >
-                                {{ project }}
-                              </li>
+<!--                              <li-->
+<!--                                v-for="(-->
+<!--                                  project, index-->
+<!--                                ) in jgzm_year_consumption"-->
+<!--                              >-->
+<!--                                {{ project }}-->
+<!--                              </li>-->
+                              <li>一品天下：11493</li>
+                              <li>城北体育中心：456</li>
+                              <li>枣子巷：5315</li>
+                              <li>一环路内透：2690</li>
                             </div>
                           </div>
                         </div>
