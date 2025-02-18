@@ -2492,58 +2492,66 @@
                             @详情统计
                           </p>
 
-                          <div class="list_container">
-                            <div class="list_title">@报警照明设备数</div>
-                            <div class="list_body">
-                              <li
-                                v-for="(project, index) in jgzm_alarm_projrect"
-                              >
-                                {{ project }}
-                              </li>
-                            </div>
-                          </div>
-                          <div class="list_container">
-                            <div class="list_title">@昨日电量统计（KWh）</div>
-                            <div class="list_body">
-                              <li
-                                v-for="(project, index) in jgzm_day_consumption"
-                              >
-                                {{ project }}
-                              </li>
-                            </div>
-                          </div>
-                          <div class="list_container">
-                            <div class="list_title">@月电量统计（KWh）</div>
-                            <div class="list_body">
+<!--                          <div class="list_container">-->
+<!--                            <div class="list_title">@报警照明设备数</div>-->
+<!--                            <div class="list_body">-->
 <!--                              <li-->
-<!--                                v-for="(-->
-<!--                                  project, index-->
-<!--                                ) in jgzm_month_consumption"-->
+<!--                                v-for="(project, index) in jgzm_alarm_projrect"-->
 <!--                              >-->
 <!--                                {{ project }}-->
 <!--                              </li>-->
-                              <li>一品天下：2949</li>
-                              <li>城北体育中心：95</li>
-                              <li>枣子巷：1073</li>
-                              <li>一环路内透：675</li>
-                            </div>
-                          </div>
-                          <div class="list_container">
-                            <div class="list_title">@年电量统计（KWh）</div>
-                            <div class="list_body">
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                          <div class="list_container">-->
+<!--                            <div class="list_title">@昨日电量统计（KWh）</div>-->
+<!--                            <div class="list_body">-->
 <!--                              <li-->
-<!--                                v-for="(-->
-<!--                                  project, index-->
-<!--                                ) in jgzm_year_consumption"-->
+<!--                                v-for="(project, index) in jgzm_day_consumption"-->
 <!--                              >-->
 <!--                                {{ project }}-->
 <!--                              </li>-->
-                              <li>一品天下：11493</li>
-                              <li>城北体育中心：456</li>
-                              <li>枣子巷：5315</li>
-                              <li>一环路内透：2690</li>
-                            </div>
-                          </div>
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                          <div class="list_container">-->
+<!--                            <div class="list_title">@月电量统计（KWh）</div>-->
+<!--                            <div class="list_body">-->
+<!--&lt;!&ndash;                              <li&ndash;&gt;-->
+<!--&lt;!&ndash;                                v-for="(&ndash;&gt;-->
+<!--&lt;!&ndash;                                  project, index&ndash;&gt;-->
+<!--&lt;!&ndash;                                ) in jgzm_month_consumption"&ndash;&gt;-->
+<!--&lt;!&ndash;                              >&ndash;&gt;-->
+<!--&lt;!&ndash;                                {{ project }}&ndash;&gt;-->
+<!--&lt;!&ndash;                              </li>&ndash;&gt;-->
+<!--                              <li>一品天下：2949</li>-->
+<!--                              <li>城北体育中心：95</li>-->
+<!--                              <li>枣子巷：1073</li>-->
+<!--                              <li>一环路内透：675</li>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                          <div class="list_container">-->
+<!--                            <div class="list_title">@年电量统计（KWh）</div>-->
+<!--                            <div class="list_body">-->
+<!--&lt;!&ndash;                              <li&ndash;&gt;-->
+<!--&lt;!&ndash;                                v-for="(&ndash;&gt;-->
+<!--&lt;!&ndash;                                  project, index&ndash;&gt;-->
+<!--&lt;!&ndash;                                ) in jgzm_year_consumption"&ndash;&gt;-->
+<!--&lt;!&ndash;                              >&ndash;&gt;-->
+<!--&lt;!&ndash;                                {{ project }}&ndash;&gt;-->
+<!--&lt;!&ndash;                              </li>&ndash;&gt;-->
+<!--                              <li>一品天下：11493</li>-->
+<!--                              <li>城北体育中心：456</li>-->
+<!--                              <li>枣子巷：5315</li>-->
+<!--                              <li>一环路内透：2690</li>-->
+<!--                            </div>-->
+<!--                          </div>-->
+                          <!-- 表格展示每个地点的统计数据 -->
+                          <el-table :data="tableData" style="width: 100%">
+                            <el-table-column label="项目" prop="name" width="200"></el-table-column>
+                            <el-table-column label="集中控制设备（台）" prop="controlDevices" width="150"></el-table-column>
+                            <el-table-column label="视频监控设备（台）" prop="videoDevices" width="150"></el-table-column>
+                            <el-table-column label="亮灯楼宇（栋）" prop="lightingBuildings" width="150"></el-table-column>
+                            <el-table-column label="亮灯桥梁及绿地（处）" prop="lightingBridges" width="150"></el-table-column>
+                          </el-table>
                         </div>
                       </div>
                     </template>
@@ -4132,6 +4140,20 @@ const TrashData = reactive([]);
 const guoShuData = reactive([]);
 const hardWaresData = reactive([]);
 
+const tableData = [
+  { name: '一环路', controlDevices: 63, videoDevices: 9, lightingBuildings: 72, lightingBridges: 0 },
+  { name: '锦江公园', controlDevices: 78, videoDevices: 3, lightingBuildings: 77, lightingBridges: 1 },
+  { name: '王家巷', controlDevices: 7, videoDevices: 1, lightingBuildings: 2, lightingBridges: 0 },
+  { name: '城北体育馆', controlDevices: 19, videoDevices: 3, lightingBuildings: 14, lightingBridges: 0 },
+  { name: '音乐公园', controlDevices: 31, videoDevices: 3, lightingBuildings: 20, lightingBridges: 0 },
+  { name: '体育公园', controlDevices: 38, videoDevices: 3, lightingBuildings: 37, lightingBridges: 0 },
+  { name: '群星路', controlDevices: 4, videoDevices: 0, lightingBuildings: 0, lightingBridges: 3 },
+  { name: '枣子巷', controlDevices: 19, videoDevices: 3, lightingBuildings: 41, lightingBridges: 0 },
+  { name: '茶店子', controlDevices: 18, videoDevices: 2, lightingBuildings: 23, lightingBridges: 0 },
+  { name: '丝路云锦', controlDevices: 6, videoDevices: 1, lightingBuildings: 0, lightingBridges: 3 },
+  { name: 'CD地块', controlDevices: 1, videoDevices: 1, lightingBuildings: 0, lightingBridges: 1 },
+  { name: '蜀西路人行天桥', controlDevices: 3, videoDevices: 2, lightingBuildings: 0, lightingBridges: 3 }
+];
 //==============================================================================2024.04.12 告警指示灯
 const query = ref("");
 const value = ref("");
