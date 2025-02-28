@@ -4989,19 +4989,19 @@ const selectedSys = ref("城市管家");
 const sysOptions = [
   { value: "共享单车管家", label: "共享单车管家" },
   { value: "智慧公厕管家", label: "智慧公厕管家" },
-  { value: "城管AI识别管家", label: "城管AI识别管家" },
+  //{ value: "城管AI识别管家", label: "城管AI识别管家" },
   { value: "网络理政管家", label: "网络理政管家" },
   { value: "临街店铺管家", label: "临街店铺管家" },
-  { value: "扬尘治理大数据协同管家", label: "扬尘治理大数据协同管家" },
-  { value: "数字化城市信息管家", label: "数字化城市信息管家" },
-  { value: "景观照明管家", label: "景观照明管家" },
+  //{ value: "扬尘治理大数据协同管家", label: "扬尘治理大数据协同管家" },
+  //{ value: "数字化城市信息管家", label: "数字化城市信息管家" },
+  //{ value: "景观照明管家", label: "景观照明管家" },
   { value: "照明管家（新）", label: "照明管家（新）" },
-  { value: "生活垃圾转运处理管家", label: "生活垃圾转运处理管家" },
+  //{ value: "生活垃圾转运处理管家", label: "生活垃圾转运处理管家" },
   { value: "调度指挥管家", label: "调度指挥管家" },
   { value: "垃圾全生命周期管家", label: "垃圾全生命周期管家" },
   { value: "餐饮油烟管家", label: "餐饮油烟管家" },
   { value: "环卫作业运行管家", label: "环卫作业运行管家" },
-  { value: "突出问题管家", label: "突出问题管家" },
+  //{ value: "突出问题管家", label: "突出问题管家" },
   { value: "城市管家", label: "城市管家" },
   { value: "餐厨收运管家", lable: "餐厨收运管家"},
 ];
@@ -9014,49 +9014,9 @@ function toSystem(item) {
       });
     }
     if (item.systemId == "12") {
-      var roles = [];
-      roles = params.roleId.split(",");
-      console.log(roles.indexOf("84"));
-      // console.log(params.roleId)
-      if (
-        roles.indexOf("84") != -1 ||
-        roles.indexOf("111") != -1 ||
-        roles.indexOf("109") != -1 ||
-        roles.indexOf("110") != -1 ||
-        roles.indexOf("83") != -1
-      ) {
-        var ddzh_url =
-          // "https://175.153.176.27:18804/map/?username=18008060886&pwd=MTIzNDU2";
-          "https://119.4.191.13:8881/map/?username=18008060886&pwd=MTIzNDU2";
-        window.open(ddzh_url);
-      }
-      if (roles.indexOf("93") != -1) {
-        var ddzh_url =
-          "https://119.4.191.13:8881/map/?username=18008061151&pwd=MTIzNDU2";
-        window.open(ddzh_url);
-      }
-
-      if (roles.indexOf("120") != -1) {
-        var ddzh_url =
-          "https://119.4.191.13:8881/map/?username=18008061081&pwd=MTIzNDU2";
-        window.open(ddzh_url);
-      }
-      if (
-        roles.indexOf("96") != -1 ||
-        roles.indexOf("99") != -1 ||
-        roles.indexOf("102") != -1
-      ) {
-        var ddzh_url =
-          "https://119.4.191.13:8881/map/?username=18008061109&pwd=MTIzNDU2";
-        window.open(ddzh_url);
-      } else {
-        var ddzh_url =
-          "https://119.4.191.13:8881/map/?username=" +
-          params.username +
-          "&pwd=MTIzNDU2";
-        console.log(ddzh_url);
-        window.open(item.url);
-      }
+      var ddzh_url = "https://119.4.191.13:8881/login/?token=" + params.token;
+      console.log("ddzh_url:  " + ddzh_url);
+      window.open(ddzh_url);
     } //调度指挥
     uploadClickLog(item.systemName);
   } else {
