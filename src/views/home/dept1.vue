@@ -1600,48 +1600,9 @@ function show(system, id, url) {
 
       if (id == "gxdc") window.open(gxdc.url);
       if (id == "ddzh") {
-        var roles = [];
-        roles = params.roleId.split(",");
-        console.log(roles.indexOf("84"));
-        // console.log(params.roleId)
-        if (
-          roles.indexOf("84") != -1 ||
-          roles.indexOf("109") != -1 ||
-          roles.indexOf("110") != -1 ||
-          roles.indexOf("111") != -1 ||
-          roles.indexOf("83") != -1
-        ) {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=18008060886&pwd=MTIzNDU2";
-          window.open(ddzh_url);
-        }
-        if (roles.indexOf("93") != -1) {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=18008061151&pwd=MTIzNDU2";
-          window.open(ddzh_url);
-        }
-
-        if (roles.indexOf("120") != -1) {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=18008061081&pwd=MTIzNDU2";
-          window.open(ddzh_url);
-        }
-        if (
-          roles.indexOf("96") != -1 ||
-          roles.indexOf("99") != -1 ||
-          roles.indexOf("102") != -1
-        ) {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=18008061109&pwd=MTIzNDU2";
-          window.open(ddzh_url);
-        } else {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=" +
-            params.username +
-            "&pwd=MTIzNDU2";
-          console.log(ddzh_url);
-          window.open(url);
-        }
+        var ddzh_url = "https://119.4.191.13:8881/login/?token=" + params.token;
+        console.log("ddzh_url:  " + ddzh_url);
+        window.open(ddzh_url);
       } //调度指挥
       uploadClickLog(system.systemName);
     }
