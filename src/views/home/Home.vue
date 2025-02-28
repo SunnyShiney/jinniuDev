@@ -8961,6 +8961,11 @@ function toSystem(item) {
           showClose: true,
           message: "正在开发中...",
         });
+      } else if (item.systemId == "15") {
+        //item.url = item.url + "?iphone=" + params.username;
+        item.url = "http://171.221.172.74:6888/eUrbanMIS/main.htm" + "?iphone=" + params.username;
+        console.log("url:" + item.url);
+        window.open(item.url);
       } else if (item.systemId == "19") {
         item.url = item.url + "?iphone=" + params.username;
         console.log("url:" + item.url);
@@ -8981,7 +8986,9 @@ function toSystem(item) {
 
     if (item.systemId == "13") {
       //共享单车
+      gxdc.url = "https://bike-web02.hzy-sz.com:81/loginauto.html?uname=scygxdc&pw=6666";
       gxdc.url += "&phone=" + params.username;
+      //gxdc.url += "&phone=" + params.username;
       window.open(gxdc.url);
     }
     if (item.systemId == "16") {
