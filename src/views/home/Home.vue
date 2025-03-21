@@ -2475,7 +2475,7 @@
 <!--                    </li>-->
                     <!-- 显示固定的值 -->
                     <li style="font-size: 20px; padding: 5px">
-                      集中控制设备：287台
+                      集中控制设备：284台
                     </li>
                     <li style="font-size: 20px; padding: 5px">
                       视频监控设备：36台
@@ -4186,7 +4186,7 @@ const hardWaresData = reactive([]);
 
 const tableData = [
   { name: '一环路', controlDevices: 63, videoDevices: 9, lightingBuildings: 72, lightingBridges: 0 },
-  { name: '锦江公园', controlDevices: 78, videoDevices: 3, lightingBuildings: 77, lightingBridges: 1 },
+  { name: '锦江公园', controlDevices: 75, videoDevices: 3, lightingBuildings: 77, lightingBridges: 1 },
   { name: '王家巷', controlDevices: 7, videoDevices: 1, lightingBuildings: 2, lightingBridges: 0 },
   { name: '城北体育馆', controlDevices: 19, videoDevices: 3, lightingBuildings: 14, lightingBridges: 0 },
   { name: '音乐公园', controlDevices: 31, videoDevices: 3, lightingBuildings: 20, lightingBridges: 0 },
