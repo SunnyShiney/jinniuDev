@@ -520,7 +520,43 @@
       </div> -->
 
       <!-- 页面显示区域 -->
-      <el-main class="main">
+      <el-main
+          class="main"
+          :style="{ backgroundImage: 'url(' + backgroundImageUrl + ')' }"
+      >
+        <!-- 在这里插入上传按钮 -->
+        <template v-if="params.role == '管理员'">
+          <el-upload
+              accept="image/jpg,image/jpeg,image/gif,image/png"
+              :action="uploadUrl"
+              class="background-uploader"
+              :show-file-list="false"
+              :default-file-list="defaultFileList"
+              :before-upload="createBeforeUpload('mainBg')"
+          >
+            <el-tooltip
+                content="点击更换背景图"
+                effect="dark"
+                placement="top"
+            >
+              <!-- 背景图已存在时显示图片 -->
+              <img
+                  v-if="backgroundImageUrl"
+                  :src="backgroundImageUrl"
+                  class="background-preview"
+                  @click="handleAvatarClick"
+              />
+              <!-- 无背景图时显示上传图标 -->
+              <el-icon
+                  v-else
+                  class="avatar-uploader-icon"
+                  @click="handleAvatarClick"
+              >
+                <Plus />
+              </el-icon>
+            </el-tooltip>
+          </el-upload>
+        </template>
         <div
           class="classification-title"
           v-if="(choosedDept == -1) | (choosedDept == 0)"
@@ -9195,6 +9231,7 @@ const uploadUrl = "/api/avatar-other/update-avatar-other"; // 后端上传接口
 const latestImageUrl = ref(""); // 最新头像 URL
 const hwzyImageUrl = ref(""); //
 const bottomBannerImageUrl = ref("");
+const backgroundImageUrl = ref("/public/images/bg-box7.jpg");
 const ccljImageUrl = ref(""); //
 const shljImageUrl = ref(""); //
 const ljflImageUrl = ref(""); //
@@ -9257,6 +9294,9 @@ const beforeUpload = async (rawFile, systemName) => {
         // 更新最新头像 URL
         if (systemName == "banner") {
           latestImageUrl.value = "/homePicture/" + response.data.url;
+        }
+        if (systemName == "mainBg") {
+          backgroundImageUrl.value = "/homePicture/" + response.data.url;
         }
         if (systemName == "hwzy") {
           hwzyImageUrl.value = "/homePicture/" + response.data.url;
@@ -9338,6 +9378,7 @@ const getLatestAvatar = async (systemName, latestImageUrl) => {
 // 在组件加载后获取最新头像的 URL
 
 getLatestAvatar("banner", latestImageUrl);
+getLatestAvatar("mainBg", backgroundImageUrl);
 getLatestAvatar("hwzy", hwzyImageUrl);
 getLatestAvatar("bottom_banner", bottomBannerImageUrl);
 getLatestAvatar("cclj", ccljImageUrl);
@@ -9539,7 +9580,7 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   flex-wrap: wrap;
   /*当屏幕尺寸变小时，各个子系统汇总模块自动换行*/
   justify-content: center;
-  background: url("/public/images/bg-box7.jpg") -30%;
+  //background: url("/public/images/bg-box7.jpg") -30% center;
 }
 
 .logo-title {

@@ -1598,7 +1598,11 @@ function show(system, id, url) {
       // router.push({ name: to, params: { subsysName } })
       if (id != "gxdc" && id != "ddzh") window.open(url);
 
-      if (id == "gxdc") window.open(gxdc.url);
+      if (id == "gxdc") {
+        gxdc.url = "https://bike-web02.hzy-sz.com:81/loginauto.html?uname=scygxdc&pw=6666";
+        gxdc.url += "&phone=" + params.username;
+        window.open(gxdc.url);
+      }
       if (id == "ddzh") {
         var ddzh_url = "https://119.4.191.13:8881/login/?token=" + params.token;
         console.log("ddzh_url:  " + ddzh_url);
