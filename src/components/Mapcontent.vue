@@ -411,14 +411,22 @@
               ></div>
               <div class="no-hd">
                 <ul>
-                  <li>{{ year_electricity }}</li>
-                  <li>{{ month_electricity }}</li>
-                  <li>{{ day_electricity }}</li>
+<!--                  <li>{{ year_electricity }}</li>-->
+<!--                  <li>{{ month_electricity }}</li>-->
+<!--                  <li>{{ day_electricity }}</li>-->
+                  <li>284台</li>
+                  <li>36台</li>
+                  <li>286栋</li>
+                  <li>11处</li>
                 </ul>
                 <ul>
-                  <li>年电量统计</li>
-                  <li>月电量统计</li>
-                  <li>昨日电量统计</li>
+<!--                  <li>年电量统计</li>-->
+<!--                  <li>月电量统计</li>-->
+<!--                  <li>昨日电量统计</li>-->
+                  <li>集中控制设备</li>
+                  <li>视频监控设备</li>
+                  <li>亮灯楼宇</li>
+                  <li>亮灯桥梁及绿地</li>
                 </ul>
               </div>
               <div
