@@ -411,14 +411,22 @@
               ></div>
               <div class="no-hd">
                 <ul>
-                  <li>{{ year_electricity }}</li>
-                  <li>{{ month_electricity }}</li>
-                  <li>{{ day_electricity }}</li>
+<!--                  <li>{{ year_electricity }}</li>-->
+<!--                  <li>{{ month_electricity }}</li>-->
+<!--                  <li>{{ day_electricity }}</li>-->
+                  <li>284台</li>
+                  <li>36台</li>
+                  <li>286栋</li>
+                  <li>11处</li>
                 </ul>
                 <ul>
-                  <li>年电量统计</li>
-                  <li>月电量统计</li>
-                  <li>昨日电量统计</li>
+<!--                  <li>年电量统计</li>-->
+<!--                  <li>月电量统计</li>-->
+<!--                  <li>昨日电量统计</li>-->
+                  <li>集中控制设备</li>
+                  <li>视频监控设备</li>
+                  <li>亮灯楼宇</li>
+                  <li>亮灯桥梁及绿地</li>
                 </ul>
               </div>
               <div
@@ -869,37 +877,38 @@ const echartInit_ddzh = () => {
     },
     yAxis: {
       type: "category",
-      data: [
-        ddzh_tableData1.value[0].department,
-        ddzh_tableData1.value[1].department,
-        ddzh_tableData1.value[2].department,
-        ddzh_tableData1.value[3].department,
-        ddzh_tableData1.value[4].department,
-        ddzh_tableData1.value[5].department,
-        ddzh_tableData1.value[6].department,
-        ddzh_tableData1.value[7].department,
-        ddzh_tableData1.value[8].department,
-        ddzh_tableData1.value[9].department,
-        ddzh_tableData1.value[10].department,
-        ddzh_tableData1.value[11].department,
-        ddzh_tableData1.value[12].department,
-        ddzh_tableData1.value[13].department,
-        ddzh_tableData1.value[14].department,
-        ddzh_tableData1.value[15].department,
-        ddzh_tableData1.value[16].department,
-        ddzh_tableData1.value[17].department,
-        ddzh_tableData1.value[18].department,
-        ddzh_tableData1.value[19].department,
-        ddzh_tableData1.value[20].department,
-        ddzh_tableData1.value[21].department,
-        ddzh_tableData1.value[22].department,
-        ddzh_tableData1.value[23].department,
-        ddzh_tableData1.value[24].department,
-        ddzh_tableData1.value[25].department,
-        ddzh_tableData1.value[26].department,
-        ddzh_tableData1.value[27].department,
-        ddzh_tableData1.value[28].department,
-      ],
+      data: ddzh_tableData1.value.map(item => item.department),
+      // data: [
+      //   ddzh_tableData1.value[0].department,
+      //   ddzh_tableData1.value[1].department,
+      //   ddzh_tableData1.value[2].department,
+      //   ddzh_tableData1.value[3].department,
+      //   ddzh_tableData1.value[4].department,
+      //   ddzh_tableData1.value[5].department,
+      //   ddzh_tableData1.value[6].department,
+      //   ddzh_tableData1.value[7].department,
+      //   ddzh_tableData1.value[8].department,
+      //   ddzh_tableData1.value[9].department,
+      //   ddzh_tableData1.value[10].department,
+      //   ddzh_tableData1.value[11].department,
+      //   ddzh_tableData1.value[12].department,
+      //   ddzh_tableData1.value[13].department,
+      //   ddzh_tableData1.value[14].department,
+      //   ddzh_tableData1.value[15].department,
+      //   ddzh_tableData1.value[16].department,
+      //   ddzh_tableData1.value[17].department,
+      //   ddzh_tableData1.value[18].department,
+      //   ddzh_tableData1.value[19].department,
+      //   ddzh_tableData1.value[20].department,
+      //   ddzh_tableData1.value[21].department,
+      //   ddzh_tableData1.value[22].department,
+      //   ddzh_tableData1.value[23].department,
+      //   ddzh_tableData1.value[24].department,
+      //   ddzh_tableData1.value[25].department,
+      //   ddzh_tableData1.value[26].department,
+      //   ddzh_tableData1.value[27].department,
+      //   ddzh_tableData1.value[28].department,
+      // ],
       axisLabel: {
         //x轴文字的配置
         show: true,
@@ -921,37 +930,39 @@ const echartInit_ddzh = () => {
     },
     series: [
       {
-        data: [
-          (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
-        ],
+        barWidth: '10%',
+        data: ddzh_tableData1.value.map(item => (item.checkRate * 100).toFixed(1)),
+        // data: [
+        //   (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
+        // ],
         type: "bar",
         showBackground: true,
         backgroundStyle: {
@@ -1969,9 +1980,12 @@ const handleSelect_srzx = (key, keypath) => {
               show: false,
             },
             data: [
-              { value: gxdcData[2].infoVal, name: "正常停放车辆" },
-              { value: gxdcData[1].infoVal, name: "异常停放车辆" },
-              { value: gxdcData[3].infoVal, name: "行驶中车辆" },
+              // { value: gxdcData[2].infoVal, name: "正常停放车辆" },
+              // { value: gxdcData[1].infoVal, name: "异常停放车辆" },
+              // { value: gxdcData[3].infoVal, name: "行驶中车辆" },
+              { value: gxdcData[0].infoVal, name: "P点总数" },
+              { value: gxdcData[1].infoVal, name: "单车总数" },
+              { value: gxdcData[2].infoVal, name: "骑行中数量" },
               // { value: 580, name: 'Email' },
               // { value: 484, name: 'Union Ads' },
               // { value: 300, name: 'Video Ads' }

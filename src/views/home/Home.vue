@@ -520,7 +520,43 @@
       </div> -->
 
       <!-- 页面显示区域 -->
-      <el-main class="main">
+      <el-main
+          class="main"
+          :style="{ backgroundImage: 'url(' + backgroundImageUrl + ')' }"
+      >
+        <!-- 在这里插入上传按钮 -->
+        <template v-if="params.role == '管理员'">
+          <el-upload
+              accept="image/jpg,image/jpeg,image/gif,image/png"
+              :action="uploadUrl"
+              class="background-uploader"
+              :show-file-list="false"
+              :default-file-list="defaultFileList"
+              :before-upload="createBeforeUpload('mainBg')"
+          >
+            <el-tooltip
+                content="点击更换背景图"
+                effect="dark"
+                placement="top"
+            >
+              <!-- 背景图已存在时显示图片 -->
+              <img
+                  v-if="backgroundImageUrl"
+                  :src="backgroundImageUrl"
+                  class="background-preview"
+                  @click="handleAvatarClick"
+              />
+              <!-- 无背景图时显示上传图标 -->
+              <el-icon
+                  v-else
+                  class="avatar-uploader-icon"
+                  @click="handleAvatarClick"
+              >
+                <Plus />
+              </el-icon>
+            </el-tooltip>
+          </el-upload>
+        </template>
         <div
           class="classification-title"
           v-if="(choosedDept == -1) | (choosedDept == 0)"
@@ -2439,7 +2475,7 @@
 <!--                    </li>-->
                     <!-- 显示固定的值 -->
                     <li style="font-size: 20px; padding: 5px">
-                      集中控制设备：287台
+                      集中控制设备：284台
                     </li>
                     <li style="font-size: 20px; padding: 5px">
                       视频监控设备：36台
@@ -4184,7 +4220,7 @@ const hardWaresData = reactive([]);
 
 const tableData = [
   { name: '一环路', controlDevices: 63, videoDevices: 9, lightingBuildings: 72, lightingBridges: 0 },
-  { name: '锦江公园', controlDevices: 78, videoDevices: 3, lightingBuildings: 77, lightingBridges: 1 },
+  { name: '锦江公园', controlDevices: 75, videoDevices: 3, lightingBuildings: 77, lightingBridges: 1 },
   { name: '王家巷', controlDevices: 7, videoDevices: 1, lightingBuildings: 2, lightingBridges: 0 },
   { name: '城北体育馆', controlDevices: 19, videoDevices: 3, lightingBuildings: 14, lightingBridges: 0 },
   { name: '音乐公园', controlDevices: 31, videoDevices: 3, lightingBuildings: 20, lightingBridges: 0 },
@@ -4551,6 +4587,7 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
       };
       EventHistoryList.push(default_site);
     }
+    EventHistoryList.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
     warningTotalRecords.value = EventHistoryList.length;
     // warningPageCount = parseInt(EventHistoryList.length) % 5;
     warningCurrentPage.value = pageNum;
@@ -7152,37 +7189,38 @@ const echartInit_ddzh = () => {
     },
     xAxis: {
       type: "category",
-      data: [
-        ddzh_tableData1.value[0].department,
-        ddzh_tableData1.value[1].department,
-        ddzh_tableData1.value[2].department,
-        ddzh_tableData1.value[3].department,
-        ddzh_tableData1.value[4].department,
-        ddzh_tableData1.value[5].department,
-        ddzh_tableData1.value[6].department,
-        ddzh_tableData1.value[7].department,
-        ddzh_tableData1.value[8].department,
-        ddzh_tableData1.value[9].department,
-        ddzh_tableData1.value[10].department,
-        ddzh_tableData1.value[11].department,
-        ddzh_tableData1.value[12].department,
-        ddzh_tableData1.value[13].department,
-        ddzh_tableData1.value[14].department,
-        ddzh_tableData1.value[15].department,
-        ddzh_tableData1.value[16].department,
-        ddzh_tableData1.value[17].department,
-        ddzh_tableData1.value[18].department,
-        ddzh_tableData1.value[19].department,
-        ddzh_tableData1.value[20].department,
-        ddzh_tableData1.value[21].department,
-        ddzh_tableData1.value[22].department,
-        ddzh_tableData1.value[23].department,
-        ddzh_tableData1.value[24].department,
-        ddzh_tableData1.value[25].department,
-        ddzh_tableData1.value[26].department,
-        ddzh_tableData1.value[27].department,
-        ddzh_tableData1.value[28].department,
-      ],
+      data: ddzh_tableData1.value.map(item => item.department),
+      // data: [
+      //   ddzh_tableData1.value[0].department,
+      //   ddzh_tableData1.value[1].department,
+      //   ddzh_tableData1.value[2].department,
+      //   ddzh_tableData1.value[3].department,
+      //   ddzh_tableData1.value[4].department,
+      //   ddzh_tableData1.value[5].department,
+      //   ddzh_tableData1.value[6].department,
+      //   ddzh_tableData1.value[7].department,
+      //   ddzh_tableData1.value[8].department,
+      //   ddzh_tableData1.value[9].department,
+      //   ddzh_tableData1.value[10].department,
+      //   ddzh_tableData1.value[11].department,
+      //   ddzh_tableData1.value[12].department,
+      //   ddzh_tableData1.value[13].department,
+      //   ddzh_tableData1.value[14].department,
+      //   ddzh_tableData1.value[15].department,
+      //   ddzh_tableData1.value[16].department,
+      //   ddzh_tableData1.value[17].department,
+      //   ddzh_tableData1.value[18].department,
+      //   ddzh_tableData1.value[19].department,
+      //   ddzh_tableData1.value[20].department,
+      //   ddzh_tableData1.value[21].department,
+      //   ddzh_tableData1.value[22].department,
+      //   ddzh_tableData1.value[23].department,
+      //   ddzh_tableData1.value[24].department,
+      //   ddzh_tableData1.value[25].department,
+      //   ddzh_tableData1.value[26].department,
+      //   ddzh_tableData1.value[27].department,
+      //   ddzh_tableData1.value[28].department,
+      // ],
       axisLabel: {
         //x轴文字的配置
         show: true,
@@ -7204,37 +7242,39 @@ const echartInit_ddzh = () => {
     },
     series: [
       {
-        data: [
-          (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
-        ],
+        barWidth: '10%',
+        data: ddzh_tableData1.value.map(item => (item.checkRate * 100).toFixed(1)),
+        // data: [
+        //   (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
+        // ],
         type: "bar",
         showBackground: true,
         backgroundStyle: {
@@ -7276,8 +7316,8 @@ const echartInit_ddzh = () => {
         type: "pie",
         radius: "50%",
         data: [
-          { value: ddzh_tableData2.value[0].num, name: "定位正常人员" },
-          { value: ddzh_tableData2.value[3].num, name: "定位异常人员" },
+          { value: ddzh_tableData2.value[3].num, name: "定位正常人员" },
+          { value: ddzh_tableData2.value[1].num, name: "定位异常人员" },
           // { value: 111, name: 222 },
         ],
         label: {
@@ -7321,8 +7361,8 @@ const echartInit_ddzh = () => {
         type: "pie",
         radius: "50%",
         data: [
-          { value: ddzh_tableData2.value[1].num, name: "定位正常人员" },
-          { value: ddzh_tableData2.value[3].num, name: "定位异常人员" },
+          { value: ddzh_tableData2.value[2].num, name: "定位正常人员" },
+          { value: ddzh_tableData2.value[0].num, name: "定位异常人员" },
           // { value: 111, name: 222 },
         ],
         label: {
@@ -9256,6 +9296,7 @@ const uploadUrl = "/api/avatar-other/update-avatar-other"; // 后端上传接口
 const latestImageUrl = ref(""); // 最新头像 URL
 const hwzyImageUrl = ref(""); //
 const bottomBannerImageUrl = ref("");
+const backgroundImageUrl = ref("/public/images/bg-box7.jpg");
 const ccljImageUrl = ref(""); //
 const shljImageUrl = ref(""); //
 const ljflImageUrl = ref(""); //
@@ -9318,6 +9359,9 @@ const beforeUpload = async (rawFile, systemName) => {
         // 更新最新头像 URL
         if (systemName == "banner") {
           latestImageUrl.value = "/homePicture/" + response.data.url;
+        }
+        if (systemName == "mainBg") {
+          backgroundImageUrl.value = "/homePicture/" + response.data.url;
         }
         if (systemName == "hwzy") {
           hwzyImageUrl.value = "/homePicture/" + response.data.url;
@@ -9399,6 +9443,7 @@ const getLatestAvatar = async (systemName, latestImageUrl) => {
 // 在组件加载后获取最新头像的 URL
 
 getLatestAvatar("banner", latestImageUrl);
+getLatestAvatar("mainBg", backgroundImageUrl);
 getLatestAvatar("hwzy", hwzyImageUrl);
 getLatestAvatar("bottom_banner", bottomBannerImageUrl);
 getLatestAvatar("cclj", ccljImageUrl);
@@ -9600,7 +9645,7 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   flex-wrap: wrap;
   /*当屏幕尺寸变小时，各个子系统汇总模块自动换行*/
   justify-content: center;
-  background: url("/public/images/bg-box7.jpg") -30%;
+  //background: url("/public/images/bg-box7.jpg") -30% center;
 }
 
 .logo-title {
