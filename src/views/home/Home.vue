@@ -3472,6 +3472,23 @@
         @close="handleClose"
       >
         <div style="font-size: 2rem">用户列表</div>
+        <div class="search-container">
+          <el-input
+            v-model="searchNameInReset"
+            placeholder="输入姓名搜索"
+            clearable
+            style="width: 200px; margin-right: 10px;"
+          />
+          <el-input
+            v-model="searchPhoneInReset"
+            placeholder="输入电话号码搜索"
+            clearable
+            style="width: 200px; margin-right: 10px;"
+          />
+          <el-button type="primary" @click="handleSearchInReset">
+            <el-icon><Search /></el-icon>搜索
+          </el-button>
+        </div>
         <el-table
           :data="
             resetPasswordList.slice(
@@ -3666,6 +3683,23 @@
 
         <div style="font-size: 2rem; display: inline-block; float: left">
           人员权限列表
+        </div>
+        <div class="search-container">
+          <el-input
+            v-model="searchName"
+            placeholder="输入姓名搜索"
+            clearable
+            style="width: 200px; margin-right: 10px;"
+          />
+          <el-input
+            v-model="searchPhone"
+            placeholder="输入电话号码搜索"
+            clearable
+            style="width: 200px; margin-right: 10px;"
+          />
+          <el-button type="primary" @click="handleSearch">
+            <el-icon><Search /></el-icon>搜索
+          </el-button>
         </div>
         <el-button
           type="primary"
@@ -4881,6 +4915,11 @@ const cities = ["浏览信息", "管理参数", "操作系统"];
 
 //===============================================================================
 const permissionList = reactive([]);
+const filteredPermissionList = reactive([]);
+const searchName = ref("");
+const searchNameInReset = ref("");
+const searchPhone = ref("");
+const searchPhoneInReset = ref("");
 const showSuperAdmin = reactive([]);
 const permissonApplicationList = reactive([]);
 const resetPasswordList = reactive([]);
@@ -5193,6 +5232,9 @@ const getClickLogApplication = (pageNum) => {
 };
 
 //-----------------------------------------------------------------sunny 090/07 密码重设列表
+const handleSearchInReset = () => {
+  getResetPasswordList(1);
+};
 const getResetPasswordList = (pageNum) => {
   axios({
     // url: "/api/lzj/getWarning",
@@ -5212,6 +5254,16 @@ const getResetPasswordList = (pageNum) => {
         telephone: data[key].telephone,
       };
       resetPasswordList.push(resetPassword);
+      if (searchNameInReset.value != "") {
+        if (!resetPassword.realName.includes(searchNameInReset.value)) {
+          resetPasswordList.pop();
+        }
+      }
+      if (searchPhoneInReset.value != "") {
+        if (!resetPassword.telephone.includes(searchPhoneInReset.value)) {
+          resetPasswordList.pop();
+        }
+      }
     }
     total_Records_reset.value = resetPasswordList.length;
     page_Count_reset = parseInt(resetPasswordList.length) % 10;
@@ -5359,6 +5411,10 @@ const refusedClick = (callback, row) => {
     getPermissonApplicationListList(1);
   });
   callback();
+};
+
+const handleSearch = () => {
+  getPermissionList(1);
 };
 
 const getPermissionList = (pageNum) => {
@@ -5565,6 +5621,16 @@ const getPermissionList = (pageNum) => {
         }
       });
       permissionList.push(permission_list);
+      if (searchName.value != "") {
+        if (!permission_list.username.includes(searchName.value)) {
+          permissionList.pop();
+        }
+      }
+      if (searchPhone.value != "") {
+        if (!permission_list.telephone.includes(searchPhone.value)) {
+          permissionList.pop();
+        }
+      }
     }
     totalRecords.value = permissionList.length;
     pageCount = parseInt(permissionList.length) % 10;
