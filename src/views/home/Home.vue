@@ -5291,15 +5291,19 @@ const getResetPasswordList = (pageNum) => {
         telephone: data[key].telephone,
       };
       resetPasswordList.push(resetPassword);
-      if (searchNameInReset.value != "") {
-        if (!resetPassword.realName.includes(searchNameInReset.value)) {
-          resetPasswordList.pop();
-        }
-      }
-      if (searchPhoneInReset.value != "") {
-        if (!resetPassword.telephone.includes(searchPhoneInReset.value)) {
-          resetPasswordList.pop();
-        }
+      // if (searchNameInReset.value != "") {
+      //   if (!resetPassword.realName.includes(searchNameInReset.value)) {
+      //     resetPasswordList.pop();
+      //   }
+      // }
+      // if (searchPhoneInReset.value != "") {
+      //   if (!resetPassword.telephone.includes(searchPhoneInReset.value)) {
+      //     resetPasswordList.pop();
+      //   }
+      // }
+      if (!resetPassword.realName.includes(searchNameInReset.value)
+        || !resetPassword.telephone.includes(searchPhoneInReset.value)) {
+        resetPasswordList.pop();
       }
     }
     total_Records_reset.value = resetPasswordList.length;
@@ -5658,15 +5662,19 @@ const getPermissionList = (pageNum) => {
         }
       });
       permissionList.push(permission_list);
-      if (searchName.value != "") {
-        if (!permission_list.username.includes(searchName.value)) {
-          permissionList.pop();
-        }
-      }
-      if (searchPhone.value != "") {
-        if (!permission_list.telephone.includes(searchPhone.value)) {
-          permissionList.pop();
-        }
+      // if (searchName.value != "") {
+      //   if (!permission_list.username.includes(searchName.value)) {
+      //     permissionList.pop();
+      //   }
+      // }
+      // if (searchPhone.value != "") {
+      //   if (!permission_list.telephone.includes(searchPhone.value)) {
+      //     permissionList.pop();
+      //   }
+      // }
+      if (!permission_list.username.includes(searchName.value) 
+          || !permission_list.telephone.includes(searchPhone.value)) {
+        permissionList.pop();
       }
     }
     totalRecords.value = permissionList.length;
@@ -9645,7 +9653,7 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   flex-wrap: wrap;
   /*当屏幕尺寸变小时，各个子系统汇总模块自动换行*/
   justify-content: center;
-  //background: url("/public/images/bg-box7.jpg") -30% center;
+  /*background: url("/public/images/bg-box7.jpg") -30% center; */
 }
 
 .logo-title {
