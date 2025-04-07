@@ -4458,6 +4458,24 @@ const warningSubmitForm = async () => {
             warningRuleForm.content
         );
       });
+      //发送短信（新增部分）
+      axios({
+        url: "/sms/sendMessage",
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: warningToken.value,
+        },
+        data: {
+          mobile: selectedValue.phone,
+          message: warningRuleForm.content,
+        },
+      }).then(function (res) {
+            console.log("短信发送成功：", res);
+          })
+          .catch(function (err) {
+            console.error("短信发送失败：", err);
+          });
 
       axios({
         url: "/api/event-query/updateHandleEvent",
@@ -8480,6 +8498,8 @@ const echartInit = () => {
   });
 
   getOverStandard().then((tableData) => {
+    const xLabels = tableData.map(item => item.areaname); // X轴类目
+    const yValues = tableData.map(item => item.total);    // 每个柱子的高度
     var option_yyxt1 = {
       title: {
         text: "超标企业街道分布",
@@ -8495,21 +8515,22 @@ const echartInit = () => {
       },
       xAxis: {
         type: "category",
-        data: [
-          tableData[0].areaname,
-          tableData[1].areaname,
-          tableData[2].areaname,
-          tableData[3].areaname,
-          tableData[4].areaname,
-          tableData[5].areaname,
-          tableData[6].areaname,
-          tableData[7].areaname,
-          tableData[8].areaname,
-          tableData[9].areaname,
-          tableData[10].areaname,
-          tableData[11].areaname,
-          tableData[12].areaname,
-        ],
+        data: xLabels,
+        // data: [
+        //   tableData[0].areaname,
+        //   tableData[1].areaname,
+        //   tableData[2].areaname,
+        //   tableData[3].areaname,
+        //   tableData[4].areaname,
+        //   tableData[5].areaname,
+        //   tableData[6].areaname,
+        //   tableData[7].areaname,
+        //   tableData[8].areaname,
+        //   tableData[9].areaname,
+        //   tableData[10].areaname,
+        //   tableData[11].areaname,
+        //   tableData[12].areaname,
+        // ],
         axisTick: {
           alignWithLabel: true,
         },
@@ -8524,22 +8545,24 @@ const echartInit = () => {
       },
       series: [
         {
-          data: [
-            tableData[0].value,
-            tableData[1].value,
-            tableData[2].value,
-            tableData[3].value,
-            tableData[4].value,
-            tableData[5].value,
-            tableData[6].value,
-            tableData[7].value,
-            tableData[8].value,
-            tableData[9].value,
-            tableData[10].value,
-            tableData[11].value,
-            tableData[12].value,
-          ],
+          data: yValues,
+          // data: [
+          //   tableData[0].value,
+          //   tableData[1].value,
+          //   tableData[2].value,
+          //   tableData[3].value,
+          //   tableData[4].value,
+          //   tableData[5].value,
+          //   tableData[6].value,
+          //   tableData[7].value,
+          //   tableData[8].value,
+          //   tableData[9].value,
+          //   tableData[10].value,
+          //   tableData[11].value,
+          //   tableData[12].value,
+          // ],
           type: "bar",
+          barWidth: '10%',
           showBackground: true,
           backgroundStyle: {
             color: "rgba(180, 180, 180, 0.2)",
@@ -8593,9 +8616,9 @@ const echartInit = () => {
             show: false,
           },
           data: [
-            { value: tableData[0].ct, name: "常态" },
-            { value: tableData[0].yb, name: "一般" },
-            { value: tableData[0].zd, name: "重点" },
+            { value: tableData.monitoring_level_c, name: "常态" },
+            { value: tableData.monitoring_level_g, name: "一般" },
+            { value: tableData.monitoring_level_p, name: "重点" },
             // { value: 484, name: 'Union Ads' },
             // { value: 300, name: 'Video Ads' }
           ],
@@ -8604,28 +8627,29 @@ const echartInit = () => {
     };
     myChart_yyxt3.setOption(option_yyxt3);
   });
-  getTouSU().then((data) => {
-    if (data.tsLastNow.length < 12) {
-      for (let i = 0; i < 20; i++) {
-        var tmp = { count: 0 };
-        data.tsLastNow.push(tmp);
-      }
-    }
-    var option_yyxt2 = {
+  getTouSU().then((resp) => {
+    const raw = resp.tsList;
+
+    // 封装成函数提取每年的数据
+    const extractMonthlyCounts = (arr) =>
+        arr.map((item) => item.count);
+
+    const extractMonths = (arr) =>
+        arr.map((item) => item.create_date.slice(5)); // 提取 "MM"
+
+    const months = extractMonths(raw.tsLastTow); // 默认用 tsLastTow 来做 x 轴（即完整的12个月）
+
+    const option_yyxt2 = {
       title: {
         text: "油烟投诉趋势图",
-        textStyle: {
-          color: "#ccc",
-        },
+        textStyle: { color: "#ccc" },
       },
       tooltip: {
         trigger: "axis",
       },
       legend: {
-        textStyle: {
-          color: "#ccc",
-        },
-        data: ["2021", "2022", "2023"],
+        textStyle: { color: "#ccc" },
+        data: ["2023", "2024", "2025"],
       },
       grid: {
         left: "3%",
@@ -8641,86 +8665,149 @@ const echartInit = () => {
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: [
-          "01",
-          "02",
-          "03",
-          "04",
-          "05",
-          "06",
-          "07",
-          "08",
-          "09",
-          "10",
-          "11",
-          "12",
-        ],
+        data: months, // ["01", "02", ..., "12"]
       },
       yAxis: {
         type: "value",
       },
       series: [
         {
-          name: "2021",
-          type: "line",
-
-          data: [
-            data.tsLastTow[0].count,
-            data.tsLastTow[1].count,
-            data.tsLastTow[2].count,
-            data.tsLastTow[3].count,
-            data.tsLastTow[4].count,
-            data.tsLastTow[5].count,
-            data.tsLastTow[6].count,
-            data.tsLastTow[7].count,
-            data.tsLastTow[8].count,
-            data.tsLastTow[9].count,
-            data.tsLastTow[10].count,
-            data.tsLastTow[11].count,
-          ],
-        },
-        {
-          name: "2022",
-          type: "line",
-
-          data: [
-            data.tsLast[0].count,
-            data.tsLast[1].count,
-            data.tsLast[2].count,
-            data.tsLast[3].count,
-            data.tsLast[4].count,
-            data.tsLast[5].count,
-            data.tsLast[6].count,
-            data.tsLast[7].count,
-            data.tsLast[8].count,
-            data.tsLast[9].count,
-            data.tsLast[10].count,
-            data.tsLast[11].count,
-          ],
-        },
-        {
           name: "2023",
           type: "line",
-
-          data: [
-            data.tsLastNow[0].count,
-            data.tsLastNow[1].count,
-            data.tsLastNow[2].count,
-            data.tsLastNow[3].count,
-            data.tsLastNow[4].count,
-            data.tsLastNow[5].count,
-            data.tsLastNow[6].count,
-            data.tsLastNow[7].count,
-            data.tsLastNow[8].count,
-            data.tsLastNow[9].count,
-            data.tsLastNow[10].count,
-            data.tsLastNow[11].count,
-          ],
+          data: extractMonthlyCounts(raw.tsLastTow),
+        },
+        {
+          name: "2024",
+          type: "line",
+          data: extractMonthlyCounts(raw.tsLast),
+        },
+        {
+          name: "2025",
+          type: "line",
+          data: extractMonthlyCounts(raw.tsLastNow),
         },
       ],
     };
+
     myChart_yyxt2.setOption(option_yyxt2);
   });
+  // getTouSU().then((data) => {
+  //   if (data.tsLastNow.length < 12) {
+  //     for (let i = 0; i < 20; i++) {
+  //       var tmp = { count: 0 };
+  //       data.tsLastNow.push(tmp);
+  //     }
+  //   }
+  //   var option_yyxt2 = {
+  //     title: {
+  //       text: "油烟投诉趋势图",
+  //       textStyle: {
+  //         color: "#ccc",
+  //       },
+  //     },
+  //     tooltip: {
+  //       trigger: "axis",
+  //     },
+  //     legend: {
+  //       textStyle: {
+  //         color: "#ccc",
+  //       },
+  //       data: ["2021", "2022", "2023"],
+  //     },
+  //     grid: {
+  //       left: "3%",
+  //       right: "4%",
+  //       bottom: "3%",
+  //       containLabel: true,
+  //     },
+  //     toolbox: {
+  //       feature: {
+  //         saveAsImage: {},
+  //       },
+  //     },
+  //     xAxis: {
+  //       type: "category",
+  //       boundaryGap: false,
+  //       data: [
+  //         "01",
+  //         "02",
+  //         "03",
+  //         "04",
+  //         "05",
+  //         "06",
+  //         "07",
+  //         "08",
+  //         "09",
+  //         "10",
+  //         "11",
+  //         "12",
+  //       ],
+  //     },
+  //     yAxis: {
+  //       type: "value",
+  //     },
+  //     series: [
+  //       {
+  //         name: "2021",
+  //         type: "line",
+  //
+  //         data: [
+  //           data.tsLastTow[0].count,
+  //           data.tsLastTow[1].count,
+  //           data.tsLastTow[2].count,
+  //           data.tsLastTow[3].count,
+  //           data.tsLastTow[4].count,
+  //           data.tsLastTow[5].count,
+  //           data.tsLastTow[6].count,
+  //           data.tsLastTow[7].count,
+  //           data.tsLastTow[8].count,
+  //           data.tsLastTow[9].count,
+  //           data.tsLastTow[10].count,
+  //           data.tsLastTow[11].count,
+  //         ],
+  //       },
+  //       {
+  //         name: "2022",
+  //         type: "line",
+  //
+  //         data: [
+  //           data.tsLast[0].count,
+  //           data.tsLast[1].count,
+  //           data.tsLast[2].count,
+  //           data.tsLast[3].count,
+  //           data.tsLast[4].count,
+  //           data.tsLast[5].count,
+  //           data.tsLast[6].count,
+  //           data.tsLast[7].count,
+  //           data.tsLast[8].count,
+  //           data.tsLast[9].count,
+  //           data.tsLast[10].count,
+  //           data.tsLast[11].count,
+  //         ],
+  //       },
+  //       {
+  //         name: "2023",
+  //         type: "line",
+  //
+  //         data: [
+  //           data.tsLastNow[0].count,
+  //           data.tsLastNow[1].count,
+  //           data.tsLastNow[2].count,
+  //           data.tsLastNow[3].count,
+  //           data.tsLastNow[4].count,
+  //           data.tsLastNow[5].count,
+  //           data.tsLastNow[6].count,
+  //           data.tsLastNow[7].count,
+  //           data.tsLastNow[8].count,
+  //           data.tsLastNow[9].count,
+  //           data.tsLastNow[10].count,
+  //           data.tsLastNow[11].count,
+  //         ],
+  //       },
+  //     ],
+  //   };
+  //   myChart_yyxt2.setOption(option_yyxt2);
+  // });
 
   getCompanyType().then((data) => {
     var option_yyxt4 = {
