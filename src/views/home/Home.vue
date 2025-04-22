@@ -4494,7 +4494,7 @@ const warningSubmitForm = async () => {
       });
       //发送短信（新增部分）
       axios({
-        url: "/sms/sendMessage",
+        url: "api/sms/sendMessage",
         method: "post",
         headers: {
           "Content-Type": "application/json",
