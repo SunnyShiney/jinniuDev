@@ -302,7 +302,10 @@
             color="fff"
             @click="showClickLog"
             size="large"
-            v-show="params.role == '管理员' "
+            v-show="params.role == '管理员' || params.realname == '李俊' || params.realname == '傅红焰'
+                    || params.realname == '刘磊' || params.realname == '王洪'
+                    || params.realname == '龚庆' || params.realname == '宋伟'
+                    || params.realname == '翁奎' || params.realname == '李莉佳'"
             >点击日志</el-button
           >
           <el-button
