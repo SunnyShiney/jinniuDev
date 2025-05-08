@@ -5173,6 +5173,8 @@ const getClickLogList = (sys, start, end, pageNum) => {
     realUrl = "/qsm/api/logs/quansm";
   } else if (sys == "餐厨收运管家") {
     realUrl = "/cc/api/logs/cancu";
+  } else if (sys == "调度指挥管家") {
+    realUrl = "/ddzh/admin-log/page?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
   }
   console.log("log realUrl:" + realUrl);
   var request;
@@ -5214,7 +5216,7 @@ const getClickLogList = (sys, start, end, pageNum) => {
       data = resp.data.data.lists;
     } else if (sys == "网络理政管家") {
       data = resp.data.data.contentData;
-    } else if (sys == "智慧公厕管家") {
+    } else if (sys == "智慧公厕管家" || sys == "调度指挥管家") {
       data = resp.data.data.records;
     } else if (sys == "城市管家") {
       data = resp.data.data.list;
@@ -5246,7 +5248,7 @@ const getClickLogList = (sys, start, end, pageNum) => {
     } else if (sys == "照明管家（新）") {
       total_Records_clickLog.value = resp.data.total;
       page_Count_clickLog = parseInt(resp.data.total) % 10;
-    } else if (sys == "智慧公厕管家") {
+    } else if (sys == "智慧公厕管家" || sys == "调度指挥管家") {
       total_Records_clickLog.value = resp.data.data.total;
       page_Count_clickLog = parseInt(resp.data.data.total) % 10;
     } else if (sys == "城市管家") {
@@ -5279,7 +5281,8 @@ const getClickLogApplication = (pageNum) => {
       selectedSys.value == "智慧公厕管家" ||
       selectedSys.value == "城市管家" ||
       selectedSys.value == "临街店铺管家" ||
-      selectedSys.value == "餐饮油烟管家") {
+      selectedSys.value == "餐饮油烟管家" ||
+      selectedSys.value == "调度指挥管家") {
     getClickLogList(selectedSys.value, logStart, logEnd, pageNum);
   } else {
     logListView.splice(0, logListView.length, ...clickLogList.slice(
