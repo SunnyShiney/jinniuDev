@@ -542,24 +542,25 @@
                 effect="dark"
                 placement="top"
             >
-              <!-- 背景图已存在时显示图片 -->
-              <img
-                  v-if="backgroundImageUrl"
-                  :src="backgroundImageUrl"
-                  class="background-preview"
-                  @click="handleAvatarClick"
-              />
-              <!-- 无背景图时显示上传图标 -->
-              <el-icon
-                  v-else
-                  class="avatar-uploader-icon"
-                  @click="handleAvatarClick"
-              >
-                <Plus />
-              </el-icon>
+              <div class="background-upload-button">
+                <img
+                    v-if="backgroundImageUrl"
+                    :src="backgroundImageUrl"
+                    class="background-preview"
+                    @click="handleAvatarClick"
+                />
+                <el-icon
+                    v-else
+                    class="avatar-uploader-icon"
+                    @click="handleAvatarClick"
+                >
+                  <Plus />
+                </el-icon>
+              </div>
             </el-tooltip>
           </el-upload>
         </template>
+
         <div
           class="classification-title"
           v-if="(choosedDept == -1) | (choosedDept == 0)"
@@ -9760,6 +9761,33 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   flex-wrap: wrap;
   width: 200;
 }
+
+.background-uploader {
+  width: 50px; /* 控制上传按钮区域大小 */
+  height: 50px;
+  position: absolute; /* 可以让它浮在 el-main 上任意位置 */
+  top: 60px; /* 距离上方20px */
+  right: 0; /* 距离右边20px */
+  z-index: 10;
+}
+
+.background-upload-button {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.background-upload-button img,
+.background-upload-button .el-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 图片自适应缩放 */
+  cursor: pointer;
+  border-radius: 8px; /* 圆角，可选 */
+}
+
 
 .subdepts {
   padding: 0px;
