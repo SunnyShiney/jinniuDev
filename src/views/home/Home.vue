@@ -3795,6 +3795,7 @@
 
           <el-table-column prop="cgsyd" label="网络理政管家" />
           <el-table-column prop="hwzy" label="环卫作业运行管家" />
+          <el-table-column prop="newZmgj" label="照明管家（新）" />
           <el-table-column
             fixed="right"
             prop="operate"
@@ -4020,6 +4021,18 @@
               v-model="radioJgzm"
               class="radioPermisson"
               @change="radioChangeJgzm"
+            >
+              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
+                city
+              }}</el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+
+          <el-form-item label="照明管家（新）" prop="newZmgj">
+            <el-checkbox-group
+              v-model="radioNewZmgj"
+              class="radioPermisson"
+              @change="radioChangeNewZmgj"
             >
               <el-checkbox v-for="city in cities" :key="city" :label="city">{{
                 city
@@ -5018,6 +5031,7 @@ const radioYczl = ref([]);
 const radioSzhcs = ref([]);
 const radioJgzm = ref([]);
 const radioShlj = ref([]);
+const radioNewZmgj = ref([]);
 const radioZhxz = ref([]);
 const radioDdzh = ref([]);
 const radioCclj = ref([]);
@@ -5049,6 +5063,9 @@ const checkSzhcs = ref(false);
 const permissonJgzm = ref("");
 const oldRadioJgzm = ref([]);
 const checkJgzm = ref(false);
+const permissonNewZmgj = ref("");
+const oldRadioNewZmgj = ref([]);
+const checkNewZmgj = ref(false);
 const permissonShlj = ref("");
 const oldRadioShlj = ref([]);
 const checkShlj = ref(false);
@@ -5079,6 +5096,7 @@ const ruleForm = reactive({
   ddzh: false,
   cclj: false,
   cyyy: false,
+  newZmgj: false,
 });
 const permissonAlert = ref(false);
 
@@ -5522,6 +5540,7 @@ const getPermissionList = (pageNum) => {
         cclj: "×",
         cyyy: "×",
         hwzy: "x",
+        newZmgj: "×",
       };
       var roleList = data[key].roleList;
       for (var index in roleList) {
@@ -5541,6 +5560,7 @@ const getPermissionList = (pageNum) => {
           permission_list.cclj = "√";
           permission_list.ddzh = "√";
           permission_list.hwzy = "√";
+          permission_list.newZmgj = "√";
         }
         if (roleList[index].system == "共享单车管家") {
           permission_list.gxdc = "√";
@@ -5583,6 +5603,9 @@ const getPermissionList = (pageNum) => {
         }
         if (roleList[index].system == "餐饮油烟管家") {
           permission_list.cyyy = "√";
+        }
+        if (roleList[index].system == "照明管家（新）") {
+          permission_list.newZmgj = "√";
         }
       }
       await axios({
@@ -5639,6 +5662,9 @@ const getPermissionList = (pageNum) => {
               if (resp[i].roleSystem == "餐饮油烟管家") {
                 permission_list.cyyy = "×(待定)";
               }
+              if (resp[i].roleSystem == "照明管家（新）") {
+                permission_list.newZmgj = "×(待定)";
+              }
             } else if (resp[i].operateType == "add") {
               if (resp[i].roleSystem == "共享单车管家") {
                 permission_list.gxdc = "√(待定)";
@@ -5681,6 +5707,9 @@ const getPermissionList = (pageNum) => {
               }
               if (resp[i].roleSystem == "餐饮油烟管家") {
                 permission_list.cyyy = "√(待定)";
+              }
+              if (resp[i].roleSystem == "照明管家（新）") {
+                permission_list.newZmgj = "√(待定)";
               }
             }
           }
@@ -5791,6 +5820,7 @@ const handleClick = (row) => {
     radioSzhcs.value = [];
     radioJgzm.value = [];
     radioShlj.value = [];
+    radioNewZmgj.value = [];
     radioZhxz.value = [];
     radioDdzh.value = [];
     radioCclj.value = [];
@@ -5825,6 +5855,7 @@ const handleClick = (row) => {
               radioDdzh.value = ["浏览信息"];
               radioCclj.value = ["浏览信息"];
               radioCyyy.value = ["浏览信息"];
+              radioNewZmgj.value = ["浏览信息"];
 
               // ElMessage({
               //   message: "您不可更改该用户权限！",
@@ -5981,6 +6012,21 @@ const handleClick = (row) => {
                   oldRadioShlj.value = "operator";
                 }
                 permissonShlj.value = oldRadioShlj.value;
+              }
+              if (roleList[index].system == "照明管家（新）") {
+                if (roleList[index].name == "viewer") {
+                  radioNewZmgj.value = ["浏览信息"];
+                  oldRadioNewZmgj.value = "viewer";
+                }
+                if (roleList[index].name == "admin") {
+                  radioNewZmgj.value = ["浏览信息", "管理参数"];
+                  oldRadioNewZmgj.value = "admin";
+                }
+                if (roleList[index].name == "operator") {
+                  radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
+                  oldRadioNewZmgj.value = "operator";
+                }
+                permissonNewZmgj.value = oldRadioNewZmgj.value;
               }
               if (roleList[index].system == "突出问题管家") {
                 if (roleList[index].name == "viewer") {
@@ -6206,6 +6252,22 @@ const handleClick = (row) => {
                   }
                   permissonJgzm.value = oldRadioJgzm.value;
                 }
+                if (roleList[index].roleSystem == "照明管家（新）") {
+                  radioNewZmgj.value = [];
+                  if (roleList[index].roleName == "viewer") {
+                    radioNewZmgj.value = ["浏览信息"];
+                    oldRadioNewZmgj.value = "viewer";
+                  }
+                  if (roleList[index].roleName == "admin") {
+                    radioNewZmgj.value = ["浏览信息", "管理参数"];
+                    oldRadioNewZmgj.value = "admin";
+                  }
+                  if (roleList[index].roleName == "operator") {
+                    radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
+                    oldRadioNewZmgj.value = "operator";
+                  }
+                  permissonNewZmgj.value = oldRadioNewZmgj.value;
+                }
                 if (roleList[index].roleSystem == "智慧公厕管家") {
                   radioShlj.value = [];
                   if (roleList[index].roleName == "viewer") {
@@ -6405,6 +6467,11 @@ const cellStyle = ({ row, column, rowIndex, columnIndex }) => {
     columnIndex === 15
   ) {
     return newstyleObject;
+  } else if (
+    (row.newZmgj === "√(待定)" || row.newZmgj === "×(待定)") &&
+    columnIndex === 16
+  ) {
+    return newstyleObject;
   } else {
     return styleObject;
   }
@@ -6429,7 +6496,8 @@ const submitPermisson = (permissionForm) => {
     oldRadioDdzh.value == permissonDdzh.value &&
     oldRadioCclj.value == permissonCclj.value &&
     oldRadioCyyy.value == permissonCyyy.value &&
-    oldRadioHwzy.value == permissonHwzy.value
+    oldRadioHwzy.value == permissonHwzy.value &&
+    oldRadioNewZmgj.value == permissonNewZmgj.value 
   ) {
     ElMessage({
       message: "您未作任何更改，请更改之后再提交！",
@@ -6531,6 +6599,16 @@ const submitPermisson = (permissionForm) => {
           selfPermisson("景观照明集中控制管家", "add", permissonJgzm.value);
         } else {
           selfPermisson("景观照明集中控制管家", "delete", oldRadioJgzm.value);
+        }
+      }
+      if (checkNewZmgj.value == true) {
+        if (permissonNewZmgj.value != "") {
+          if (oldRadioNewZmgj.value != "") {
+            selfPermisson("照明管家（新）", "delete", oldRadioNewZmgj.value);
+          }
+          selfPermisson("照明管家（新）", "add", permissonNewZmgj.value);
+        } else {
+          selfPermisson("照明管家（新）", "delete", oldRadioNewZmgj.value);
         }
       }
       if (checkShlj.value == true) {
@@ -6795,6 +6873,28 @@ const radioChangeJgzm = (value) => {
     }
   }
   checkJgzm.value = true;
+};
+
+const radioChangeNewZmgj = (value) => {
+  console.log("value长度：" + value.length);
+  if (value.length == 0) {
+    permissonNewZmgj.value = "";
+  }
+  for (var index in value) {
+    console.log("value:" + value[index]);
+    if (value[index] == "浏览信息") {
+      permissonNewZmgj.value = "viewer";
+    }
+    if (value[index] == "管理参数") {
+      radioNewZmgj.value = ["浏览信息", "管理参数"];
+      permissonNewZmgj.value = "admin";
+    }
+    if (value[index] == "操作系统") {
+      radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
+      permissonNewZmgj.value = "operator";
+    }
+  }
+  checkNewZmgj.value = true;
 };
 
 const radioChangeShlj = (value) => {
