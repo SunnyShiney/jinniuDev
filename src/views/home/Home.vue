@@ -3869,6 +3869,9 @@
           <el-form-item label="密码" prop="password">
             <el-input v-model="ruleAddForm.password" />
           </el-form-item>
+          <el-form-item label="单位" prop="department">
+            <el-input v-model="ruleAddForm.department" />
+          </el-form-item>
         </el-form>
         <template #footer>
           <span class="dialog-footer">
@@ -4850,6 +4853,7 @@ const ruleAddForm = reactive({
   realName: "",
   telephone: "",
   password: "1234567",
+  department:"",
 });
 const rulesAdd = reactive({
   realName: [{ required: "true", message: "姓名不能为空", trigger: "blur" }],
@@ -4885,6 +4889,7 @@ const submitAddForm = async () => {
           password: Number(ruleAddForm.password),
           realName: ruleAddForm.realName,
           telephone: Number(ruleAddForm.telephone),
+          department:ruleAddForm.department,
         }),
         method: "post",
       }).then(function (resp) {
