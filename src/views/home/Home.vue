@@ -296,6 +296,17 @@
       <template #userinfo>
         <div class="router">
           <el-button
+              class="buttonToMap"
+              plain
+              link
+              color="fff"
+              @click="updateCompanyDialog = true"
+              size="large"
+              v-show="params.role == '管理员'"
+          >
+            修改单位信息
+          </el-button>
+          <el-button
             class="buttonToMap"
             plain
             link
@@ -3503,6 +3514,111 @@
         </div>
       </el-main>
 
+      <el-dialog
+          v-model="updateCompanyDialog"
+          title="修改单位信息"
+          align-center="true"
+          width="90%"
+          @close="handleClose"
+      >
+        <div style="font-size: 2rem">用户列表</div>
+        <div class="search-container">
+          <el-input
+              v-model="searchNameInCompany"
+              placeholder="输入姓名搜索"
+              clearable
+              style="width: 200px; margin-right: 10px;"
+          />
+          <el-input
+              v-model="searchPhoneInCompany"
+              placeholder="输入电话号码搜索"
+              clearable
+              style="width: 200px; margin-right: 10px;"
+          />
+          <el-button type="primary" @click="handleSearchInCompany">
+            <el-icon><Search /></el-icon>搜索
+          </el-button>
+        </div>
+        <el-table
+            :data="
+            updateCompanyList.slice(
+              (current_Page_company - 1) * 10,
+              current_Page_company * 10
+            )
+          "
+            size="large"
+            style="width: 100%"
+            :header-cell-style="{
+            'text-align': 'center',
+            'font-size': '1.5rem',
+            background: '#3B53A1 !important',
+            color: '#ffffff',
+            border: 'none !important',
+          }"
+            :cell-style="cellStyle"
+        >
+          <!-- 序号（应该可选才对-目前没有） -->
+
+          \
+          <el-table-column fixed="left" prop="realName" label="人员姓名" />
+          <el-table-column fixed="left" prop="telephone" label="手机号" />
+          <el-table-column fixed="left" prop="company" label="当前单位" />
+          <el-table-column fixed="right" prop="operate" label="操作">
+            <template #default="scope">
+              <el-button type="primary" @click="handleUpdateCompany(scope.row)"
+              >修改单位</el-button
+              >
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="float-end" style="margin-bottom: 20px">
+          <el-pagination
+              background
+              layout="->,total, prev, pager, next, jumper"
+              :total="total_Records_company"
+              :current-page="current_Page_company"
+              :page-size="10"
+              @current-change="getEditCompanyApplication"
+          />
+        </div>
+      </el-dialog>
+
+      <el-dialog
+          v-model="editCompanyDialogVisible"
+          title="修改单位信息"
+          width="40%"
+          @close="handleCloseEditCompany"
+      >
+        <el-form
+            ref="editCompanyFormRef"
+            :model="editCompanyForm"
+            label-width="100px"
+            :rules="editCompanyRules"
+            status-icon
+        >
+          <el-form-item label="姓名" prop="realName">
+            <el-input v-model="editCompanyForm.realName" disabled />
+          </el-form-item>
+          <el-form-item label="手机号" prop="telephone">
+            <el-input v-model="editCompanyForm.telephone" disabled />
+          </el-form-item>
+          <el-form-item label="当前单位">
+            <el-input v-model="editCompanyForm.currentCompany" disabled />
+          </el-form-item>
+          <el-form-item label="新单位" prop="newCompany">
+            <el-input v-model="editCompanyForm.newCompany" />
+          </el-form-item>
+        </el-form>
+
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="editCompanyDialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitEditCompanyForm">
+              确认修改
+            </el-button>
+          </span>
+        </template>
+      </el-dialog>
       <!-- //-----------------------------------------------------------------sunny 09/07 密码重设列表 -->
       <el-dialog
         v-model="resetPasswordDialog"
@@ -3773,6 +3889,12 @@
             prop="username"
             label="人员姓名"
             width="100"
+          />
+          <el-table-column
+              fixed="left"
+              prop="company"
+              label="单位"
+              width="100"
           />
           <el-table-column
             fixed="left"
@@ -5316,6 +5438,101 @@ const getClickLogApplication = (pageNum) => {
   }
 };
 
+const updateCompanyDialog = ref(false);
+const searchNameInCompany = ref("");
+const searchPhoneInCompany = ref("");
+const updateCompanyList = reactive([]);
+const total_Records_company = ref(0);
+const current_Page_company = ref(1);
+
+const handleSearchInCompany = () => {
+  getEditCompanyList(1);
+};
+
+const getEditCompanyList = (pageNum) =>{
+  axios({
+    url: "/api/auth/all_permission",
+    method: "get",
+    headers: {
+      Authorization: "Bearer " + params.token,
+    },
+  }).then(async (resp) => {
+    var data = resp.data;
+    updateCompanyList.splice(0, updateCompanyList.length);
+    for (var key in data) {
+      var updateCompany = {
+        realName: data[key].realName,
+        telephone: data[key].telephone,
+        company: data[key].department,
+      };
+      updateCompanyList.push(updateCompany);
+      if (!updateCompany.realName.includes(searchNameInCompany.value)
+          || !updateCompany.telephone.includes(searchPhoneInCompany.value)) {
+        updateCompanyList.pop();
+      }
+    }
+    total_Records_company.value = updateCompanyList.length;
+    //page_Count_company = parseInt(updateCompanyList.length) % 10;
+    current_Page_company.value = pageNum;
+  })
+};
+
+setInterval(getEditCompanyList(1), 60000);
+const getEditCompanyApplication = (pageNum) => {
+  // 当前页
+  current_Page_company.value = pageNum;
+};
+
+const editCompanyDialogVisible = ref(false);
+const editCompanyFormRef = ref(null);
+
+const editCompanyForm = reactive({
+  realName: "",
+  telephone: "",
+  currentCompany: "",
+  newCompany: "",
+});
+
+const editCompanyRules = {
+  newCompany: [
+    { required: true, message: "请输入新单位", trigger: "blur" },
+  ],
+};
+
+// 点击按钮时触发
+const handleUpdateCompany = (row) => {
+  editCompanyForm.realName = row.realName;
+  editCompanyForm.telephone = row.telephone;
+  editCompanyForm.currentCompany = row.company;
+  editCompanyForm.newCompany = ""; // 清空输入框
+  editCompanyDialogVisible.value = true;
+};
+
+// 提交表单
+const submitEditCompanyForm = () => {
+  editCompanyFormRef.value.validate((valid) => {
+    if (!valid) return;
+    axios.post("/api/auth/admin_change_department", {
+      name: editCompanyForm.telephone,
+      department: editCompanyForm.newCompany,
+    }, {
+      headers: {
+        Authorization: "Bearer " + params.token,
+      },
+    }).then((res) => {
+      ElMessage.success("单位修改成功");
+      editCompanyDialogVisible.value = false;
+      getEditCompanyList(current_Page_company.value); // 刷新表格
+    }).catch((err) => {
+      ElMessage.error("修改失败：" + err.message);
+    });
+  });
+};
+
+// 可选：关闭弹窗时清理数据
+const handleCloseEditCompany = () => {
+  editCompanyForm.newCompany = "";
+};
 //-----------------------------------------------------------------sunny 090/07 密码重设列表
 const handleSearchInReset = () => {
   getResetPasswordList(1);
@@ -5538,11 +5755,11 @@ const getPermissionList = (pageNum, filteredName, filteredPhone) => {
     // console.log("data.code：" + data);
     var realName = ref("");
     var telephone = ref("");
-
+    var company = ref("");
     for (var key in data) {
       realName.value = data[key].realName;
       telephone.value = data[key].telephone;
-
+      company.value = data[key].department;
       var permission_list = {
         index: Number(key) + 1,
         username: data[key].realName,
