@@ -4913,7 +4913,7 @@ const submitAddForm = async () => {
           loading.value = true;
           console.log("lastPage" + lastPage);
 
-          getPermissionList(lastPage);
+          getPermissionList(lastPage, searchName.value, searchPhone.value);
         } else {
           alert("提交失败！");
         }
@@ -5464,7 +5464,7 @@ const approvedClick = (callback, row) => {
   }).then(function (resp) {
     aplicationloading.value = true;
     loading.value = true;
-    getPermissionList(1);
+    getPermissionList(1, searchName.value, searchPhone.value);
     getPermissonApplicationListList(1);
   });
   callback();
@@ -5496,20 +5496,36 @@ const refusedClick = (callback, row) => {
   }).then(function (resp) {
     aplicationloading.value = true;
     loading.value = true;
-    getPermissionList(1);
+    getPermissionList(1, searchName.value, searchPhone.value);
     getPermissonApplicationListList(1);
   });
   callback();
 };
 
 const handleSearch = () => {
-  getPermissionList(1);
+  getPermissionList(1, searchName.value, searchPhone.value);
 };
 
-const getPermissionList = (pageNum) => {
+const getPermissionList = (pageNum, filteredName, filteredPhone) => {
+  // Construct URL with query parameters if they're provided
+  let url = "/api/auth/non_super_admin_list";
+  const queryParams = [];
+  
+  if (filteredName && filteredName.trim() !== "") {
+    queryParams.push(`filteredName=${encodeURIComponent(filteredName.trim())}`);
+  }
+  
+  if (filteredPhone && filteredPhone.trim() !== "") {
+    queryParams.push(`filteredPhone=${encodeURIComponent(filteredPhone.trim())}`);
+  }
+  
+  // Add query parameters to URL if any exist
+  if (queryParams.length > 0) {
+    url += `?${queryParams.join("&")}`;
+  }
+  console.log("请求的URL：" + url);
   axios({
-    // url: "/api/lzj/getWarning",
-    url: "/api/auth/non_super_admin_list",
+    url: url,
     method: "get",
     headers: {
       Authorization: "Bearer " + params.token,
@@ -5721,20 +5737,11 @@ const getPermissionList = (pageNum) => {
         }
       });
       permissionList.push(permission_list);
-      // if (searchName.value != "") {
-      //   if (!permission_list.username.includes(searchName.value)) {
-      //     permissionList.pop();
-      //   }
+      
+      // if (!permission_list.username.includes(searchName.value) 
+      //     || !permission_list.telephone.includes(searchPhone.value)) {
+      //   permissionList.pop();
       // }
-      // if (searchPhone.value != "") {
-      //   if (!permission_list.telephone.includes(searchPhone.value)) {
-      //     permissionList.pop();
-      //   }
-      // }
-      if (!permission_list.username.includes(searchName.value) 
-          || !permission_list.telephone.includes(searchPhone.value)) {
-        permissionList.pop();
-      }
     }
     totalRecords.value = permissionList.length;
     pageCount = parseInt(permissionList.length) % 10;
@@ -5746,7 +5753,9 @@ const getPermissionList = (pageNum) => {
   });
 };
 // getPermissionList(1);
-setInterval(getPermissionList(1), 60000);
+setInterval(() => {
+  getPermissionList(1, searchName.value, searchPhone.value);
+}, 60000);
 
 const getPermission = (pageNum) => {
   // 当前页
@@ -5778,7 +5787,7 @@ const handleDelete = (row) => {
         }).then(function (resp) {
           console.log(2, resp);
           loading.value = true;
-          getPermissionList(currentRowPage);
+          getPermissionList(currentRowPage, searchName.value, searchPhone.value);
 
           ElMessage({
             type: "success",
@@ -6676,7 +6685,7 @@ const submitPermisson = (permissionForm) => {
     }
     loading.value = true;
     console.log("currentRowPage:" + currentRowPage);
-    getPermissionList(currentRowPage);
+    getPermissionList(currentRowPage, searchName.value, searchPhone.value);
     getPermissonApplicationListList(1);
   }
 };
