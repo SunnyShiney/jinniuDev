@@ -283,25 +283,44 @@
             id="#vcfResult"
             :row-class-name="tableRowClassName"
           >
-            <el-table-column property="uuid" label="事件uuid" width="260">
+<!--            <el-table-column property="uuid" label="事件uuid" width="260">-->
+<!--              <template #default="scope">-->
+<!--                <el-tooltip-->
+<!--                  class="item"-->
+<!--                  effect="dark"-->
+<!--                  content="点击查看事件详情"-->
+<!--                  placement="top-start"-->
+<!--                >-->
+<!--                  <el-button-->
+<!--                    size="medium"-->
+<!--                    type="primary"-->
+<!--                    link-->
+<!--                    @click="warningDetail(scope.$index, scope.row)"-->
+<!--                    >{{ scope.row.uuid }}-->
+<!--                  </el-button>-->
+<!--                </el-tooltip>-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--            <el-table-column property="event_no" label="事件编号" width="150" />-->
+            <el-table-column property="event_no" label="事件编号" width="150">
               <template #default="scope">
                 <el-tooltip
-                  class="item"
-                  effect="dark"
-                  content="点击查看事件详情"
-                  placement="top-start"
+                    class="item"
+                    effect="dark"
+                    content="点击查看事件详情"
+                    placement="top-start"
                 >
                   <el-button
-                    size="medium"
-                    type="primary"
-                    link
-                    @click="warningDetail(scope.$index, scope.row)"
-                    >{{ scope.row.uuid }}
+                      size="medium"
+                      type="primary"
+                      link
+                      @click="warningDetail(scope.$index, scope.row)"
+                  >
+                    {{ scope.row.event_no }}
                   </el-button>
                 </el-tooltip>
               </template>
             </el-table-column>
-            <el-table-column property="event_no" label="事件编号" width="150" />
             <el-table-column
               property="event_name"
               label="事件名称"
@@ -351,7 +370,7 @@
             style="padding-top: 20px; padding-left: 20px"
           >
             <ul style="display: inline-block">
-              <li>事件id：{{ id }}</li>
+<!--              <li>事件id：{{ id }}</li>-->
               <li>事件名称：{{ eventName }}</li>
               <li>事件来源：{{ eventSource }}</li>
               <li>事件类型：{{ eventType }}</li>

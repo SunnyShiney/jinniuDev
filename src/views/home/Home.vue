@@ -8556,7 +8556,7 @@ function toSystemHjws(item) {
     }
   }
   if (permission.value == true) {
-    var realURL = item.url + "?phone=" + params.username;
+    var realURL = item.url + "?phone=" + params.username + "&realName=" + params.realname;
     console.log("realURL:  " + realURL);
     window.open(realURL);
     uploadClickLog(item.systemName);
