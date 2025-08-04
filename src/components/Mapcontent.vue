@@ -663,7 +663,7 @@ const syd_data = ref([]);
 //     method: "post",
 //     data: JSON.stringify({
 //       phone: "18380195019",
-//       password: "123456",
+//       password: "",
 //     }),
 // }).then(function (resp) {
 //     console.log("ddzh2",resp)
