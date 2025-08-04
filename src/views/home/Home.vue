@@ -5462,7 +5462,7 @@ const tableData = [
 //==============================================================================2024.04.12 告警指示灯
 const query = ref("");
 const value = ref("");
-const warningPersonList = ref("");
+const warningPersonList = ref([]);
 // const warningPersonList = [
 //   { name: "周攀", phone: "18008061031", company: "办公室" },
 //   { name: "李自勇", phone: "18008060397", company: "办公室" },
