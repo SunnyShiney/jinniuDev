@@ -170,23 +170,37 @@
                 >
 
                 <div style="padding: 5px">
-                  <template v-for="tableItem in tableData_jbgl">
-                    <el-table
-                      :data="tableItem.data"
-                      class="table"
-                      :fit="false"
-                      :row-style="{ height: '80px' }"
-                      :cell-style="cellstyle"
-                      max-height="300"
-                    >
-                      <el-table-column
-                        v-for="i in tableItem.headerNames.length"
-                        :label="tableItem.headerNames[i - 1]"
-                        :prop="tableItem.dataNames[i - 1]"
-                        width="200"
-                      />
-                    </el-table>
-                  </template>
+<!--                  <template v-for="tableItem in tableData_jbgl">-->
+<!--                    <el-table-->
+<!--                      :data="tableItem.data"-->
+<!--                      class="table"-->
+<!--                      :fit="false"-->
+<!--                      :row-style="{ height: '80px' }"-->
+<!--                      :cell-style="cellstyle"-->
+<!--                      max-height="300"-->
+<!--                    >-->
+<!--                      <el-table-column-->
+<!--                        v-for="i in tableItem.headerNames.length"-->
+<!--                        :label="tableItem.headerNames[i - 1]"-->
+<!--                        :prop="tableItem.dataNames[i - 1]"-->
+<!--                        width="200"-->
+<!--                      />-->
+<!--                    </el-table>-->
+<!--                  </template>-->
+
+                  <el-table
+                      :data="tableData_jgzm"
+                      style="width: 100%"
+                      :max-height="maxTableHeight"
+                  >
+                    <el-table-column prop="area" label="区域"></el-table-column>
+                    <el-table-column prop="status" label="状态"></el-table-column>
+                    <el-table-column prop="name" label="设备名称"></el-table-column>
+                    <el-table-column prop="class" label="设备类型"></el-table-column>
+                    <el-table-column prop="type" label="警报类型"></el-table-column>
+                    <el-table-column prop="time" label="警报时间"></el-table-column>
+                  </el-table>
+
                 </div>
               </div>
             </div>
@@ -333,7 +347,6 @@ const store = useStore();
 
 const maxTableHeight = "35vh";
 const tableData = ref([
-  { region: "金牛区" },
   { region: "茶店子街道" },
   { region: "抚琴街道" },
   { region: "荷花池街道" },
@@ -348,6 +361,88 @@ const tableData = ref([
   { region: "西华街道" },
   { region: "凤凰山街道" },
 ]);
+
+const fetchData = async () => {
+  try {
+    // 获取店铺数量接口数据
+    // const shopCountResponse = await axios.get('/api/ggzp/shopCountByStreet', {
+    //   headers: {
+    //     Authorization: "Bearer" + params.token // 带上 token
+    //   }
+    // });
+    const inspectionStatsResponse = await axios.get('/api/ggzp/inspectionStats', {
+      headers: {
+        Authorization: "Bearer" + params.token // 带上 token
+      }
+    });
+
+    // // 处理后端返回的数据
+    // const shopData = shopCountResponse.data.data; // 店铺数量数据
+    const inspectionData = inspectionStatsResponse.data.data; // 巡查统计数据
+
+    // 合并数据
+    tableData.value = tableData.value.map((item) => {
+      const region = item.region;
+
+      return {
+        region, // 区域
+        dpzs: inspectionData[region]?.check_total || 0, // 店铺总数
+        xcsl: inspectionData[region]?.check_finish || 0, // 巡查数量
+        xcbl: inspectionData[region]?.check_rate || '0%', // 巡查比例
+        gxsl: inspectionData[region]?.update_count || 0, // 更新数量
+        wtzpsl: inspectionData[region]?.problem_shop_count || 0, // 问题招牌数量
+      };
+    });
+
+    // 添加“金牛区”作为总领
+    const totalCheckTotal = Object.values(inspectionData).reduce((acc, value) => acc + (value.check_total || 0), 0);
+    const totalCheckFinish = Object.values(inspectionData).reduce((acc, value) => acc + (value.check_finish || 0), 0);
+    const totalUpdateCount = Object.values(inspectionData).reduce((acc, value) => acc + (value.update_count || 0), 0);
+    const totalProblemShopCount = Object.values(inspectionData).reduce((acc, value) => acc + (value.problem_shop_count || 0), 0);
+    const xcbl = totalCheckTotal > 0 ? ((totalCheckFinish / totalCheckTotal) * 100).toFixed(2) : "0.00%";
+    // 添加“金牛区”数据
+    tableData.value.unshift({
+      region: "金牛区", // 区域名称
+      dpzs: totalCheckTotal, // 店铺总数
+      xcsl: totalCheckFinish, // 巡查数量
+      xcbl: `${xcbl}%`, // 巡查比例
+      gxsl: totalUpdateCount, // 更新数量
+      wtzpsl: totalProblemShopCount, // 问题招牌数量
+    });
+
+    // 合并街道数据
+    tableData.value = tableData.value.slice(); // 强制更新视图
+  } catch (error) {
+    console.error('数据加载失败', error);
+  }
+};
+
+// 在组件挂载时调用接口
+onMounted(() => {
+  fetchData();
+});
+
+const tableData_jgzm = ref([]);
+const fetchData_jgzm = async () => {
+  try {
+    const jgzmResponse = await axios.get('/jgzm/get_fault_list/', {
+      headers: {
+        Authorization: "Bearer " + params.token // 带上 token
+      }
+    });
+
+    // 获取后端返回的数据，并存储到 tableData_jgzm 中
+    tableData_jgzm.value = jgzmResponse.data.data;
+
+  } catch (error) {
+    console.error('数据加载失败', error);
+  }
+};
+
+// 在组件挂载时调用接口
+onMounted(() => {
+  fetchData_jgzm();
+});
 const imgVisible = ref(true);
 //用户信息
 const user = reactive({
@@ -397,141 +492,231 @@ onBeforeUnmount(() => {
     myChart_ggzp1 = null;
   }
 });
-onMounted(() => {
-  // function echartInit_ggzp() {
-  myChart_ggzp1 = echarts.init(document.getElementById("container_ggzp1"));
-  var option_ggzp1 = {
-    title: {
-      text: "当月巡查率",
-      left: "left",
-    },
-    tooltip: {
-      trigger: "item",
-    },
-    // legend: {
-    //     orient: 'vertical',
-    //     left: 'left'
-    // },
-    xAxis: {
-      type: "category",
-      data: [
-        "荷花池",
-        "茶店子",
-        "抚琴",
-        "西安路",
-        "驷马桥",
-        "金泉",
-        "营门口",
-        "天回镇",
-        "五块石",
-        "九里堤",
-        "沙河源",
-        "西华",
-        "凤凰山",
-      ],
-      axisLabel: {
-        interval: 0, // 强制显示所有标签
-        //   rotate: 45   // 标签旋转角度
-      },
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        name: "当月巡查率",
-        type: "bar",
-        barWidth: "60%", // 调整柱子的宽度，可以是绝对值或百分比
-        // radius: '50%',
-        barGap: "300px", // 柱子之间的间隔，可以是绝对值或百分比
-        data: [
-          {
-            value: 15,
-            name: "荷花池",
-          },
-          {
-            value: 10,
-            name: "茶店子",
-          },
 
-          {
-            value: 30,
-            name: "抚琴",
-          },
-          {
-            value: 22,
-            name: "西安路",
-          },
-          {
-            value: 14,
-            name: "驷马桥",
-          },
-          {
-            value: 6,
-            name: "金泉",
-          },
-          {
-            value: 41,
-            name: "营门口",
-          },
-          {
-            value: 15,
-            name: "天回镇",
-          },
-          {
-            value: 22,
-            name: "五块石",
-          },
-          {
-            value: 24,
-            name: "九里堤",
-          },
-          {
-            value: 3,
-            name: "沙河源",
-          },
-          {
-            value: 7,
-            name: "西华",
-          },
-          {
-            // value: ggzp_tableData.value[3].infoVal,
-            value: 8,
-            name: "凤凰山",
-          },
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-          },
-        },
-      },
-    ],
-  };
-  // 监听窗口大小变化事件
-  // window.addEventListener("resize", function () {
-  //   myChart_ggzp1.resize(); // 重新计算图表大小
-  // });
-  myChart_ggzp1.setOption(option_ggzp1);
-  // }
-  getMain().then((data) => {
-    ggzp_tableData.value = data;
-    echartInit_ggzp();
-  });
-
-  getSystemList().then((data) => {
-    systems.value = data;
-    // 请求各个子系统要显示的数据
-    systems.value.forEach((system) => {
-      if (system.api !== "") {
-        if (system.systemId == "9" || system.systemId == "10")
-          get(system.api).then((data) => (system.data = data));
+// 获取巡查统计数据并绘制柱状图
+const fetchDataAndRenderChart = async () => {
+  try {
+    // 获取巡查统计接口数据
+    const inspectionStatsResponse = await axios.get('/api/ggzp/inspectionStats', {
+      headers: {
+        Authorization: "Bearer" + params.token // 带上 token
       }
     });
-  });
+
+    // 处理后端返回的巡查数据
+    const inspectionData = inspectionStatsResponse.data.data;
+
+    // 定义固定的街道顺序
+    const streets = [
+      "荷花池", "茶店子", "抚琴", "西安路", "驷马桥", "金泉",
+      "营门口", "天回镇", "五块石", "九里堤", "沙河源", "西华", "凤凰山"
+    ];
+
+    // 通过街道名查找巡查率，若没有找到则默认值为0
+    const chartData = streets.map(street => ({
+      value: inspectionData[`${street}街道`] ? parseFloat(inspectionData[`${street}街道`].check_rate) : 0, // 取巡查率，若没有则为0
+      name: street
+    }));
+
+    // 初始化图表
+    const myChart_ggzp1 = echarts.init(document.getElementById("container_ggzp1"));
+    const option_ggzp1 = {
+      title: {
+        text: "当月巡查率",
+        left: "left",
+      },
+      tooltip: {
+        trigger: "item",
+      },
+      xAxis: {
+        type: "category",
+        data: streets, // 固定街道名称顺序
+        axisLabel: {
+          interval: 0, // 强制显示所有标签
+        },
+      },
+      yAxis: {
+        type: "value",
+      },
+      series: [
+        {
+          name: "当月巡查率",
+          type: "bar",
+          barWidth: "60%", // 调整柱子的宽度
+          barGap: "30%", // 柱子之间的间隔
+          data: chartData, // 使用动态数据填充柱状图
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: "rgba(0, 0, 0, 0.5)",
+            },
+          },
+        },
+      ],
+    };
+
+    // 渲染图表
+    myChart_ggzp1.setOption(option_ggzp1);
+    getMain().then((data) => {
+      ggzp_tableData.value = data;
+      echartInit_ggzp();
+    });
+
+    getSystemList().then((data) => {
+      systems.value = data;
+      // 请求各个子系统要显示的数据
+      systems.value.forEach((system) => {
+        if (system.api !== "") {
+          if (system.systemId == "9" || system.systemId == "10")
+            get(system.api).then((data) => (system.data = data));
+        }
+      });
+    });
+  } catch (error) {
+    console.error('数据加载失败', error);
+  }
+};
+
+// 在组件挂载时调用数据获取和图表渲染函数
+onMounted(() => {
+  fetchDataAndRenderChart();
 });
+// onMounted(() => {
+//   // function echartInit_ggzp() {
+//   myChart_ggzp1 = echarts.init(document.getElementById("container_ggzp1"));
+//   var option_ggzp1 = {
+//     title: {
+//       text: "当月巡查率",
+//       left: "left",
+//     },
+//     tooltip: {
+//       trigger: "item",
+//     },
+//     // legend: {
+//     //     orient: 'vertical',
+//     //     left: 'left'
+//     // },
+//     xAxis: {
+//       type: "category",
+//       data: [
+//         "荷花池",
+//         "茶店子",
+//         "抚琴",
+//         "西安路",
+//         "驷马桥",
+//         "金泉",
+//         "营门口",
+//         "天回镇",
+//         "五块石",
+//         "九里堤",
+//         "沙河源",
+//         "西华",
+//         "凤凰山",
+//       ],
+//       axisLabel: {
+//         interval: 0, // 强制显示所有标签
+//         //   rotate: 45   // 标签旋转角度
+//       },
+//     },
+//     yAxis: {
+//       type: "value",
+//     },
+//     series: [
+//       {
+//         name: "当月巡查率",
+//         type: "bar",
+//         barWidth: "60%", // 调整柱子的宽度，可以是绝对值或百分比
+//         // radius: '50%',
+//         barGap: "300px", // 柱子之间的间隔，可以是绝对值或百分比
+//         data: [
+//           {
+//             value: 15,
+//             name: "荷花池",
+//           },
+//           {
+//             value: 10,
+//             name: "茶店子",
+//           },
+//
+//           {
+//             value: 30,
+//             name: "抚琴",
+//           },
+//           {
+//             value: 22,
+//             name: "西安路",
+//           },
+//           {
+//             value: 14,
+//             name: "驷马桥",
+//           },
+//           {
+//             value: 6,
+//             name: "金泉",
+//           },
+//           {
+//             value: 41,
+//             name: "营门口",
+//           },
+//           {
+//             value: 15,
+//             name: "天回镇",
+//           },
+//           {
+//             value: 22,
+//             name: "五块石",
+//           },
+//           {
+//             value: 24,
+//             name: "九里堤",
+//           },
+//           {
+//             value: 3,
+//             name: "沙河源",
+//           },
+//           {
+//             value: 7,
+//             name: "西华",
+//           },
+//           {
+//             // value: ggzp_tableData.value[3].infoVal,
+//             value: 8,
+//             name: "凤凰山",
+//           },
+//         ],
+//         emphasis: {
+//           itemStyle: {
+//             shadowBlur: 10,
+//             shadowOffsetX: 0,
+//             shadowColor: "rgba(0, 0, 0, 0.5)",
+//           },
+//         },
+//       },
+//     ],
+//   };
+//   // 监听窗口大小变化事件
+//   // window.addEventListener("resize", function () {
+//   //   myChart_ggzp1.resize(); // 重新计算图表大小
+//   // });
+//   myChart_ggzp1.setOption(option_ggzp1);
+//   // }
+//   getMain().then((data) => {
+//     ggzp_tableData.value = data;
+//     echartInit_ggzp();
+//   });
+//
+//   getSystemList().then((data) => {
+//     systems.value = data;
+//     // 请求各个子系统要显示的数据
+//     systems.value.forEach((system) => {
+//       if (system.api !== "") {
+//         if (system.systemId == "9" || system.systemId == "10")
+//           get(system.api).then((data) => (system.data = data));
+//       }
+//     });
+//   });
+// });
 
 //选中的部门
 // -1表示全选，为默认值

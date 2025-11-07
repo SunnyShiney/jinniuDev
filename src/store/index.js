@@ -75,6 +75,7 @@ const store = createStore({
             params.hwzyToken = hwzyToken;
             params.roleId = resp.data.data.role_id;
             params.realname = resp.data.data.real_name;
+            params.department = resp.data.data.department;
             if (resp.data.data.role_id.includes("83")) {
               params.role = "管理员";
             } else {

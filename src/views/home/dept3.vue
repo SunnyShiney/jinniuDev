@@ -995,6 +995,11 @@ function show(system, id, url) {
         showClose: true,
         message: "正在开发中...",
       });
+    } else if(id == "15"){
+      //item.url = item.url + "?iphone=" + params.username;
+      url = "http://171.221.172.74:6888/eUrbanMIS/main.htm" + "?iphone=" + params.username;
+      console.log("url:" + url);
+      window.open(url);
     } else {
       // router.push({ name: to, params: { subsysName } })
       if (id != "16" && id != "17" && id != "4") window.open(url);

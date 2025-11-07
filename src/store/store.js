@@ -8,4 +8,5 @@ export const params = reactive({
     roleId: "",
     realname: "",
     hwzyToken:"",
+    department:"",
 })

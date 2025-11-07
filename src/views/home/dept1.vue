@@ -372,204 +372,221 @@
                   @change="handleChange"
                   accordion
                 >
-                  <el-collapse-item title="金泉中队 定位异常情况" name="1">
-                    <el-table
-                      :data="ddzh_jinquan"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
+                    <el-collapse-item
+                        v-for="(personList, groupName, index) in groupData"
+                        :key="groupName"
+                        :title="`${groupName} 定位异常情况`"
+                        :name="index + 1"
                     >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table>
-                  </el-collapse-item>
-                  <el-collapse-item title="沙河源中队 定位异常情况" name="2">
-                    <el-table
-                      :data="ddzh_shaheyuan"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="茶店子中队 定位异常情况" name="3">
-                    <el-table
-                      :data="ddzh_chadianzi"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="西华中队 定位异常情况" name="4">
-                    <el-table
-                      :data="ddzh_xihua"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="营门口中队 定位异常情况" name="5">
-                    <el-table
-                      :data="ddzh_yingmenkou"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="九里堤中队 定位异常情况" name="6">
-                    <el-table
-                      :data="ddzh_jinquan"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="荷花池中队 定位异常情况" name="7">
-                    <el-table
-                      :data="ddzh_hehuachi"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="五块石中队 定位异常情况" name="8">
-                    <el-table
-                      :data="ddzh_wukuaishi"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="天回中队 定位异常情况" name="9">
-                    <el-table
-                      :data="ddzh_tianhui"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="驷马桥中队 定位异常情况" name="10">
-                    <el-table
-                      :data="ddzh_simaqiao"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="凤凰山中队 定位异常情况" name="11">
-                    <el-table
-                      :data="ddzh_fenghuanshan"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table> </el-collapse-item
-                  ><el-collapse-item title="西安路中队 定位异常情况" name="12">
-                    <el-table
-                      :data="ddzh_xianlu"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table>
-                  </el-collapse-item>
-                  <el-collapse-item title="抚琴中队 定位异常情况" name="13">
-                    <el-table
-                      :data="ddzh_fuqin"
-                      stripe
-                      style="width: 100%"
-                      max-height="500"
-                    >
-                      <el-table-column prop="name" label="姓名" width="180" />
-                      <el-table-column
-                        prop="telephone"
-                        label="电话"
-                        width="280"
-                      />
-                      <el-table-column prop="department" label="部门" />
-                    </el-table>
-                  </el-collapse-item>
+                      <el-table
+                          :data="personList"
+                          stripe
+                          style="width: 100%"
+                          max-height="500"
+                      >
+                        <el-table-column prop="name" label="姓名" width="180" />
+                        <el-table-column prop="telephone" label="电话" width="280" />
+                        <el-table-column prop="department" label="部门" />
+                      </el-table>
+                    </el-collapse-item>
+<!--                  <el-collapse-item title="金泉中队 定位异常情况" name="1">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_jinquan"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table>-->
+<!--                  </el-collapse-item>-->
+<!--                  <el-collapse-item title="沙河源中队 定位异常情况" name="2">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_shaheyuan"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="茶店子中队 定位异常情况" name="3">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_chadianzi"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="西华中队 定位异常情况" name="4">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_xihua"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="营门口中队 定位异常情况" name="5">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_yingmenkou"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="九里堤中队 定位异常情况" name="6">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_jinquan"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="荷花池中队 定位异常情况" name="7">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_hehuachi"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="五块石中队 定位异常情况" name="8">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_wukuaishi"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="天回中队 定位异常情况" name="9">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_tianhui"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="驷马桥中队 定位异常情况" name="10">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_simaqiao"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="凤凰山中队 定位异常情况" name="11">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_fenghuanshan"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table> </el-collapse-item-->
+<!--                  ><el-collapse-item title="西安路中队 定位异常情况" name="12">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_xianlu"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table>-->
+<!--                  </el-collapse-item>-->
+<!--                  <el-collapse-item title="抚琴中队 定位异常情况" name="13">-->
+<!--                    <el-table-->
+<!--                      :data="ddzh_fuqin"-->
+<!--                      stripe-->
+<!--                      style="width: 100%"-->
+<!--                      max-height="500"-->
+<!--                    >-->
+<!--                      <el-table-column prop="name" label="姓名" width="180" />-->
+<!--                      <el-table-column-->
+<!--                        prop="telephone"-->
+<!--                        label="电话"-->
+<!--                        width="280"-->
+<!--                      />-->
+<!--                      <el-table-column prop="department" label="部门" />-->
+<!--                    </el-table>-->
+<!--                  </el-collapse-item>-->
                 </el-collapse>
               </div>
             </template>
@@ -714,6 +731,7 @@ const ddzh_hehuachi = ref([]);
 const ddzh_tianhui = ref([]);
 const ddzh_simaqiao = ref([]);
 const ddzh_fenghuanshan = ref([]);
+const groupData = ref({});
 
 let myChart_gxdc = null;
 let myChart_gxdc1 = null;
@@ -884,38 +902,40 @@ function echartInit_gxdc() {
 }
 function echartInit_yyxt() {
   if (
-    document
-      .getElementById("container_yyxt1")
-      .hasAttribute("_echarts_instance_")
+      document
+          .getElementById("container_yyxt1")
+          .hasAttribute("_echarts_instance_")
   )
     document
-      .getElementById("container_yyxt1")
-      .removeAttribute("_echarts_instance_");
+        .getElementById("container_yyxt1")
+        .removeAttribute("_echarts_instance_");
   if (
-    document
-      .getElementById("container_yyxt2")
-      .hasAttribute("_echarts_instance_")
+      document
+          .getElementById("container_yyxt2")
+          .hasAttribute("_echarts_instance_")
   )
     document
-      .getElementById("container_yyxt2")
-      .removeAttribute("_echarts_instance_");
+        .getElementById("container_yyxt2")
+        .removeAttribute("_echarts_instance_");
   if (
-    document
-      .getElementById("container_yyxt3")
-      .hasAttribute("_echarts_instance_")
+      document
+          .getElementById("container_yyxt3")
+          .hasAttribute("_echarts_instance_")
   )
     document
-      .getElementById("container_yyxt3")
-      .removeAttribute("_echarts_instance_");
+        .getElementById("container_yyxt3")
+        .removeAttribute("_echarts_instance_");
   myChart_yyxt1 = echarts.init(document.getElementById("container_yyxt1"));
   myChart_yyxt2 = echarts.init(document.getElementById("container_yyxt2"));
   myChart_yyxt3 = echarts.init(document.getElementById("container_yyxt3"));
   getOverStandard().then((tableData) => {
+    const xLabels = tableData.map(item => item.areaname); // X轴类目
+    const yValues = tableData.map(item => item.total);    // 每个柱子的高度
     var option_yyxt1 = {
       title: {
         text: "超标企业街道分布",
         textStyle: {
-          color: "black",
+          color: "#ccc",
         },
       },
       tooltip: {
@@ -926,25 +946,26 @@ function echartInit_yyxt() {
       },
       xAxis: {
         type: "category",
-        data: [
-          tableData[0].areaname,
-          tableData[1].areaname,
-          tableData[2].areaname,
-          tableData[3].areaname,
-          tableData[4].areaname,
-          tableData[5].areaname,
-          tableData[6].areaname,
-          tableData[7].areaname,
-          tableData[8].areaname,
-          tableData[9].areaname,
-          tableData[10].areaname,
-          tableData[11].areaname,
-          tableData[12].areaname,
-        ],
+        data: xLabels,
+        // data: [
+        //   tableData[0].areaname,
+        //   tableData[1].areaname,
+        //   tableData[2].areaname,
+        //   tableData[3].areaname,
+        //   tableData[4].areaname,
+        //   tableData[5].areaname,
+        //   tableData[6].areaname,
+        //   tableData[7].areaname,
+        //   tableData[8].areaname,
+        //   tableData[9].areaname,
+        //   tableData[10].areaname,
+        //   tableData[11].areaname,
+        //   tableData[12].areaname,
+        // ],
         axisTick: {
           alignWithLabel: true,
         },
-        axisLabel: { interval: 0 },
+        axisLabel: {interval: 0},
       },
 
       yAxis: {
@@ -955,22 +976,24 @@ function echartInit_yyxt() {
       },
       series: [
         {
-          data: [
-            tableData[0].value,
-            tableData[1].value,
-            tableData[2].value,
-            tableData[3].value,
-            tableData[4].value,
-            tableData[5].value,
-            tableData[6].value,
-            tableData[7].value,
-            tableData[8].value,
-            tableData[9].value,
-            tableData[10].value,
-            tableData[11].value,
-            tableData[12].value,
-          ],
+          data: yValues,
+          // data: [
+          //   tableData[0].value,
+          //   tableData[1].value,
+          //   tableData[2].value,
+          //   tableData[3].value,
+          //   tableData[4].value,
+          //   tableData[5].value,
+          //   tableData[6].value,
+          //   tableData[7].value,
+          //   tableData[8].value,
+          //   tableData[9].value,
+          //   tableData[10].value,
+          //   tableData[11].value,
+          //   tableData[12].value,
+          // ],
           type: "bar",
+          barWidth: '10%',
           showBackground: true,
           backgroundStyle: {
             color: "rgba(180, 180, 180, 0.2)",
@@ -1024,9 +1047,9 @@ function echartInit_yyxt() {
             show: false,
           },
           data: [
-            { value: tableData[0].ct, name: "常态" },
-            { value: tableData[0].yb, name: "一般" },
-            { value: tableData[0].zd, name: "重点" },
+            {value: tableData.monitoring_level_c, name: "常态"},
+            {value: tableData.monitoring_level_g, name: "一般"},
+            {value: tableData.monitoring_level_p, name: "重点"},
             // { value: 484, name: 'Union Ads' },
             // { value: 300, name: 'Video Ads' }
           ],
@@ -1035,28 +1058,29 @@ function echartInit_yyxt() {
     };
     myChart_yyxt3.setOption(option_yyxt3);
   });
-  getTouSU().then((data) => {
-    if (data.tsLastNow.length < 12) {
-      for (let i = 0; i < 20; i++) {
-        var tmp = { count: 0 };
-        data.tsLastNow.push(tmp);
-      }
-    }
-    var option_yyxt2 = {
+  getTouSU().then((resp) => {
+    const raw = resp.tsList;
+
+    // 封装成函数提取每年的数据
+    const extractMonthlyCounts = (arr) =>
+        arr.map((item) => item.count);
+
+    const extractMonths = (arr) =>
+        arr.map((item) => item.create_date.slice(5)); // 提取 "MM"
+
+    const months = extractMonths(raw.tsLastTow); // 默认用 tsLastTow 来做 x 轴（即完整的12个月）
+
+    const option_yyxt2 = {
       title: {
         text: "油烟投诉趋势图",
-        textStyle: {
-          color: "black",
-        },
+        textStyle: {color: "#ccc"},
       },
       tooltip: {
         trigger: "axis",
       },
       legend: {
-        textStyle: {
-          color: "black",
-        },
-        data: ["2021", "2022", "2023"],
+        textStyle: {color: "#ccc"},
+        data: ["2023", "2024", "2025"],
       },
       grid: {
         left: "3%",
@@ -1072,87 +1096,151 @@ function echartInit_yyxt() {
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: [
-          "01",
-          "02",
-          "03",
-          "04",
-          "05",
-          "06",
-          "07",
-          "08",
-          "09",
-          "10",
-          "11",
-          "12",
-        ],
+        data: months, // ["01", "02", ..., "12"]
       },
       yAxis: {
         type: "value",
       },
       series: [
         {
-          name: "2021",
-          type: "line",
-
-          data: [
-            data.tsLastTow[0].count,
-            data.tsLastTow[1].count,
-            data.tsLastTow[2].count,
-            data.tsLastTow[3].count,
-            data.tsLastTow[4].count,
-            data.tsLastTow[5].count,
-            data.tsLastTow[6].count,
-            data.tsLastTow[7].count,
-            data.tsLastTow[8].count,
-            data.tsLastTow[9].count,
-            data.tsLastTow[10].count,
-            data.tsLastTow[11].count,
-          ],
-        },
-        {
-          name: "2022",
-          type: "line",
-
-          data: [
-            data.tsLast[0].count,
-            data.tsLast[1].count,
-            data.tsLast[2].count,
-            data.tsLast[3].count,
-            data.tsLast[4].count,
-            data.tsLast[5].count,
-            data.tsLast[6].count,
-            data.tsLast[7].count,
-            data.tsLast[8].count,
-            data.tsLast[9].count,
-            data.tsLast[10].count,
-            data.tsLast[11].count,
-          ],
-        },
-        {
           name: "2023",
           type: "line",
-
-          data: [
-            data.tsLastNow[0].count,
-            data.tsLastNow[1].count,
-            data.tsLastNow[2].count,
-            data.tsLastNow[3].count,
-            data.tsLastNow[4].count,
-            data.tsLastNow[5].count,
-            data.tsLastNow[6].count,
-            data.tsLastNow[7].count,
-            data.tsLastNow[8].count,
-            data.tsLastNow[9].count,
-            data.tsLastNow[10].count,
-            data.tsLastNow[11].count,
-          ],
+          data: extractMonthlyCounts(raw.tsLastTow),
+        },
+        {
+          name: "2024",
+          type: "line",
+          data: extractMonthlyCounts(raw.tsLast),
+        },
+        {
+          name: "2025",
+          type: "line",
+          data: extractMonthlyCounts(raw.tsLastNow),
         },
       ],
     };
+
     myChart_yyxt2.setOption(option_yyxt2);
   });
 }
+//   getTouSU().then((data) => {
+//     if (data.tsLastNow.length < 12) {
+//       for (let i = 0; i < 20; i++) {
+//         var tmp = { count: 0 };
+//         data.tsLastNow.push(tmp);
+//       }
+//     }
+//     var option_yyxt2 = {
+//       title: {
+//         text: "油烟投诉趋势图",
+//         textStyle: {
+//           color: "black",
+//         },
+//       },
+//       tooltip: {
+//         trigger: "axis",
+//       },
+//       legend: {
+//         textStyle: {
+//           color: "black",
+//         },
+//         data: ["2021", "2022", "2023"],
+//       },
+//       grid: {
+//         left: "3%",
+//         right: "4%",
+//         bottom: "3%",
+//         containLabel: true,
+//       },
+//       toolbox: {
+//         feature: {
+//           saveAsImage: {},
+//         },
+//       },
+//       xAxis: {
+//         type: "category",
+//         boundaryGap: false,
+//         data: [
+//           "01",
+//           "02",
+//           "03",
+//           "04",
+//           "05",
+//           "06",
+//           "07",
+//           "08",
+//           "09",
+//           "10",
+//           "11",
+//           "12",
+//         ],
+//       },
+//       yAxis: {
+//         type: "value",
+//       },
+//       series: [
+//         {
+//           name: "2021",
+//           type: "line",
+//
+//           data: [
+//             data.tsLastTow[0].count,
+//             data.tsLastTow[1].count,
+//             data.tsLastTow[2].count,
+//             data.tsLastTow[3].count,
+//             data.tsLastTow[4].count,
+//             data.tsLastTow[5].count,
+//             data.tsLastTow[6].count,
+//             data.tsLastTow[7].count,
+//             data.tsLastTow[8].count,
+//             data.tsLastTow[9].count,
+//             data.tsLastTow[10].count,
+//             data.tsLastTow[11].count,
+//           ],
+//         },
+//         {
+//           name: "2022",
+//           type: "line",
+//
+//           data: [
+//             data.tsLast[0].count,
+//             data.tsLast[1].count,
+//             data.tsLast[2].count,
+//             data.tsLast[3].count,
+//             data.tsLast[4].count,
+//             data.tsLast[5].count,
+//             data.tsLast[6].count,
+//             data.tsLast[7].count,
+//             data.tsLast[8].count,
+//             data.tsLast[9].count,
+//             data.tsLast[10].count,
+//             data.tsLast[11].count,
+//           ],
+//         },
+//         {
+//           name: "2023",
+//           type: "line",
+//
+//           data: [
+//             data.tsLastNow[0].count,
+//             data.tsLastNow[1].count,
+//             data.tsLastNow[2].count,
+//             data.tsLastNow[3].count,
+//             data.tsLastNow[4].count,
+//             data.tsLastNow[5].count,
+//             data.tsLastNow[6].count,
+//             data.tsLastNow[7].count,
+//             data.tsLastNow[8].count,
+//             data.tsLastNow[9].count,
+//             data.tsLastNow[10].count,
+//             data.tsLastNow[11].count,
+//           ],
+//         },
+//       ],
+//     };
+//     myChart_yyxt2.setOption(option_yyxt2);
+//   });
+// }
 function echartInit_ycxt2() {
   if (
     document
@@ -1417,19 +1505,20 @@ onBeforeMount(() => {
     if (data.length != 0) ycxt_tableData2.value = data;
   });
   getGroup().then((data) => {
-    ddzh_jinquan.value = data.金泉中队;
-    ddzh_shaheyuan.value = data.沙河源中队;
-    ddzh_chadianzi.value = data.茶店子中队;
-    ddzh_xihua.value = data.西华中队;
-    ddzh_yingmenkou.value = data.营门口中队;
-    ddzh_jiulidi.value = data.九里堤中队;
-    ddzh_hehuachi.value = data.荷花池中队;
-    ddzh_wukuaishi.value = data.五块石中队;
-    ddzh_tianhui.value = data.天回中队;
-    ddzh_simaqiao.value = data.驷马桥中队;
-    ddzh_fenghuanshan.value = data.凤凰山中队;
-    ddzh_xianlu.value = data.西安路中队;
-    ddzh_fuqin.value = data.抚琴中队;
+    groupData.value = data ;
+    // ddzh_jinquan.value = data.金泉中队;
+    // ddzh_shaheyuan.value = data.沙河源中队;
+    // ddzh_chadianzi.value = data.茶店子中队;
+    // ddzh_xihua.value = data.西华中队;
+    // ddzh_yingmenkou.value = data.营门口中队;
+    // ddzh_jiulidi.value = data.九里堤中队;
+    // ddzh_hehuachi.value = data.荷花池中队;
+    // ddzh_wukuaishi.value = data.五块石中队;
+    // ddzh_tianhui.value = data.天回中队;
+    // ddzh_simaqiao.value = data.驷马桥中队;
+    // ddzh_fenghuanshan.value = data.凤凰山中队;
+    // ddzh_xianlu.value = data.西安路中队;
+    // ddzh_fuqin.value = data.抚琴中队;
   });
   getDeptList().then((response) => {
     depts.value = response;
@@ -1598,50 +1687,15 @@ function show(system, id, url) {
       // router.push({ name: to, params: { subsysName } })
       if (id != "gxdc" && id != "ddzh") window.open(url);
 
-      if (id == "gxdc") window.open(gxdc.url);
+      if (id == "gxdc") {
+        gxdc.url = "https://bike-web02.hzy-sz.com:81/loginauto.html?uname=scygxdc&pw=6666";
+        gxdc.url += "&phone=" + params.username;
+        window.open(gxdc.url);
+      }
       if (id == "ddzh") {
-        var roles = [];
-        roles = params.roleId.split(",");
-        console.log(roles.indexOf("84"));
-        // console.log(params.roleId)
-        if (
-          roles.indexOf("84") != -1 ||
-          roles.indexOf("109") != -1 ||
-          roles.indexOf("110") != -1 ||
-          roles.indexOf("111") != -1 ||
-          roles.indexOf("83") != -1
-        ) {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=18008060886&pwd=MTIzNDU2";
-          window.open(ddzh_url);
-        }
-        if (roles.indexOf("93") != -1) {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=18008061151&pwd=MTIzNDU2";
-          window.open(ddzh_url);
-        }
-
-        if (roles.indexOf("120") != -1) {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=18008061081&pwd=MTIzNDU2";
-          window.open(ddzh_url);
-        }
-        if (
-          roles.indexOf("96") != -1 ||
-          roles.indexOf("99") != -1 ||
-          roles.indexOf("102") != -1
-        ) {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=18008061109&pwd=MTIzNDU2";
-          window.open(ddzh_url);
-        } else {
-          var ddzh_url =
-            "https://119.4.191.13:8881/map/?username=" +
-            params.username +
-            "&pwd=MTIzNDU2";
-          console.log(ddzh_url);
-          window.open(url);
-        }
+        var ddzh_url = "https://119.4.191.13:8881/login/?token=" + params.token;
+        console.log("ddzh_url:  " + ddzh_url);
+        window.open(ddzh_url);
       } //调度指挥
       uploadClickLog(system.systemName);
     }

@@ -283,25 +283,44 @@
             id="#vcfResult"
             :row-class-name="tableRowClassName"
           >
-            <el-table-column property="uuid" label="事件uuid" width="260">
+<!--            <el-table-column property="uuid" label="事件uuid" width="260">-->
+<!--              <template #default="scope">-->
+<!--                <el-tooltip-->
+<!--                  class="item"-->
+<!--                  effect="dark"-->
+<!--                  content="点击查看事件详情"-->
+<!--                  placement="top-start"-->
+<!--                >-->
+<!--                  <el-button-->
+<!--                    size="medium"-->
+<!--                    type="primary"-->
+<!--                    link-->
+<!--                    @click="warningDetail(scope.$index, scope.row)"-->
+<!--                    >{{ scope.row.uuid }}-->
+<!--                  </el-button>-->
+<!--                </el-tooltip>-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--            <el-table-column property="event_no" label="事件编号" width="150" />-->
+            <el-table-column property="event_no" label="事件编号" width="150">
               <template #default="scope">
                 <el-tooltip
-                  class="item"
-                  effect="dark"
-                  content="点击查看事件详情"
-                  placement="top-start"
+                    class="item"
+                    effect="dark"
+                    content="点击查看事件详情"
+                    placement="top-start"
                 >
                   <el-button
-                    size="medium"
-                    type="primary"
-                    link
-                    @click="warningDetail(scope.$index, scope.row)"
-                    >{{ scope.row.uuid }}
+                      size="medium"
+                      type="primary"
+                      link
+                      @click="warningDetail(scope.$index, scope.row)"
+                  >
+                    {{ scope.row.event_no }}
                   </el-button>
                 </el-tooltip>
               </template>
             </el-table-column>
-            <el-table-column property="event_no" label="事件编号" width="150" />
             <el-table-column
               property="event_name"
               label="事件名称"
@@ -351,7 +370,7 @@
             style="padding-top: 20px; padding-left: 20px"
           >
             <ul style="display: inline-block">
-              <li>事件id：{{ id }}</li>
+<!--              <li>事件id：{{ id }}</li>-->
               <li>事件名称：{{ eventName }}</li>
               <li>事件来源：{{ eventSource }}</li>
               <li>事件类型：{{ eventType }}</li>
@@ -411,14 +430,22 @@
               ></div>
               <div class="no-hd">
                 <ul>
-                  <li>{{ year_electricity }}</li>
-                  <li>{{ month_electricity }}</li>
-                  <li>{{ day_electricity }}</li>
+<!--                  <li>{{ year_electricity }}</li>-->
+<!--                  <li>{{ month_electricity }}</li>-->
+<!--                  <li>{{ day_electricity }}</li>-->
+                  <li>284台</li>
+                  <li>36台</li>
+                  <li>286栋</li>
+                  <li>11处</li>
                 </ul>
                 <ul>
-                  <li>年电量统计</li>
-                  <li>月电量统计</li>
-                  <li>昨日电量统计</li>
+<!--                  <li>年电量统计</li>-->
+<!--                  <li>月电量统计</li>-->
+<!--                  <li>昨日电量统计</li>-->
+                  <li>集中控制设备</li>
+                  <li>视频监控设备</li>
+                  <li>亮灯楼宇</li>
+                  <li>亮灯桥梁及绿地</li>
                 </ul>
               </div>
               <div
@@ -636,7 +663,7 @@ const syd_data = ref([]);
 //     method: "post",
 //     data: JSON.stringify({
 //       phone: "18380195019",
-//       password: "123456",
+//       password: "",
 //     }),
 // }).then(function (resp) {
 //     console.log("ddzh2",resp)
@@ -869,37 +896,38 @@ const echartInit_ddzh = () => {
     },
     yAxis: {
       type: "category",
-      data: [
-        ddzh_tableData1.value[0].department,
-        ddzh_tableData1.value[1].department,
-        ddzh_tableData1.value[2].department,
-        ddzh_tableData1.value[3].department,
-        ddzh_tableData1.value[4].department,
-        ddzh_tableData1.value[5].department,
-        ddzh_tableData1.value[6].department,
-        ddzh_tableData1.value[7].department,
-        ddzh_tableData1.value[8].department,
-        ddzh_tableData1.value[9].department,
-        ddzh_tableData1.value[10].department,
-        ddzh_tableData1.value[11].department,
-        ddzh_tableData1.value[12].department,
-        ddzh_tableData1.value[13].department,
-        ddzh_tableData1.value[14].department,
-        ddzh_tableData1.value[15].department,
-        ddzh_tableData1.value[16].department,
-        ddzh_tableData1.value[17].department,
-        ddzh_tableData1.value[18].department,
-        ddzh_tableData1.value[19].department,
-        ddzh_tableData1.value[20].department,
-        ddzh_tableData1.value[21].department,
-        ddzh_tableData1.value[22].department,
-        ddzh_tableData1.value[23].department,
-        ddzh_tableData1.value[24].department,
-        ddzh_tableData1.value[25].department,
-        ddzh_tableData1.value[26].department,
-        ddzh_tableData1.value[27].department,
-        ddzh_tableData1.value[28].department,
-      ],
+      data: ddzh_tableData1.value.map(item => item.department),
+      // data: [
+      //   ddzh_tableData1.value[0].department,
+      //   ddzh_tableData1.value[1].department,
+      //   ddzh_tableData1.value[2].department,
+      //   ddzh_tableData1.value[3].department,
+      //   ddzh_tableData1.value[4].department,
+      //   ddzh_tableData1.value[5].department,
+      //   ddzh_tableData1.value[6].department,
+      //   ddzh_tableData1.value[7].department,
+      //   ddzh_tableData1.value[8].department,
+      //   ddzh_tableData1.value[9].department,
+      //   ddzh_tableData1.value[10].department,
+      //   ddzh_tableData1.value[11].department,
+      //   ddzh_tableData1.value[12].department,
+      //   ddzh_tableData1.value[13].department,
+      //   ddzh_tableData1.value[14].department,
+      //   ddzh_tableData1.value[15].department,
+      //   ddzh_tableData1.value[16].department,
+      //   ddzh_tableData1.value[17].department,
+      //   ddzh_tableData1.value[18].department,
+      //   ddzh_tableData1.value[19].department,
+      //   ddzh_tableData1.value[20].department,
+      //   ddzh_tableData1.value[21].department,
+      //   ddzh_tableData1.value[22].department,
+      //   ddzh_tableData1.value[23].department,
+      //   ddzh_tableData1.value[24].department,
+      //   ddzh_tableData1.value[25].department,
+      //   ddzh_tableData1.value[26].department,
+      //   ddzh_tableData1.value[27].department,
+      //   ddzh_tableData1.value[28].department,
+      // ],
       axisLabel: {
         //x轴文字的配置
         show: true,
@@ -921,37 +949,39 @@ const echartInit_ddzh = () => {
     },
     series: [
       {
-        data: [
-          (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
-          (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
-        ],
+        barWidth: '10%',
+        data: ddzh_tableData1.value.map(item => (item.checkRate * 100).toFixed(1)),
+        // data: [
+        //   (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
+        //   (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
+        // ],
         type: "bar",
         showBackground: true,
         backgroundStyle: {
@@ -1220,6 +1250,8 @@ const changeCyyyChart = (page) => {
       .removeAttribute("_echarts_instance_");
     var myChart_cyyy = echarts.init(document.getElementById("cyyy-Charts"));
     getOverStandard().then((tableData) => {
+      const xLabels = tableData.map(item => item.areaname); // X轴类目
+      const yValues = tableData.map(item => item.total);    // 每个柱子的高度
       var option_yyxt1 = {
         title: {
           text: "超标企业街道分布",
@@ -1245,21 +1277,22 @@ const changeCyyyChart = (page) => {
         },
         xAxis: {
           type: "category",
-          data: [
-            tableData[0].areaname,
-            tableData[1].areaname,
-            tableData[2].areaname,
-            tableData[3].areaname,
-            tableData[4].areaname,
-            tableData[5].areaname,
-            tableData[6].areaname,
-            tableData[7].areaname,
-            tableData[8].areaname,
-            tableData[9].areaname,
-            tableData[10].areaname,
-            tableData[11].areaname,
-            tableData[12].areaname,
-          ],
+          data: xLabels,
+          // data: [
+          //   tableData[0].areaname,
+          //   tableData[1].areaname,
+          //   tableData[2].areaname,
+          //   tableData[3].areaname,
+          //   tableData[4].areaname,
+          //   tableData[5].areaname,
+          //   tableData[6].areaname,
+          //   tableData[7].areaname,
+          //   tableData[8].areaname,
+          //   tableData[9].areaname,
+          //   tableData[10].areaname,
+          //   tableData[11].areaname,
+          //   tableData[12].areaname,
+          // ],
           axisTick: {
             alignWithLabel: true,
           },
@@ -1274,21 +1307,22 @@ const changeCyyyChart = (page) => {
         },
         series: [
           {
-            data: [
-              tableData[0].value,
-              tableData[1].value,
-              tableData[2].value,
-              tableData[3].value,
-              tableData[4].value,
-              tableData[5].value,
-              tableData[6].value,
-              tableData[7].value,
-              tableData[8].value,
-              tableData[9].value,
-              tableData[10].value,
-              tableData[11].value,
-              tableData[12].value,
-            ],
+            data: yValues,
+            // data: [
+            //   tableData[0].value,
+            //   tableData[1].value,
+            //   tableData[2].value,
+            //   tableData[3].value,
+            //   tableData[4].value,
+            //   tableData[5].value,
+            //   tableData[6].value,
+            //   tableData[7].value,
+            //   tableData[8].value,
+            //   tableData[9].value,
+            //   tableData[10].value,
+            //   tableData[11].value,
+            //   tableData[12].value,
+            // ],
             type: "bar",
             showBackground: true,
             backgroundStyle: {
@@ -1301,32 +1335,33 @@ const changeCyyyChart = (page) => {
     });
   }
   if (currentPageCyyy.value === 2) {
-    getTouSU().then((data) => {
+    getTouSU().then((resp) => {
       document
         .getElementById("cyyy-Charts")
         .removeAttribute("_echarts_instance_");
       var myChart_cyyy = echarts.init(document.getElementById("cyyy-Charts"));
-      if (data.tsLastNow.length < 12) {
-        for (let i = 0; i < 20; i++) {
-          var tmp = { count: 0 };
-          data.tsLastNow.push(tmp);
-        }
-      }
-      var option_yyxt2 = {
+      const raw = resp.tsList;
+
+      // 封装成函数提取每年的数据
+      const extractMonthlyCounts = (arr) =>
+          arr.map((item) => item.count);
+
+      const extractMonths = (arr) =>
+          arr.map((item) => item.create_date.slice(5)); // 提取 "MM"
+
+      const months = extractMonths(raw.tsLastTow); // 默认用 tsLastTow 来做 x 轴（即完整的12个月）
+
+      const option_yyxt2 = {
         title: {
           text: "油烟投诉趋势图",
-          textStyle: {
-            color: "#ccc",
-          },
+          textStyle: { color: "#ccc" },
         },
         tooltip: {
           trigger: "axis",
         },
         legend: {
-          textStyle: {
-            color: "#ccc",
-          },
-          data: ["2021", "2022", "2023"],
+          textStyle: { color: "#ccc" },
+          data: ["2023", "2024", "2025"],
         },
         grid: {
           left: "3%",
@@ -1342,81 +1377,26 @@ const changeCyyyChart = (page) => {
         xAxis: {
           type: "category",
           boundaryGap: false,
-          data: [
-            "01",
-            "02",
-            "03",
-            "04",
-            "05",
-            "06",
-            "07",
-            "08",
-            "09",
-            "10",
-            "11",
-            "12",
-          ],
+          data: months, // ["01", "02", ..., "12"]
         },
         yAxis: {
           type: "value",
         },
         series: [
           {
-            name: "2021",
-            type: "line",
-
-            data: [
-              data.tsLastTow[0].count,
-              data.tsLastTow[1].count,
-              data.tsLastTow[2].count,
-              data.tsLastTow[3].count,
-              data.tsLastTow[4].count,
-              data.tsLastTow[5].count,
-              data.tsLastTow[6].count,
-              data.tsLastTow[7].count,
-              data.tsLastTow[8].count,
-              data.tsLastTow[9].count,
-              data.tsLastTow[10].count,
-              data.tsLastTow[11].count,
-            ],
-          },
-          {
-            name: "2022",
-            type: "line",
-
-            data: [
-              data.tsLast[0].count,
-              data.tsLast[1].count,
-              data.tsLast[2].count,
-              data.tsLast[3].count,
-              data.tsLast[4].count,
-              data.tsLast[5].count,
-              data.tsLast[6].count,
-              data.tsLast[7].count,
-              data.tsLast[8].count,
-              data.tsLast[9].count,
-              data.tsLast[10].count,
-              data.tsLast[11].count,
-            ],
-          },
-          {
             name: "2023",
             type: "line",
-
-            data: [
-              data.tsLastNow[0].count,
-              data.tsLastNow[1].count,
-              data.tsLastNow[2].count,
-              data.tsLastNow[3].count,
-              data.tsLastNow[4].count,
-              data.tsLastNow[5].count,
-              data.tsLastNow[6].count,
-              data.tsLastNow[7].count,
-              data.tsLastNow[8].count,
-              data.tsLastNow[9].count,
-              data.tsLastNow[10].count,
-              data.tsLastNow[11].count,
-            ],
+            data: extractMonthlyCounts(raw.tsLastTow),
+          },
+          {
+            name: "2024",
+            type: "line",
+            data: extractMonthlyCounts(raw.tsLast),
+          },
+          {
+            name: "2025",
+            type: "line",
+            data: extractMonthlyCounts(raw.tsLastNow),
           },
         ],
       };
@@ -1472,9 +1452,9 @@ const changeCyyyChart = (page) => {
               show: false,
             },
             data: [
-              { value: tableData[0].ct, name: "常态" },
-              { value: tableData[0].yb, name: "一般" },
-              { value: tableData[0].zd, name: "重点" },
+              { value: tableData.monitoring_level_c, name: "常态" },
+              { value: tableData.monitoring_level_g, name: "一般" },
+              { value: tableData.monitoring_level_p, name: "重点" },
               // { value: 484, name: 'Union Ads' },
               // { value: 300, name: 'Video Ads' }
             ],
@@ -1969,9 +1949,12 @@ const handleSelect_srzx = (key, keypath) => {
               show: false,
             },
             data: [
-              { value: gxdcData[2].infoVal, name: "正常停放车辆" },
-              { value: gxdcData[1].infoVal, name: "异常停放车辆" },
-              { value: gxdcData[3].infoVal, name: "行驶中车辆" },
+              // { value: gxdcData[2].infoVal, name: "正常停放车辆" },
+              // { value: gxdcData[1].infoVal, name: "异常停放车辆" },
+              // { value: gxdcData[3].infoVal, name: "行驶中车辆" },
+              { value: gxdcData[0].infoVal, name: "P点总数" },
+              { value: gxdcData[1].infoVal, name: "单车总数" },
+              { value: gxdcData[2].infoVal, name: "骑行中数量" },
               // { value: 580, name: 'Email' },
               // { value: 484, name: 'Union Ads' },
               // { value: 300, name: 'Video Ads' }
@@ -2731,13 +2714,14 @@ onMounted(() => {
       .getElementById("cyyy-Charts")
       .removeAttribute("_echarts_instance_");
     var myChart_cyyy = echarts.init(document.getElementById("cyyy-Charts"));
+    const xLabels = tableData.map(item => item.areaname); // X轴类目
+    const yValues = tableData.map(item => item.total);    // 每个柱子的高度
     var option_yyxt1 = {
       title: {
         text: "超标企业街道分布",
         textStyle: {
           color: "#ccc",
         },
-        left: "5%",
       },
       tooltip: {
         trigger: "axis",
@@ -2747,30 +2731,26 @@ onMounted(() => {
       },
       xAxis: {
         type: "category",
-        data: [
-          tableData[0].areaname,
-          tableData[1].areaname,
-          tableData[2].areaname,
-          tableData[3].areaname,
-          tableData[4].areaname,
-          tableData[5].areaname,
-          tableData[6].areaname,
-          tableData[7].areaname,
-          tableData[8].areaname,
-          tableData[9].areaname,
-          tableData[10].areaname,
-          tableData[11].areaname,
-          tableData[12].areaname,
-        ],
+        data: xLabels,
+        // data: [
+        //   tableData[0].areaname,
+        //   tableData[1].areaname,
+        //   tableData[2].areaname,
+        //   tableData[3].areaname,
+        //   tableData[4].areaname,
+        //   tableData[5].areaname,
+        //   tableData[6].areaname,
+        //   tableData[7].areaname,
+        //   tableData[8].areaname,
+        //   tableData[9].areaname,
+        //   tableData[10].areaname,
+        //   tableData[11].areaname,
+        //   tableData[12].areaname,
+        // ],
         axisTick: {
           alignWithLabel: true,
         },
-        axisLabel: {
-          interval: 0,
-          formatter: function (value) {
-            return value.split("").join("\n");
-          },
-        },
+        axisLabel: { interval: 0 },
       },
 
       yAxis: {
@@ -2779,25 +2759,26 @@ onMounted(() => {
       axisTick: {
         alignWithLabel: true,
       },
-      grid: { left: "2%", bottom: "10%", containLabel: true },
       series: [
         {
-          data: [
-            tableData[0].value,
-            tableData[1].value,
-            tableData[2].value,
-            tableData[3].value,
-            tableData[4].value,
-            tableData[5].value,
-            tableData[6].value,
-            tableData[7].value,
-            tableData[8].value,
-            tableData[9].value,
-            tableData[10].value,
-            tableData[11].value,
-            tableData[12].value,
-          ],
+          data: yValues,
+          // data: [
+          //   tableData[0].value,
+          //   tableData[1].value,
+          //   tableData[2].value,
+          //   tableData[3].value,
+          //   tableData[4].value,
+          //   tableData[5].value,
+          //   tableData[6].value,
+          //   tableData[7].value,
+          //   tableData[8].value,
+          //   tableData[9].value,
+          //   tableData[10].value,
+          //   tableData[11].value,
+          //   tableData[12].value,
+          // ],
           type: "bar",
+          barWidth: '10%',
           showBackground: true,
           backgroundStyle: {
             color: "rgba(180, 180, 180, 0.2)",

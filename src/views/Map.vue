@@ -311,7 +311,7 @@
         </div>
         <el-dropdown>
           <span class="el-dropdown-link">
-            {{ params.username + "" + params.role + "" }}
+            {{ params.username + "" + params.role + "" +params.department}}
             <el-icon>
               <ArrowDown />
             </el-icon>
@@ -2913,6 +2913,7 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
       };
       EventHistoryList.push(default_site);
     }
+    EventHistoryList.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
     warningTotalRecords.value = EventHistoryList.length;
     // warningPageCount = parseInt(EventHistoryList.length) % 5;
     warningCurrentPage.value = pageNum;
