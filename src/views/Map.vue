@@ -359,7 +359,7 @@
       v-model:strokeColor="polygonFuqin.strokeColor"
       :strokeStyle="polygonFuqin.strokeStyle"
     />
-
+    <!-- 区划图 -->
     <el-amap-polygon
       :visible="polygonVisible"
       :path="polygonFuqin.path"
@@ -2974,6 +2974,7 @@ changeColor();
 setInterval(changeColor, 60000);
 
 // =========================================================
+//切换地图显示
 function changeArea() {
   polygonVisible.value = !polygonVisible.value;
   jinniuVisible.value = !jinniuVisible.value;
