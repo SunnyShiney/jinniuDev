@@ -626,12 +626,10 @@ onBeforeMount(() => {
   getStations().then((data) => {
     stations_table.value = data;
     echartInit_ljz();
-    console.log(4171, stations_table.value);
   });
   getLifecycle().then((data) => {
     lifecycle_table.value = data;
     echartInit_ljz();
-    console.log(4172, lifecycle_table.value.total_lifecycle_truck);
   });
   getSum().then((data) => {
     ljz_table2.value = data;

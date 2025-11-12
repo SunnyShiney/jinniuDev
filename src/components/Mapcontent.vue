@@ -1103,42 +1103,41 @@ function changeDate() {
   getAllWarning(start, end, 1, warningTitle.value);
 }
 
-const getAllWarning = (startTime, endTime, pageNum, warningType) => {
-  axios({
-    url: "/api/event/getEventsByStatus",
-    params: {
-      status: warningType,
-      startTime: startTime,
-      endTime: endTime,
-    },
-    method: "get",
-  }).then(function (resp) {
-    if (resp.status == 200) {
-      var data = resp.data.data;
-      data_total.splice(0, data_total.length);
-      for (var i in data) {
-        console.log("modify_time:" + data[i].modify_time);
-        var warningThings = {
-          event_no: data[i].event_no,
-          event_name: data[i].event_name,
-          event_time: data[i].event_time,
-          map_info: data[i].map_info,
-          submit_time: data[i].submit_time,
-          handle_deadline: data[i].handle_deadline,
-          event_type_pid: data[i].event_type_pid,
-          tags: data[i].tags,
-          uuid: data[i].uuid,
-        };
-        data_total.push(warningThings);
-      }
-      console.log("数据长度：" + data.length);
-      totalRecords.value = data_total.length;
-      pageCount = parseInt(data_total.length) % 6;
-      currentPage.value = pageNum;
-    }
-  });
-};
-getAllWarning(today, tomorrow, 1);
+// const getAllWarning = (startTime, endTime, pageNum, warningType) => {
+//   axios({
+//     url: "/api/event/getEventsByStatus",
+//     params: {
+//       status: warningType,
+//       startTime: startTime,
+//       endTime: endTime,
+//     },
+//     method: "get",
+//   }).then(function (resp) {
+//     if (resp.status == 200) {
+//       var data = resp.data.data;
+//       data_total.splice(0, data_total.length);
+//       for (var i in data) {
+//         var warningThings = {
+//           event_no: data[i].event_no,
+//           event_name: data[i].event_name,
+//           event_time: data[i].event_time,
+//           map_info: data[i].map_info,
+//           submit_time: data[i].submit_time,
+//           handle_deadline: data[i].handle_deadline,
+//           event_type_pid: data[i].event_type_pid,
+//           tags: data[i].tags,
+//           uuid: data[i].uuid,
+//         };
+//         data_total.push(warningThings);
+//       }
+//       console.log("数据长度：" + data.length);
+//       totalRecords.value = data_total.length;
+//       pageCount = parseInt(data_total.length) % 6;
+//       currentPage.value = pageNum;
+//     }
+//   });
+// };
+// getAllWarning(today, tomorrow, 1);
 
 const getTransport = (pageNum) => {
   // 当前页
@@ -2651,63 +2650,59 @@ onMounted(() => {
     // mychar_cqcl.setOption(cqcl_option);
   });
   getMainLjz().then((tableData) => {
-    console.log(4211,tableData[0])
-   otherTodayWeight.value = tableData[0].infoVal;
+    otherTodayWeight.value = tableData[0].infoVal;
 })
-  getMainCclj().then((tableData) => {
-    ccljTodayWeight.value = tableData[4].infoVal;
-   
-    console.log(421,tableData[3].infoVal);
-    if (tableData[3].infoVal == "今日无数据【注意检查】") {
-      aflTodayWeight.value="无数据"
-    }else{
-      aflTodayWeight.value = tableData[3].infoVal;
-    }
-    
-    var cclj_option = {
-      title: {
-        text: "餐厨垃圾全生命周期管家管家",
-        textStyle: {
-          color: "#ccc",
-        },
-      },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "shadow",
-        },
-      },
-      xAxis: {
-        type: "category",
-        data: [
-          "年度收运量累积（吨）",
-          "当月收运量累积（吨）",
-          "当日收运量累积（吨）",
-        ],
-      },
-      yAxis: {
-        type: "value",
-      },
-      series: [
-        {
-          data: [
-            tableData[0].infoVal,
-            tableData[1].infoVal,
-            tableData[2].infoVal,
-          ],
-          type: "bar",
-          showBackground: true,
-          backgroundStyle: {
-            color: "rgba(180, 180, 180, 0.2)",
-          },
-        },
-      ],
-    };
-    window.onresize = function () {
-      mychar_cclj.resize();
-    };
-    mychar_cclj.setOption(cclj_option);
-  });
+// getMainCclj().then((tableData) => {
+//     ccljTodayWeight.value = tableData[4].infoVal;
+//     if (tableData[3].infoVal == "今日无数据【注意检查】") {
+//       aflTodayWeight.value="无数据"
+//     }else{
+//       aflTodayWeight.value = tableData[3].infoVal;
+//     }
+//     var cclj_option = {
+//       title: {
+//         text: "餐厨垃圾全生命周期管家管家",
+//         textStyle: {
+//           color: "#ccc",
+//         },
+//       },
+//       tooltip: {
+//         trigger: "axis",
+//         axisPointer: {
+//           type: "shadow",
+//         },
+//       },
+//       xAxis: {
+//         type: "category",
+//         data: [
+//           "年度收运量累积（吨）",
+//           "当月收运量累积（吨）",
+//           "当日收运量累积（吨）",
+//         ],
+//       },
+//       yAxis: {
+//         type: "value",
+//       },
+//       series: [
+//         {
+//           data: [
+//             tableData[0].infoVal,
+//             tableData[1].infoVal,
+//             tableData[2].infoVal,
+//           ],
+//           type: "bar",
+//           showBackground: true,
+//           backgroundStyle: {
+//             color: "rgba(180, 180, 180, 0.2)",
+//           },
+//         },
+//       ],
+//     };
+//     window.onresize = function () {
+//       mychar_cclj.resize();
+//     };
+//     mychar_cclj.setOption(cclj_option);
+//   });
 
   getOverStandard().then((tableData) => {
     document
@@ -2831,38 +2826,9 @@ onMounted(() => {
       myChart_jgzm1.resize();
     };
   });
-  // var mychar_hjws = echarts.init(document.getElementById("hwzy-Charts"));
-  // var hjws_option = {
-  //   title: {
-  //     text: "环卫作业运行管家",
-  //     textStyle: {
-  //       color: "#ccc",
-  //     },
-  //   },
-  //   xAxis: {
-  //     type: "category",
-  //     data: ["出勤车辆", "总车辆"],
-  //   },
-  //   yAxis: {
-  //     type: "value",
-  //   },
-  //   series: [
-  //     {
-  //       data: [141, 145],
-  //       type: "bar",
-  //       showBackground: true,
-  //       backgroundStyle: {
-  //         color: "rgba(180, 180, 180, 0.2)",
-  //       },
-  //     },
-  //   ],
-  // };
-  // window.onresize = function () {
-  //   mychar_hjws.resize();
-  // };
-  // mychar_hjws.setOption(hjws_option);
 
   getTrend().then((data) => {
+    // var myChart_cyyy = echarts.init(document.getElementById("cyyy-Charts"));
     var myChart_tcwt = echarts.init(document.getElementById("tcwt-Charts"));
 
     echart_index_szcg.value = 1;
@@ -2912,7 +2878,7 @@ onMounted(() => {
     };
     myChart_tcwt.setOption(option);
     window.onresize = function () {
-      myChart_cyyy.resize();
+      myChart_tcwt.resize();
     };
   });
 });

@@ -336,10 +336,8 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
       endTime: warningEndTime,
     },
   }).then(function (resp) {
-    console.log(222, "Bearer" + params.token);
     var data = resp.data.data;
     EventHistoryList.splice(0, EventHistoryList.length);
-    console.log(111, resp.data.data);
     for (var key in data) {
       var default_site = {
         event_source: data[key].eventSource,
@@ -410,20 +408,18 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
     szcgHistoryList.push(...tcwtHistoryList, ...cgaiHistoryList, ...wllzHistoryList, ...szhcsHistoryList);
     EventHistoryList.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
     warningTotalRecords.value = EventHistoryList.length;
-    // warningPageCount = parseInt(EventHistoryList.length) % 5;
     warningCurrentPage.value = pageNum;
   });
 };
+
 queryAllWarning(warningStart, warningEnd, 1);
 const getTransport = (pageNum) => {
-  // 当前页
   warningCurrentPage.value = pageNum;
 };
 
 const changeColor = () => {
   queryAllWarning(warningStart, warningEnd, 1);
   axios({
-    // url: "/api/lzj/getWarning",
     url: "/api/event-query/getNeedHandleEvent",
     method: "get",
     headers: {
@@ -437,9 +433,7 @@ const changeColor = () => {
       jgzmList,zmgjList,ljdpList,
       tcwtList, cgaiList, wllzList, szhcsList
     ].forEach(list => list.splice(0, list.length));
-    console.log(resp);
     var data = resp.data.data;
-    console.log("resp.code：" + data);
     for (var key in data) {
       var default_site = {
         event_time: data[key].eventTime,
@@ -448,7 +442,6 @@ const changeColor = () => {
         event_id: data[key].id,
       };
       defaultList.push(default_site);
-      console.log(612, data[key].systemName);
 
       switch (data[key].systemName) {
         case "垃圾系统":

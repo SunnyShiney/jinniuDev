@@ -1,390 +1,142 @@
 <template>
   <el-container class="container">
-    <Header style="height: 60px" :icon="null">
-      <!-- 系统名字 -->
-      <template #title>
-        <span class="text-title">成都市金牛区综合行政执法局,欢迎您~</span>
-      </template>
-      <!-- 时间 -->
+  <Header style="height: 60px" :icon="null">
+    <template #title>
+      <span class="text-title">成都市金牛区综合行政执法局，欢迎您~</span>
+    </template>
 
-      <template #time>
-        <div class="text-week">今天是: {{ date }} {{ week }}</div>
-      </template>
-      <template #warning>
-        <div class="text-week">
-          <div id="dotClass" title="" @click="fault_details">
-            <div id="lamp" style="display: none"></div>
-          </div>
-          <el-dialog
-            v-model="defaultVisible"
-            title="事故详情"
-            @close="handleClose"
-          >
-            <div
-              style="text-align: center; font-size: x-large; font-weight: bold"
-            >
-              未处理的事件
-            </div>
-            <el-table
-              :data="defaultList"
-              style="width: 100%"
-              size="large"
-              class="data-table"
-            >
-              <el-table-column
-                prop="event_id"
-                label="事件编号"
-                min-width="80"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="event_time"
-                label="事件时间"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="site_name"
-                label="事件来源"
-                min-width="80"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="Accident_cause"
-                label="事件详情"
-                min-width="200"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column>
-                <template #default="scope">
-                  <el-button
-                    size="small"
-                    type="danger"
-                    @click="warningHandleClick(scope.$index, scope.row)"
-                    >处理</el-button
-                  >
-                </template>
-              </el-table-column>
-            </el-table>
+    <template #time>
+      <div class="text-week">今天是: {{ date }} {{ week }}</div>
+    </template>
 
-            <div
-              style="text-align: center; font-size: x-large; font-weight: bold"
-            >
-              历史告警事件
-            </div>
-            <el-date-picker
-              v-model="changeValue"
-              type="daterange"
-              unlink-panels
-              range-separator="到"
-              start-placeholder="选择开始时间"
-              end-placeholder="选择结束时间"
+    <template #warning>
+      <div class="alarm-indicator">
+        <div id="dotClass" title="点击查看详情" @click="fault_details">
+          <div id="lamp" :style="{ display: hasAlarm ? 'block' : 'none' }"></div> 
+        </div>
+
+        <el-dialog
+          v-model="defaultVisible"
+          title="事故详情"
+          width="min(90%, 1200px)"
+          destroy-on-close
+          @close="handleClose"
+        >
+          <AlarmDetailsDialog
+              :default-list="defaultList"
+              :event-history-list="EventHistoryList"
+              :change-value="changeValue"
+              :warning-current-page="warningCurrentPage"
+              :warning-total-records="warningTotalRecords"
               :disabled-date="disabledDate"
               :shortcuts="shortcuts"
-              @change="changeDate"
-              size="large"
-              style="margin: 0.5rem 0 0.5rem"
-            />
-            <el-table
-              :data="
-                EventHistoryList.slice(
-                  (warningCurrentPage - 1) * 5,
-                  warningCurrentPage * 5
-                )
-              "
-              style="width: 100%"
-              size="large"
-              class="data-table"
-            >
-              <el-table-column
-                prop="event_id"
-                label="事件编号"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_source"
-                label="事件来源"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_cause"
-                label="事件详情"
-                min-width="450"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="event_disposed"
-                label="事件是否已处理"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_time"
-                label="发生时间"
-                min-width="250"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
+              @warning-handle-click="warningHandleClick"
+              @change-date="changeDate"
+              @current-change="getTransport"
+          />
+        </el-dialog>
 
-              <el-table-column
-                prop="administrator"
-                label="派发人"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="instruction_time"
-                label="指令下达时间"
-                min-width="250"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="administrator_phone"
-                label="派发人电话"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="instruction_content"
-                label="指令内容"
-                min-width="450"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_handler"
-                label="事件处理人"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="handler_phone"
-                label="处理人电话"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="handler_work"
-                label="处理人工作单位"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-            </el-table>
-            <div class="float-warningEnd">
-              <el-pagination
-                background
-                layout="jumper ,total, prev, pager, next"
-                :total="warningTotalRecords"
-                :current-page="warningCurrentPage"
-                :page-size="5"
-                @current-change="getTransport"
-              />
-            </div>
-          </el-dialog>
-
-          <el-dialog
-            v-model="warningHandleEvent"
-            title="事故处理"
-            @close="handleClose"
+        <el-dialog
+          v-model="warningHandleEvent"
+          title="事故处理"
+          width="40%"
+          destroy-on-close
+          @close="handleClose"
+        >
+          <el-form
+            ref="warningRuleFormRef"
+            :model="warningRuleForm"
+            :rules="warningRules"
+            label-width="120px"
           >
-            <div
-              style="text-align: center; font-size: x-large; font-weight: bold"
-            ></div>
+            <el-form-item label="处置人信息：" prop="info">
+              <el-select
+                v-model="warningRuleForm.info"
+                filterable
+                placeholder="请输入处置人姓名/电话号/工作单位"
+                class="fuzzy_select"
+              >
+                <el-option
+                  v-for="person in warningPersonList"
+                  :key="person.name"
+                  :label="warningFormatResult(person)"
+                  :value="JSON.stringify(person)"
+                />
+              </el-select>
+            </el-form-item>
 
-            <el-form
-              ref="warningRuleFormRef"
-              :model="warningRuleForm"
-              status-icon
-              :warningRules="warningRules"
-              label-width="120px"
-              class="demo-warningRuleForm"
-            >
-              <el-form-item label="处置人信息：" prop="info"
-                ><el-select
-                  v-model="warningRuleForm.info"
-                  filterable
-                  placeholder="请输入处置人姓名/电话号/工作单位"
-                  class="fuzzy_select"
-                >
-                  <el-option
-                    v-for="item in warningPersonList"
-                    :key="item.name"
-                    :label="warningFormatResult(item)"
-                    :value="JSON.stringify(item)"
-                  /> </el-select
-              ></el-form-item>
+            <el-form-item label="处置指令内容：" prop="content">
+              <el-input
+                v-model="warningRuleForm.content"
+                type="textarea"
+                placeholder="请填写详细的处置指令"
+              />
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button
+                type="primary"
+                @click="warningSubmitForm(warningRuleFormRef)"
+              >提交</el-button>
+            </el-form-item>
+          </el-form>
+        </el-dialog>
+      </div>
+    </template>
 
-              <!-- <el-form-item label="处置人姓名：" prop="name">
-                <el-input v-model="warningRuleForm.name" autocomplete="off"></el-input>
-              </el-form-item>
-              <el-form-item label="处置人电话号码：" prop="phone">
-                <el-input
-                  v-model="warningRuleForm.phone"
-                  autocomplete="off"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="工作单位：" prop="place">
-                <el-input
-                  v-model="warningRuleForm.place"
-                  autocomplete="off"
-                ></el-input>
-              </el-form-item> -->
-              <el-form-item label="处置指令内容：" prop="content">
-                <el-input
-                  v-model="warningRuleForm.content"
-                  type="textarea"
-                  autocomplete="off"
-                ></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button
-                  type="primary"
-                  @click="warningSubmitForm(warningRuleFormRef)"
-                  >提交</el-button
-                >
-              </el-form-item>
-            </el-form>
-          </el-dialog>
-        </div>
-      </template>
-
-      <!-- 用户信息 -->
-      <template #userinfo>
-        <div class="router">
+    <template #userinfo>
+      <div class="router">
           <el-button
               class="buttonToMap"
-              plain
               link
               color="fff"
               @click="updateCompanyDialog = true"
               size="large"
-              v-show="params.role == '管理员'"
+              v-show="isAdmin"
           >
-            修改单位信息
+              修改单位信息
           </el-button>
-          <el-button
-              class="buttonToMap"
-              plain
-              link
-              color="fff"
-              @click="updateCompanyDialog = true"
-              size="large"
-              v-show="params.role == '管理员'"
-          >
-            修改单位信息
-          </el-button>
-          <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="showClickLog"
-            size="large"
-            v-show="params.role == '管理员' || params.realname == '李俊' || params.realname == '傅红焰'
-                    || params.realname == '刘磊' || params.realname == '王洪'
-                    || params.realname == '龚庆' || params.realname == '宋伟'
-                    || params.realname == '翁奎' || params.realname == '李莉佳'"
-            >点击日志</el-button
-          >
-          <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="changePermissonDialog = true"
-            size="large"
-            v-show="params.role == '管理员'"
-            >权限管理</el-button
-          >
-          <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="resetPasswordDialog = true"
-            size="large"
-            v-show="params.role == '管理员'"
-            >用户密码重置管理</el-button
-          >
-          <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="changePasswordDialog = true"
-            size="large"
-            >修改个人密码</el-button
-          >
 
           <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="toMap"
-            size="large"
-            >前往地图主页</el-button
+              class="buttonToMap"
+              link
+              color="fff"
+              @click="showClickLog"
+              size="large"
+              v-show="canViewLog"
           >
-        </div>
-        <el-dropdown>
-          <span class="el-dropdown-link">
-            {{ params.username + "" + params.role + "" +params.department}}
-            <el-icon>
-              <ArrowDown />
-            </el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="logout">退出</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </template>
-    </Header>
+              点击日志
+          </el-button>
+          
+          <el-button class="buttonToMap" link color="fff" @click="changePermissonDialog = true" size="large" v-show="isAdmin">
+              权限管理
+          </el-button>
+          <el-button class="buttonToMap" link color="fff" @click="resetPasswordDialog = true" size="large" v-show="isAdmin">
+              用户密码重置管理
+          </el-button>
+
+          <el-button class="buttonToMap" link color="fff" @click="changePasswordDialog = true" size="large">
+              修改个人密码
+          </el-button>
+
+          <el-button class="buttonToMap" link color="fff" @click="toMap" size="large">
+              前往地图主页
+          </el-button>
+      </div>
+      
+      <el-dropdown>
+        <span class="el-dropdown-link user-display-info">
+          {{ `${params.username} - ${params.role} - ${params.department}` }}
+          <el-icon><ArrowDown /></el-icon>
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="logout">退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </template>
+  </Header>
 
     <el-container>
       <!-- 大类和子系统栏 -->
@@ -821,21 +573,6 @@
           </h2>
         </div>
       </div>
-      <!-- <div class="background" v-if="choosedDept === 0">
-        <img src="@/assets/home/banner-hjws.png" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div>
-      <div class="background" v-if="choosedDept === 1">
-        <img src="@/assets/home/banner-srzx.png" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div>
-      <div class="background" v-if="choosedDept === 2">
-        <img src="@/assets/home/banner-jgzm.png" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div>
-      <div class="background" v-if="choosedDept === 3">
-        <img src="@/assets/home/banner-szcg.png" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div>
-      <div class="background" v-if="choosedDept === 4">
-        <img src="@/assets/home/background-ggzp.jpg" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div> -->
 
       <!-- 页面显示区域 -->
       <el-main
@@ -894,32 +631,14 @@
         <el-divider v-if="(choosedDept == -1) | (choosedDept == 0)" />
 
         <template v-for="(item, idx) in choosedSystems">
-          <!-- <main-info v-if="item.deptId == 0" :key="idx" :systemName="item.systemName" :url="item.url"
-            :logo="item.systemLogo" :info-list="item.data" :image="item.image" :to="item.to" :deptId="item.deptId"
-            :isLogin="item.isLogin">
-          </main-info> -->
-          <!--测试-->
           <el-card
             v-if="item.systemName == '环卫作业运行管家'"
             class="card"
             shadow="hover"
             :body-style="{ padding: '0px' }"
           >
-            <!-- <el-image
-              class="image"
-              :src="require('@/assets/home/img-hwzy2.jpg')"
-            >
-            </el-image> -->
             <ul v-if="item.url">
               <div class="header-card">
-<!--                <el-button-->
-<!--                  class="el-button-hjws-title"-->
-<!--                  type="text"-->
-<!--                  @click="toSystemHjws(item)"-->
-<!--                  style="margin-top: 10px"-->
-<!--                  >{{ item.systemName }}-->
-<!--                  <div id="warning-hwzy" class="warning-hwzy"></div>-->
-<!--                </el-button>-->
                 <!-- 文字部分 -->
                 <el-button
                     class="el-button-hjws-title"
@@ -1189,10 +908,8 @@
                         </el-form-item>
                       </el-form>
                     </el-dialog>
-                  </div>
-
+              </div>
             </ul>
-
             <div class="header" style="font-size: 20px" v-else>
               <el-button
                 class="el-button-null"
@@ -1238,16 +955,10 @@
             <template v-else>
               <img :src="hwzyImageUrl" class="image" />
             </template>
-
             <div
               class="infoContainer"
               style="background-color: #2775b6; color: white"
             >
-              <!-- logo -->
-              <!-- <div>
-        <el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large"></el-avatar>
-        </div> -->
-              <!-- 汇总数据列表 -->
               <div>
                 <ul class="infoList">
                   <li v-for="item in item.data" style="font-size: 20px">
@@ -1443,11 +1154,7 @@
             shadow="hover"
             :body-style="{ padding: '0px' }"
           >
-            <!-- <el-image
-              class="image"
-              :src="require('@/assets/home/img-cclj2.jpg')"
-            >
-            </el-image> -->
+
             <ul v-if="item.url">
               <div class="header-card">
                 <el-button
@@ -2478,13 +2185,7 @@
                             </div>
                           </dv-border-box6>
                         </div>
-                        <div
-                          id="weekly_chart"
-                          style="width: 1000px; height: 400px"
-                        ></div>
-
-                        <!-- <div id="container_jgzm1" style="width: 600px; height: 400px;float: left;"></div>
-    <div id="container_jgzm2" style="width: 600px; height: 400px ;float:left"></div> -->
+                        <div id="weekly_chart" style="width: 1000px; height: 400px"></div>
                       </div>
                     </div>
                   </template>
@@ -5334,41 +5035,59 @@
       <el-dialog
         v-model="changePasswordDialog"
         title="修改密码"
-        align-center="true"
         width="30%"
+        destroy-on-close
       >
-        <el-form :model="form" :rules="rules" ref="ruleFormRef">
+        <el-form
+          :model="form"
+          :rules="rules"
+          ref="ruleFormRef"
+          label-width="120px"  
+        >
+          <el-form-item
+            label="当前密码"
+            prop="old_password"
+          >
+            <el-input
+              v-model="form.old_password"
+              type="password"
+              placeholder="请输入当前密码"
+              show-password
+            />
+          </el-form-item>
+          
           <el-form-item
             label="新密码"
-            :label-width="formLabelWidth"
             prop="new_password"
           >
             <el-input
               v-model="form.new_password"
-              autocomplete="off"
               type="password"
+              placeholder="请输入新密码"
+              show-password
             />
           </el-form-item>
+          
           <el-form-item
-            label="再次确认密码"
-            :label-width="formLabelWidth"
+            label="确认新密码"
             prop="new_password_confirm"
           >
             <el-input
               v-model="form.new_password_confirm"
-              autocomplete="off"
               type="password"
+              placeholder="请再次输入新密码"
+              show-password
             />
           </el-form-item>
         </el-form>
 
         <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="changePasswordDialog = false">取消</el-button>
+          <div class="dialog-footer">
+            <el-button @click="resetForm(ruleFormRef)">取 消</el-button>
             <el-button type="primary" @click="submitForm(ruleFormRef)">
-              确认修改密码
+              确认修改
             </el-button>
-          </span>
+          </div>
         </template>
       </el-dialog>
     </el-container>
@@ -5413,10 +5132,8 @@ import {
 } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
-import MainInfo from "@/views/home/components/MainInfo.vue";
 import ClassItem from "@/views/home/components/ClassItem.vue";
 import Header from "@/components/Header.vue";
-import WarningEventTable from "@/components/WarningEventTable.vue";
 import {
   get,
   getDeptList,
@@ -5449,6 +5166,19 @@ import moment from "moment";
 
 import axios from "axios";
 
+
+
+
+const isAdmin = computed(() => params.role === '管理员');
+const canViewLog = computed(() => {
+  const privilegedUsers = [
+    '李俊', '傅红焰', '刘磊', '王洪', 
+    '龚庆', '宋伟', '翁奎', '李莉佳'
+  ];
+  return isAdmin.value || privilegedUsers.includes(params.realname);
+});
+const hasAlarm = computed(() => defaultList.values.length > 0);
+
 const cityRoad = reactive([]);
 const trucksData = reactive([]);
 const workersData = reactive([]);
@@ -5474,58 +5204,7 @@ const tableData = [
 const query = ref("");
 const value = ref("");
 const warningPersonList = ref([]);
-// const warningPersonList = [
-//   { name: "周攀", phone: "18008061031", company: "办公室" },
-//   { name: "李自勇", phone: "18008060397", company: "办公室" },
-//   { name: "蒲远胜", phone: "18008060520", company: "办公室" },
-//   { name: "周思源", phone: "18008060503", company: "办公室" },
-//   { name: "虞诚磊", phone: "18008060536", company: "办公室" },
-//   { name: "尹叶峰", phone: "18008060657", company: "办公室" },
-//   { name: "周晓蓉", phone: "19381969851", company: "办公室" },
-//   { name: "叶建春", phone: "19381968202", company: "办公室" },
-//   { name: "彭姣", phone: "19381969852", company: "办公室" },
-//   { name: "谈方灿", phone: "18008061082", company: "城市环境综合治理科" },
-//   { name: "刘敏", phone: "18008060760", company: "城市环境综合治理科" },
-//   { name: "张蓉", phone: "18008060787", company: "城市环境综合治理科" },
-//   { name: "王胜男", phone: "18008060872", company: "城市环境综合治理科" },
-//   { name: "彭蕾", phone: "18008060898", company: "城市环境综合治理科" },
-//   { name: "杜强", phone: "18008061026", company: "基建设备管理科" },
-//   { name: "张红星", phone: "18008061015", company: "基建设备管理科" },
-//   { name: "邓雨檬", phone: "18008061016", company: "基建设备管理科" },
-//   { name: "胡浩", phone: "18008061036", company: "环境卫生监督管理科" },
-//   { name: "张宗贵", phone: "18008061087", company: "环境卫生监督管理科" },
-//   { name: "张静", phone: "18008061139", company: "环境卫生监督管理科" },
-//   { name: "胡玉莲", phone: "19381969853", company: "环境卫生监督管理科" },
-//   { name: "杨雨荷", phone: "19381969856", company: "环境卫生监督管理科" },
-//   { name: "周勇刚", phone: "18008060092", company: "环境卫生监督管理科" },
-//   { name: "肖轶", phone: "18008061056", company: "广告招牌和景观照明管理科" },
-//   { name: "聂宁", phone: "18008061159", company: "广告招牌和景观照明管理科" },
-//   { name: "刘文", phone: "19381969857", company: "广告招牌和景观照明管理科" },
-//   { name: "叶华", phone: "18008061175", company: "计划财务处" },
-//   { name: "罗争妍", phone: "18008061176", company: "计划财务处" },
-//   { name: "邱惠", phone: "18008061181", company: "计划财务处" },
-//   { name: "代然", phone: "18008061185", company: "计划财务处" },
-//   { name: "王英", phone: "18008061191", company: "计划财务处" },
-//   { name: "陈雪梅", phone: "18008061293", company: "计划财务处" },
-//   { name: "周建春", phone: "18008061295", company: "计划财务处" },
-//   { name: "钟杨", phone: "19381969858", company: "计划财务处" },
-//   { name: "蒋波", phone: "18008061301", company: "人事劳资科" },
-//   { name: "徐巧英", phone: "18008061303", company: "人事劳资科" },
-//   { name: "张宽", phone: "18008061380", company: "人事劳资科" },
-//   { name: "张成波", phone: "18008061369", company: "人事劳资科" },
-//   { name: "段国钢", phone: "15388115360", company: "数字化指挥监督中心" },
-//   { name: "高志昊", phone: "19381968262", company: "政策法规科" },
-//   { name: "李新成", phone: "18008061170", company: "大队勤务科" },
-//   { name: "邱志强", phone: "18008061023", company: "大队勤务科" },
-//   { name: "李贵明", phone: "18008061381", company: "大队勤务科" },
-//   { name: "冯娟", phone: "18008061037", company: "大队勤务科" },
-//   { name: "汪敏", phone: "18190992825", company: "大队勤务科" },
-//   { name: "赵杨", phone: "17723321969", company: "大队勤务科" },
-//   { name: "文宇恒", phone: "18008060691", company: "大队勤务科" },
-//   { name: "张宇杨", phone: "18008061257", company: "大队勤务科" },
-// ];
-// 自定义结果格式
-// const selectedResult = ref(null);
+
 onMounted(() => {
   getAllWarningPersonList();
 });
@@ -5538,7 +5217,6 @@ const getAllWarningPersonList = () => {
     },
   }).then((resp) => {
         warningPersonList.value = resp.data;
-        console.log("人员列表：", warningPersonList);
       })
       .catch((err) => {
         console.error("获取人员信息失败：", err);
@@ -5557,7 +5235,6 @@ const getwarningPersonList = (pageNum) => {
     },
   }).then(async (resp) => {
     var data = resp.data;
-    console.log("人员列表:" + data);
 
     for (var key in data) {
       if (data[key].telephone == "13880769883") {
@@ -5642,8 +5319,6 @@ const getwarningPersonList = (pageNum) => {
           company: "办公室",
         };
       }
-
-      console.log("这里：" + resetPassword);
       warningPersonList.push(resetPassword);
     }
   });
@@ -5654,10 +5329,8 @@ const warningTotalRecords = ref(1000);
 let warningCurrentPage = ref(1);
 let warningPageCount = 0;
 
-let warningStart = moment("2023-03-01").format("YYYY-MM-DD");
-console.log(4211, warningStart);
+let warningStart = moment("2025-01-01").format("YYYY-MM-DD");
 let warningEnd = moment().format("YYYY-MM-DD");
-console.log(4212, warningEnd);
 let logStart = moment().startOf("month").format("YYYY-MM-DD");
 let logEnd = moment().add(1, "days").format("YYYY-MM-DD");
 // const tomorrow = moment()
@@ -5677,7 +5350,7 @@ function changeDate() {
   warningStart = moment(changeValue.value[0]).format("YYYY-MM-DD");
   warningEnd = moment(changeValue.value[1]).format("YYYY-MM-DD");
   // warningEnd =  new Date();
-  queryAllWarning(warningStart, warningEnd, 1);
+  // queryAllWarning(warningStart, warningEnd, 1);
 }
 function changeDateLog() {
   logStart = moment(changeValueLog.value[0]).format("YYYY-MM-DD");
@@ -5740,13 +5413,7 @@ const warningSubmitForm = async () => {
         }),
         method: "post",
       }).then(function (resp) {
-        console.log(2, resp);
-        console.log(
-          "发送给了电话为：" +
-            selectedValue.phone +
-            "，指令内容为：" +
-            warningRuleForm.content
-        );
+
       });
       //发送短信（新增部分）
       axios({
@@ -5786,7 +5453,6 @@ const warningSubmitForm = async () => {
       }).then(function (resp) {
         systemData.out.println("event_uuid:" + event_uuid);
       });
-      console.log("submit!");
       alert("提交成功！");
       warningHandleEvent.value = false;
       // defaultList.pop(rowIndex);
@@ -5806,7 +5472,6 @@ const warningSubmitForm = async () => {
 const warningHandleClick = (index, row) => {
   event_uuid.value = row.event_id;
   rowIndex.value = index;
-  console.log("event_uuid:" + event_uuid.value);
   warningHandleEvent.value = true;
   warningRuleForm.phone = "";
   warningRuleForm.name = "";
@@ -5815,74 +5480,54 @@ const warningHandleClick = (index, row) => {
 };
 const fault_details = () => {
   var div = document.getElementById("dotClass");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     defaultVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     defaultVisible.value = true;
-    console.log(defaultVisible.value);
   }
 };
 const fault_details_hwzy = () => {
   var div = document.getElementById("dotClass-hwzy");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     hwzyVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     hwzyVisible.value = true;
-    console.log(hwzyVisible.value);
   }
 };
 const fault_details_ljqsm = () => {
   var div = document.getElementById("dotClass-ljqsm");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     ljqsmVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     ljqsmVisible.value = true;
-    console.log(ljqsmVisible.value);
   }
 };
 
 const fault_details_toiletWarning = () => {
   var div = document.getElementById("dotClass-toiletWarning");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     toiletWarningVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     toiletWarningVisible.value = true;
-    console.log(toiletWarningVisible.value);
   }
 };
 
 const fault_details_hjws = () => {
   var div = document.getElementById("dotClass-hjws");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     hjwsVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     hjwsVisible.value = true;
-    console.log(hjwsVisible.value);
   }
 };
 //四大板块的历史告警事件列表
@@ -5917,10 +5562,8 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
       endTime: warningEndTime,
     },
   }).then(function (resp) {
-    console.log(222, "Bearer" + params.token);
     var data = resp.data.data;
     EventHistoryList.splice(0, EventHistoryList.length);
-    console.log(111, resp.data.data);
     for (var key in data) {
       var default_site = {
         event_source: data[key].eventSource,
@@ -5995,17 +5638,13 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
     warningCurrentPage.value = pageNum;
   });
 };
-queryAllWarning(warningStart, warningEnd, 1);
 const getTransport = (pageNum) => {
-  // 当前页
   warningCurrentPage.value = pageNum;
 };
-
 const hwzyVisible = ref(false);
 const ljqsmVisible = ref(false);
 const toiletWarningVisible = ref(false);
 const hjwsVisible = ref(false);
-
 //四大板块的告警事件列表，如果列表不为空，则指示灯闪烁
 const hjwsList = reactive([]);
 const srzxList = reactive([]);
@@ -6026,20 +5665,14 @@ const tcwtList = reactive([]);
 const cgaiList = reactive([]);
 const wllzList = reactive([]);
 const szhcsList = reactive([]);
+//刷新告警指示灯颜色
 const changeColor = () => {
-  queryAllWarning(warningStart, warningEnd, 1);
   axios({
-    // url: "/api/lzj/getWarning",
     url: "/api/event-query/getNeedHandleEvent",
     method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
+    headers: {Authorization: "Bearer " + params.token,},
   }).then(function (resp) {
      defaultList.splice(0, defaultList.length);
-    // hjwsList.splice(0, hjwsList.length);
-    // ljqsmList.splice(0, ljqsmList.length);
-    // toiletWarningList.splice(0, toiletWarningList.length);
     [
       hjwsList, srzxList, csjgList, szcgList,
       hwzyList, ljqsmList, toiletWarningList,
@@ -6047,9 +5680,7 @@ const changeColor = () => {
       jgzmList,zmgjList,ljdpList,
       tcwtList, cgaiList, wllzList, szhcsList
     ].forEach(list => list.splice(0, list.length));
-    console.log(resp);
     var data = resp.data.data;
-    console.log("resp.code：" + data);
     for (var key in data) {
       var default_site = {
         event_time: data[key].eventTime,
@@ -6058,19 +5689,6 @@ const changeColor = () => {
         event_id: data[key].id,
       };
       defaultList.push(default_site);
-      console.log(612, data[key].systemName);
-      // if (
-      //   data[key].systemName == "垃圾系统" ||
-      //   data[key].systemName == "厕所系统"
-      // ) {
-      //   hjwsList.push(default_site);
-      // }
-      // if (data[key].systemName == "垃圾系统") {
-      //   ljqsmList.push(default_site);
-      // }
-      // if (data[key].systemName == "厕所系统") {
-      //   toiletWarningList.push(default_site);
-      // }
       switch (data[key].systemName) {
         case "垃圾系统":
           hwzyList.push(default_site);
@@ -6134,7 +5752,6 @@ const changeColor = () => {
       szcgList.push(...tcwtList, ...cgaiList, ...wllzList, ...szhcsList);
     }
 
-    console.log("data.length:" + defaultList.length);
     // 出现事故
     if (defaultList.length != 0) {
       document.getElementById("dotClass").title = "出现异常！请点击查看详情！";
@@ -6146,7 +5763,6 @@ const changeColor = () => {
     }
 
     if (hwzyList.length != 0) {
-      document.getElementById("dotClass-hwzy").title = "出现异常！请点击查看详情！";
       document.getElementById("dotClass-hwzy").style.backgroundColor = "#E12911";
       document.getElementById("lamp-hwzy").style.display = "block";
     } else {
@@ -6183,8 +5799,15 @@ const changeColor = () => {
 
   });
 };
+queryAllWarning(warningStart, warningEnd, 1);
 changeColor();
-setInterval(changeColor, 60000);
+window.setInterval(() => {
+  setTimeout(() => {
+    changeColor();
+    queryAllWarning(warningStart, warningEnd, 1);
+  }, 0);
+}, 360000);
+// setInterval(changeColor, 60000);
 
 //========================================================================================
 
@@ -6198,7 +5821,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6215,7 +5837,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6234,7 +5855,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6252,7 +5872,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6269,7 +5888,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6286,7 +5904,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6360,12 +5977,10 @@ const submitAddForm = async () => {
         }),
         method: "post",
       }).then(function (resp) {
-        console.log(2, resp);
         if (resp.data) {
           alert("提交成功！");
           peopleAdd.value = false;
           loading.value = true;
-          console.log("lastPage" + lastPage);
 
           getPermissionList(lastPage, searchName.value, searchPhone.value);
         } else {
@@ -6373,7 +5988,6 @@ const submitAddForm = async () => {
         }
       });
 
-      console.log("submit!");
     } else {
       return false;
     }
@@ -6390,10 +6004,8 @@ const selfSystemPermisson = () => {
   }).then(function (resp) {
     var data = resp.data;
     for (var index in data) {
-      // console.log("姓名：" + data[index].realName);
       var roleList = data[index].roleList;
       for (var key in roleList) {
-        console.log("子系统" + roleList[key].system);
         if (roleList[key].system == "all") {
           // systemPermisson.value = ["共享单车管家", "垃圾数据归集管家", "城管AI识别管家", "网络理政管家", "广告招牌二维码管", "扬尘治理大数据协同管家", "数字化城市信息管家", "景观照明集中控制管家", "智慧公厕管家", "突出问题管家", "调度指挥管家", "垃圾全生命周期管家", "餐饮油烟管家"];
           systemPermisson.push("共享单车管家");
@@ -6432,7 +6044,6 @@ const selfSystemPermisson = () => {
         }
       }
     }
-    console.log("所有的" + systemPermisson.value);
   });
 };
 selfSystemPermisson();
@@ -6595,7 +6206,6 @@ const showClickLog = async () => {
 };
 const exportExcelOfClickLog = () => {
   var URL = "/api/click-log/excel?start=" + logStart + "&end=" + logEnd;
-  console.log("exportExcelOfClickLog URL: ", URL);
 
   axios({
     url: URL,
@@ -6606,12 +6216,10 @@ const exportExcelOfClickLog = () => {
     },
   }).then(function (res) {
     if (res.status === 200) {
-      console.log("成功了！");
-      console.log("res body: ", res.data);
+
       // 生成blob对象 定义下载格式
       let blob = new Blob([res.data], { type: res.headers['content-type'] });
-      // 获取文件名
-      console.log("res.headers: ", res.headers);
+
       // let contentDisposition = res.headers['content-disposition'];
       // let filename = decodeURIComponent(contentDisposition.split("filename=")[1]);
       let filename = logStart + "至" + logEnd + "城市管家点击日志.xlsx";
@@ -6654,7 +6262,6 @@ const getClickLogList = (sys, start, end, pageNum) => {
   } else if (sys == "调度指挥管家") {
     realUrl = "/ddzh/admin-log/page?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
   }
-  console.log("log realUrl:" + realUrl);
   var request;
   if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
     request = axios({
@@ -6715,7 +6322,6 @@ const getClickLogList = (sys, start, end, pageNum) => {
       };
       clickLogList.push(clickLog);
     }
-    //console.log("clickLogList:" + data);
     total_Records_clickLog.value = clickLogList.length;
     page_Count_clickLog = parseInt(clickLogList.length) % 10;
     if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
@@ -6883,7 +6489,6 @@ const getResetPasswordList = (pageNum) => {
   }).then(async (resp) => {
     var data = resp.data;
     resetPasswordList.splice(0, resetPasswordList.length);
-    console.log("人员列表:" + data);
 
     for (var key in data) {
       var resetPassword = {
@@ -6911,7 +6516,6 @@ const getResetPasswordList = (pageNum) => {
     current_Page_reset.value = pageNum;
   });
 };
-// getPermissonApplicationListList(1);
 setInterval(getResetPasswordList(1), 60000);
 const getResetPasswordApplication = (pageNum) => {
   // 当前页
@@ -6919,9 +6523,7 @@ const getResetPasswordApplication = (pageNum) => {
 };
 
 const resetPassword = (row) => {
-  console.log("人员姓名：" + row.realName + "电话：" + row.telephone);
   axios({
-    // url: "/api/lzj/getWarning",
     url: "/api/auth/admin_change_password",
     method: "post",
     headers: {
@@ -6959,9 +6561,7 @@ const getPermissonApplicationListList = (pageNum) => {
   }).then(function (resp) {
     permissonApplicationList.splice(0, permissonApplicationList.length);
     var data = resp.data;
-    console.log(111, data);
 
-    console.log("resp.code：" + data);
     for (var key in data) {
       if (data[key].reviewed == false) {
         var permission_list = {
@@ -7059,7 +6659,6 @@ const handleSearch = () => {
 };
 
 const getPermissionList = (pageNum, filteredName, filteredPhone) => {
-  // Construct URL with query parameters if they're provided
   let url = "/api/auth/non_super_admin_list";
   const queryParams = [];
   
@@ -7075,7 +6674,6 @@ const getPermissionList = (pageNum, filteredName, filteredPhone) => {
   if (queryParams.length > 0) {
     url += `?${queryParams.join("&")}`;
   }
-  console.log("请求的URL：" + url);
   axios({
     url: url,
     method: "get",
@@ -7085,9 +6683,7 @@ const getPermissionList = (pageNum, filteredName, filteredPhone) => {
   }).then(async (resp) => {
     permissionList.splice(0, permissionList.length);
     var data = resp.data;
-    // console.log(111, data);
 
-    // console.log("data.code：" + data);
     var realName = ref("");
     var telephone = ref("");
     var company = ref("");
@@ -7182,7 +6778,6 @@ const getPermissionList = (pageNum, filteredName, filteredPhone) => {
         }
       }
       await axios({
-        // url: "/api/lzj/getWarning",
         url: "/api/auth/get_self_permission_applications",
         method: "get",
         headers: {
@@ -7299,27 +6894,22 @@ const getPermissionList = (pageNum, filteredName, filteredPhone) => {
     pageCount = parseInt(permissionList.length) % 10;
     // 计算最后一页的页码
     lastPage = Math.ceil(totalRecords.value / 10);
-    console.log("lastPage:" + lastPage);
     currentPage.value = pageNum;
     loading.value = false;
   });
 };
-// getPermissionList(1);
 setInterval(() => {
   getPermissionList(1, searchName.value, searchPhone.value);
-}, 60000);
+}, 360000);
 
 const getPermission = (pageNum) => {
-  // 当前页
   currentPage.value = pageNum;
 };
 
 const handleDelete = (row) => {
-  console.log("length:" + permissonApplicationList.length);
   currentRowPage = Math.ceil((row.index - 1) / 10);
   var div = document.getElementById("permissonAlert");
   if (permissonApplicationList.length != 0) {
-    console.log("div.style.display" + div.style.display);
     div.style.display = "flex";
   } else {
     ElMessageBox.confirm("是否删除该人员?", "提示", {
@@ -7328,7 +6918,6 @@ const handleDelete = (row) => {
       type: "提示",
     })
       .then(() => {
-        console.log("row.username:" + row.telephone);
         axios({
           url: "/api/auth/delete_user/" + row.telephone,
           headers: {
@@ -7337,15 +6926,12 @@ const handleDelete = (row) => {
           },
           method: "get",
         }).then(function (resp) {
-          console.log(2, resp);
           loading.value = true;
           getPermissionList(currentRowPage, searchName.value, searchPhone.value);
-
           ElMessage({
             type: "success",
             message: "删除成功！",
           });
-          console.log("我管理员" + params.username + "删除" + row.telephone);
         });
       })
       .catch(() => {
@@ -7361,20 +6947,16 @@ const handleAdd = () => {
   peopleAdd.value = true;
 };
 const handleClick = (row) => {
-  console.log("所在行：" + row.index);
   currentRowPage = Math.ceil((row.index + 1) / 10);
 
-  console.log("length:" + permissonApplicationList.length);
   var div = document.getElementById("permissonAlert");
   if (permissonApplicationList.length != 0) {
-    console.log("div.style.display" + div.style.display);
     div.style.display = "flex";
   } else {
     div.style.display = "none";
     formLoading.value = true;
     permissonName.value = row.username;
     permissonTelephone.value = row.telephone;
-    console.log("permissonTelephone:" + permissonTelephone.value);
     handleEvent.value = true;
     radioGxdc.value = [];
     radioHwzy.value = [];
@@ -7393,7 +6975,6 @@ const handleClick = (row) => {
     radioCyyy.value = [];
 
     axios({
-      // url: "/api/lzj/getWarning",
       url: "/api/auth/non_super_admin_list",
       method: "get",
       headers: {
@@ -7458,22 +7039,6 @@ const handleClick = (row) => {
                 }
                 permissonHwzy.value = oldRadioHwzy.value;
               }
-              // if (roleList[index].system == "垃圾数据归集管家") {
-              //   if (roleList[index].name == "viewer") {
-              //     radioLjsj.value = ["浏览信息"];
-              //     oldRadioLjsj.value = "viewer";
-              //   }
-              //   if (roleList[index].name == "admin") {
-              //     radioLjsj.value = ["浏览信息", "管理参数"];
-              //     oldRadioLjsj.value = "admin";
-              //   }
-              //   if (roleList[index].name == "operator") {
-              //     radioLjsj.value = ["浏览信息", "管理参数", "操作系统"];
-              //     oldRadioLjsj.value = "operator";
-              //   }
-              //   permissonLjsj.value = oldRadioLjsj.value;
-              // }
-
               if (roleList[index].system == "城管AI识别管家") {
                 if (roleList[index].name == "viewer") {
                   radioCgAI.value = ["浏览信息"];
@@ -7657,7 +7222,6 @@ const handleClick = (row) => {
             }
           }
           await axios({
-            // url: "/api/lzj/getWarning",
             url: "/api/auth/get_self_permission_applications",
             method: "get",
             headers: {
@@ -7667,9 +7231,7 @@ const handleClick = (row) => {
             var roleList = data.data;
             for (var index in roleList) {
               if (permissonTelephone.value == roleList[index].telephone) {
-                console.log(
-                  "roleList[index].telephone:" + roleList[index].telephone
-                );
+
                 if (roleList[index].roleSystem == "共享单车管家") {
                   radioGxdc.value = [];
                   if (roleList[index].operateType == "add") {
@@ -7706,22 +7268,6 @@ const handleClick = (row) => {
                     permissonHwzy.value = oldRadioHwzy.value;
                   }
                 }
-                // if (roleList[index].roleSystem == "垃圾数据归集管家") {
-                //   radioLjsj.value = [];
-                //   if (roleList[index].roleName == "viewer") {
-                //     radioLjsj.value = ["浏览信息"];
-                //     oldRadioLjsj.value = "viewer";
-                //   }
-                //   if (roleList[index].roleName == "admin") {
-                //     radioLjsj.value = ["浏览信息", "管理参数"];
-                //     oldRadioLjsj.value = "admin";
-                //   }
-                //   if (roleList[index].roleName == "operator") {
-                //     radioLjsj.value = ["浏览信息", "管理参数", "操作系统"];
-                //     oldRadioLjsj.value = "operator";
-                //   }
-                //   permissonLjsj.value = oldRadioLjsj.value;
-                // }
                 if (roleList[index].roleSystem == "城管AI识别管家") {
                   radioCgAI.value = [];
                   if (roleList[index].roleName == "viewer") {
@@ -7943,7 +7489,6 @@ const selfPermisson = (systemName, operateType, roleName) => {
     ),
     method: "post",
   }).then(function (resp) {
-    console.log(2, resp);
     console.log(
       "我管理员" + params.username + "指定人员" + permissonTelephone.value
     );
@@ -8045,9 +7590,7 @@ const cellStyle = ({ row, column, rowIndex, columnIndex }) => {
 
 //提交权限修改表单
 const submitPermisson = (permissionForm) => {
-  // console.log(
-  //   "更改之前：" + oldRadioGxdc.value + "更改之后：" + permissonGxdc.value
-  // );
+
   if (
     oldRadioGxdc.value == permissonGxdc.value &&
     oldRadioLjsj.value == permissonLjsj.value &&
@@ -8236,7 +7779,6 @@ const submitPermisson = (permissionForm) => {
       });
     }
     loading.value = true;
-    console.log("currentRowPage:" + currentRowPage);
     getPermissionList(currentRowPage, searchName.value, searchPhone.value);
     getPermissonApplicationListList(1);
   }
@@ -8244,12 +7786,10 @@ const submitPermisson = (permissionForm) => {
 
 //多选框--》角色分配
 const radioChangeGxdc = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonGxdc.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonGxdc.value = "viewer";
     }
@@ -8266,12 +7806,10 @@ const radioChangeGxdc = (value) => {
 };
 
 const radioChangeHwzy = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonHwzy.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonHwzy.value = "viewer";
     }
@@ -8288,12 +7826,10 @@ const radioChangeHwzy = (value) => {
 };
 
 const radioChangeLjsj = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonLjsj.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonLjsj.value = "viewer";
     }
@@ -8310,12 +7846,10 @@ const radioChangeLjsj = (value) => {
 };
 
 const radioChangeCgAI = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonCgAI.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonCgAI.value = "viewer";
     }
@@ -8332,12 +7866,10 @@ const radioChangeCgAI = (value) => {
 };
 
 const radioChangeCgsyd = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonCgsyd.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonCgsyd.value = "viewer";
     }
@@ -8354,12 +7886,10 @@ const radioChangeCgsyd = (value) => {
 };
 
 const radioChangeGgzp = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonGgzp.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonGgzp.value = "viewer";
     }
@@ -8376,12 +7906,10 @@ const radioChangeGgzp = (value) => {
 };
 
 const radioChangeYczl = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonYczl.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonYczl.value = "viewer";
     }
@@ -8398,12 +7926,10 @@ const radioChangeYczl = (value) => {
 };
 
 const radioChangeSzhcs = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonSzhcs.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonSzhcs.value = "viewer";
     }
@@ -8420,12 +7946,10 @@ const radioChangeSzhcs = (value) => {
 };
 
 const radioChangeJgzm = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonJgzm.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonJgzm.value = "viewer";
     }
@@ -8442,12 +7966,10 @@ const radioChangeJgzm = (value) => {
 };
 
 const radioChangeNewZmgj = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonNewZmgj.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonNewZmgj.value = "viewer";
     }
@@ -8464,12 +7986,10 @@ const radioChangeNewZmgj = (value) => {
 };
 
 const radioChangeShlj = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonShlj.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonShlj.value = "viewer";
     }
@@ -8486,12 +8006,10 @@ const radioChangeShlj = (value) => {
 };
 
 const radioChangeZhxz = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonZhxz.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonZhxz.value = "viewer";
     }
@@ -8508,12 +8026,10 @@ const radioChangeZhxz = (value) => {
 };
 
 const radioChangeDdzh = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonDdzh.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonDdzh.value = "viewer";
     }
@@ -8530,12 +8046,10 @@ const radioChangeDdzh = (value) => {
 };
 
 const radioChangeCclj = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonCclj.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonCclj.value = "viewer";
     }
@@ -8552,12 +8066,10 @@ const radioChangeCclj = (value) => {
 };
 
 const radioChangeCyyy = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonCyyy.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonCyyy.value = "viewer";
     }
@@ -8619,66 +8131,69 @@ const validatePass2 = (rule, value, callback) => {
     callback();
   }
 };
-
-const submitForm = (formEl) => {
+const resetForm = (formEl) => {
+    if (!formEl) return;
+    formEl.resetFields(); // 清除表单数据和验证状态
+    changePasswordDialog.value = false;
+};
+const submitForm = async (formEl) => {
   if (!formEl) return;
-  formEl.validate((valid) => {
-    if (valid) {
-      ElMessageBox.confirm("确认修改密码？", "提示", {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
-        type: "warning",
-        center: true,
-      })
-        .then(() => {
-          axios({
-            url: "/api/auth/change_password",
-            method: "post",
-            headers: {
-              Authorization: "Bearer" + params.token,
-              "Content-Type": " application/json",
-            },
-            data: form.new_password,
-          }).then((res) => {
-            if (res.data) {
-              ElMessage({
-                type: "success",
-                message: "修改密码成功！",
-              });
-            } else {
-              ElMessage({
-                type: "error",
-                message:
-                  "密码的组成至少8位以上，要包含字母、数字、符号，例如：w-765223！",
-              });
-            }
-          });
-          // changePassword(form).then(res => {
-          //   console.log(res)
-          //   ElMessage({
-          //     type: 'success',
-          //     message: '修改密码成功！',
-          //   })
-          // })
-        })
-        .catch(() => {
-          ElMessage({
-            type: "info",
-            message: "取消修改密码！",
-          });
-        });
-    } else {
-      console.log("error submit!");
-      return false;
+  try {
+    const isValid = await formEl.validate();
+    if (!isValid) {
+      console.log("表单验证失败！");
+      ElMessage.error("请检查表单内容是否完整且符合要求！");
+      return;
     }
-  });
+    await ElMessageBox.confirm("确认修改密码？", "提示", {
+      confirmButtonText: "确认",
+      cancelButtonText: "取消",
+      type: "warning",
+      center: true,
+    });
+    const response = await axios({
+      url: "/api/auth/change_password",
+      method: "post",
+      headers: {
+        Authorization: "Bearer " + params.token, 
+        "Content-Type": "application/json",
+      },
+      data: {
+        old_password: form.old_password, 
+        new_password: form.new_password,
+      },
+    });
+    if (response.data && response.data.success) {
+      ElMessage({ type: "success", message: "修改密码成功！" });
+    } else {
+      const errorMsg = response.data.message || "密码格式不符合要求，例如：w-765223！";
+      ElMessage({ type: "error", message: errorMsg });
+    }
+    resetForm(formEl);
+  } catch (error) {
+    // 统一处理所有错误 (验证失败已在上面处理)
+    // 如果错误是取消操作（用户点击了取消按钮）
+    if (error === 'cancel') {
+      ElMessage({ type: "info", message: "已取消修改密码！" });
+    } else if (error.response) {
+      // API 请求失败（例如 401, 500 错误）
+      console.error("修改密码 API 失败:", error.response.data);
+      ElMessage({ type: "error", message: error.response.data.message || "修改密码失败，请联系管理员！" });
+    } else {
+      // 其他错误（网络错误、代码错误等）
+      console.error("未知错误:", error);
+      ElMessage({ type: "error", message: "操作失败，请重试。" });
+    }
+  }
 };
 const rules = reactive({
+  old_password: [{ required: true, message: '请输入当前密码', trigger: 'blur' },],
   new_password: [{ validator: validatePass, trigger: "blur" }],
   new_password_confirm: [{ validator: validatePass2, trigger: "blur" }],
 });
 
 const form = reactive({
+  old_password: "",
   new_password: "",
   new_password_confirm: "",
 });
@@ -8836,7 +8351,6 @@ const echartInit_srzx = () => {
 };
 
 const echartInit_ddzh = () => {
-  console.log(ddzh_tableData2);
   if (ddzh_tableData2.value.length == 3) {
     ddzh_tableData2.value.unshift({
       isNormal: false,
@@ -9100,168 +8614,270 @@ onMounted(() => {
 //页面跳转之前销毁图表
 onBeforeUnmount(() => {
   if (weeklyChart) {
-    //window.removeEventListener("resize", weeklyChart);
     weeklyChart.dispose();
     weeklyChart = null;
   }
 });
-const showWeeklyChart = () => {
-  document.getElementById("weekly_chart").removeAttribute("_echarts_instance_");
-  var chartDom = document.getElementById("weekly_chart");
-  weeklyChart = echarts.init(chartDom);
+const showWeeklyChart = async () => {
+  let domElement = document.getElementById("weekly_chart");
+  if (!domElement) {
+    console.error("ECharts 容器未找到，ID可能错误或DOM尚未渲染！");
+    return;
+  }
+  try {
+      domElement.removeAttribute("_echarts_instance_");
+      // 重新获取实例，如果 weeklyChart 变量是全局或外部声明的
+      weeklyChart = echarts.init(domElement);
+  } catch (e) {
+      console.warn("无法移除旧的 ECharts 实例属性或初始化图表", e);
+      return; // 如果初始化失败，则中止后续操作
+  }
+  // --- 步骤 2: 数据准备和 API 调用 ---
+  // 使用 const 代替 var，并确保日期格式化工具 (moment) 已导入
+  const showPersonStart = moment().subtract(6, "days").format("YYYY-MM-DD"); // 优化: 使用 subtract 代替 add(-6, "d")
+  const showPersonEnd = moment().add(1, "days").format("YYYY-MM-DD"); 
+  const apiUrl = `/api/toilet/getSumByDuration/枣子巷/${showPersonStart}/${showPersonEnd}/threeType`;
+  try {
+      // 优化：使用 async/await 简化 Promise 链
+      const response = await axios.get(apiUrl, {
+          headers: {
+              // 修复：Authorization 后的空格
+              Authorization: "Bearer " + params.token,
+              "Content-Type": "application/json",
+          },
+      });
+      // 优化：使用解构赋值和更清晰的变量名
+      const rawData = response.data.data;
+      // --- 步骤 3: 数据处理优化（使用 Reduce/Map 或更简洁的 Filter） ---
+      // 优化：通过 Reduce 遍历一次数据，同时收集所有需要的数组，避免三次 filter
+      const processedData = rawData.reduce((acc, item) => {
+          if (item.gender === "男卫生间") {
+              acc.flowValues1.push(item.flowValue);
+              acc.DateValues1.push(item.startDate);
+          } else if (item.gender === "女卫生间") {
+              acc.flowValues2.push(item.flowValue);
+          } else if (item.gender === "第三卫生间") {
+              acc.flowValues3.push(item.flowValue);
+          }
+          return acc;
+      }, { flowValues1: [], DateValues1: [], flowValues2: [], flowValues3: [] });
+      const { flowValues1, DateValues1, flowValues2, flowValues3 } = processedData;
+      const option = {
+          title: {
+              text: "最近一周每日客流量统计",
+              textStyle: { color: "white" },
+          },
+          tooltip: {
+              trigger: "axis",
+              axisPointer: { type: "shadow" },
+              formatter: function (params) {
+                  const dataMap = {};
+                  params.forEach(p => {
+                      dataMap[p.seriesName] = p.value;
+                  });
+                  return `${params[0].axisValue}<br>` +
+                         `第三卫生间 ${dataMap["第三卫生间"] || 0}人<br>` +
+                         `女卫生间 ${dataMap["女卫生间"] || 0}人<br>` +
+                         `男卫生间 ${dataMap["男卫生间"] || 0}人`;
+              },
+          },
+          legend: {
+              textStyle: { color: "white" },
+          },
+          grid: {
+              left: "3%",
+              right: "4%",
+              bottom: "3%",
+              containLabel: true,
+          },
+          xAxis: [{ 
+              type: "category", 
+              data: DateValues1,
+              axisLabel: { color: "white" } 
+          }],
+          yAxis: [{
+              type: "value",
+              axisLabel: { 
+                  formatter: "{value} 人",
+                  color: "white" 
+              },
+          }],
+          series: [
+              { name: "男卫生间", type: "bar", stack: "Ad", label: { show: true }, emphasis: { focus: "series" }, data: flowValues1 },
+              { name: "女卫生间", type: "bar", stack: "Ad", label: { show: true }, emphasis: { focus: "series" }, data: flowValues2 },
+              { name: "第三卫生间", type: "bar", stack: "Ad", label: { show: true }, emphasis: { focus: "series" }, data: flowValues3 },
+          ],
+      };
 
-  var showPersonStart = moment().add(-6, "d").format("YYYY-MM-DD");
-  var showPersonEnd = moment().add(1, "d").format("YYYY-MM-DD");
+      // 5. 设置图表选项
+      weeklyChart.setOption(option);
 
-  axios({
-    url:
-      "/api/toilet/getSumByDuration/枣子巷/" +
-      showPersonStart +
-      "/" +
-      showPersonEnd +
-      "/threeType",
-    headers: {
-      Authorization: "Bearer" + params.token,
-      "Content-Type": " application/json",
-    },
-    method: "get",
-  }).then((dataTable) => {
-    console.log(222, dataTable.data.data);
-    dataTable = dataTable.data.data;
-    const filteredData1 = dataTable.filter(
-      (item) => item.gender === "男卫生间"
-    );
-    const flowValues1 = filteredData1.map((item) => item.flowValue);
-    const DateValues1 = filteredData1.map((item) => item.startDate);
-    const filteredData2 = dataTable.filter(
-      (item) => item.gender === "女卫生间"
-    );
-    const flowValues2 = filteredData2.map((item) => item.flowValue);
-
-    const filteredData3 = dataTable.filter(
-      (item) => item.gender === "第三卫生间"
-    );
-    const flowValues3 = filteredData3.map((item) => item.flowValue);
-
-    // 处理成功响应
-    var option;
-
-    option = {
-      title: {
-        text: "最近一周每日客流量统计",
-        textStyle: {
-          color: "white",
-        },
-      },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "shadow",
-        },
-        formatter: function (params) {
-          // 获取横坐标的内容
-          let xAxisLabel = params[0].axisValue;
-
-          // 获取数据项的数值
-          let dataValue = params[0].value;
-          let dataValue1 = params[1].value;
-          let dataValue2 = params[2].value;
-
-          // 构建 tooltip 内容并换行显示
-          return (
-            xAxisLabel +
-            "<br>第三卫生间 " +
-            dataValue2 +
-            "人" +
-            "<br>女卫生间 " +
-            dataValue1 +
-            "人" +
-            "<br>男卫生间 " +
-            dataValue +
-            "人"
-          );
-        },
-      },
-      legend: {
-        textStyle: {
-          color: "white",
-        },
-      },
-      grid: {
-        left: "3%",
-        right: "4%",
-        bottom: "3%",
-        containLabel: true,
-        textStyle: {
-          color: "white",
-        },
-      },
-      xAxis: [
-        {
-          type: "category",
-          data: DateValues1,
-        },
-      ],
-      yAxis: [
-        {
-          type: "value",
-          axisLabel: {
-            formatter: "{value} 人",
-          },
-        },
-      ],
-      series: [
-        {
-          name: "男卫生间",
-          type: "bar",
-          stack: "Ad",
-          label: {
-            show: true,
-          },
-          emphasis: {
-            focus: "series",
-          },
-          textStyle: {
-            color: "white",
-          },
-          data: flowValues1,
-        },
-        {
-          name: "女卫生间",
-          type: "bar",
-          stack: "Ad",
-          label: {
-            show: true,
-          },
-          emphasis: {
-            focus: "series",
-          },
-          textStyle: {
-            color: "white",
-          },
-          data: flowValues2,
-        },
-        {
-          name: "第三卫生间",
-          type: "bar",
-          stack: "Ad",
-          label: {
-            show: true,
-          },
-          emphasis: {
-            focus: "series",
-          },
-          textStyle: {
-            color: "white",
-          },
-          data: flowValues3,
-        },
-      ],
-    };
-
-    option && weeklyChart.setOption(option);
-  });
+  } catch (error) {
+      // 捕获 API 调用的错误
+      console.error("获取客流量数据失败:", error);
+      ElMessage.error("客流量数据加载失败！");
+  }
 };
+// const showWeeklyChart = () => {
+//   const chartContainer = weeklyChartRef.value;
+//   document.getElementById("weekly_chart").removeAttribute("_echarts_instance_");
+//   var chartDom = document.getElementById("weekly_chart");
+//   if (!chartDom) {
+//     console.error("ECharts 容器未找到，ID可能错误或DOM尚未渲染！");
+//     return;
+//   }
+//   weeklyChart = echarts.init(chartDom);
+
+//   var showPersonStart = moment().add(-6, "d").format("YYYY-MM-DD");
+//   var showPersonEnd = moment().add(1, "d").format("YYYY-MM-DD");
+//   axios({
+//     url:
+//       "/api/toilet/getSumByDuration/枣子巷/" +
+//       showPersonStart +
+//       "/" +
+//       showPersonEnd +
+//       "/threeType",
+//     headers: {
+//       Authorization: "Bearer" + params.token,
+//       "Content-Type": " application/json",
+//     },
+//     method: "get",
+//   }).then((dataTable) => {
+//     dataTable = dataTable.data.data;
+//     const filteredData1 = dataTable.filter(
+//       (item) => item.gender === "男卫生间"
+//     );
+//     const flowValues1 = filteredData1.map((item) => item.flowValue);
+//     const DateValues1 = filteredData1.map((item) => item.startDate);
+//     const filteredData2 = dataTable.filter(
+//       (item) => item.gender === "女卫生间"
+//     );
+//     const flowValues2 = filteredData2.map((item) => item.flowValue);
+
+//     const filteredData3 = dataTable.filter(
+//       (item) => item.gender === "第三卫生间"
+//     );
+//     const flowValues3 = filteredData3.map((item) => item.flowValue);
+
+//     // 处理成功响应
+//     var option;
+
+//     option = {
+//       title: {
+//         text: "最近一周每日客流量统计",
+//         textStyle: {
+//           color: "white",
+//         },
+//       },
+//       tooltip: {
+//         trigger: "axis",
+//         axisPointer: {
+//           type: "shadow",
+//         },
+//         formatter: function (params) {
+//           // 获取横坐标的内容
+//           let xAxisLabel = params[0].axisValue;
+
+//           // 获取数据项的数值
+//           let dataValue = params[0].value;
+//           let dataValue1 = params[1].value;
+//           let dataValue2 = params[2].value;
+
+//           // 构建 tooltip 内容并换行显示
+//           return (
+//             xAxisLabel +
+//             "<br>第三卫生间 " +
+//             dataValue2 +
+//             "人" +
+//             "<br>女卫生间 " +
+//             dataValue1 +
+//             "人" +
+//             "<br>男卫生间 " +
+//             dataValue +
+//             "人"
+//           );
+//         },
+//       },
+//       legend: {
+//         textStyle: {
+//           color: "white",
+//         },
+//       },
+//       grid: {
+//         left: "3%",
+//         right: "4%",
+//         bottom: "3%",
+//         containLabel: true,
+//         textStyle: {
+//           color: "white",
+//         },
+//       },
+//       xAxis: [
+//         {
+//           type: "category",
+//           data: DateValues1,
+//         },
+//       ],
+//       yAxis: [
+//         {
+//           type: "value",
+//           axisLabel: {
+//             formatter: "{value} 人",
+//           },
+//         },
+//       ],
+//       series: [
+//         {
+//           name: "男卫生间",
+//           type: "bar",
+//           stack: "Ad",
+//           label: {
+//             show: true,
+//           },
+//           emphasis: {
+//             focus: "series",
+//           },
+//           textStyle: {
+//             color: "white",
+//           },
+//           data: flowValues1,
+//         },
+//         {
+//           name: "女卫生间",
+//           type: "bar",
+//           stack: "Ad",
+//           label: {
+//             show: true,
+//           },
+//           emphasis: {
+//             focus: "series",
+//           },
+//           textStyle: {
+//             color: "white",
+//           },
+//           data: flowValues2,
+//         },
+//         {
+//           name: "第三卫生间",
+//           type: "bar",
+//           stack: "Ad",
+//           label: {
+//             show: true,
+//           },
+//           emphasis: {
+//             focus: "series",
+//           },
+//           textStyle: {
+//             color: "white",
+//           },
+//           data: flowValues3,
+//         },
+//       ],
+//     };
+
+//     option && weeklyChart.setOption(option);
+//   });
+// };
 const echartInit_ljz = () => {
   document
     .getElementById("container_ljz1")
@@ -9517,9 +9133,6 @@ const echartInit_syd = () => {
             value: syd_data.value[1].infoVal,
             name: "超期量",
           },
-          // { value: 580, name: 'Email' },
-          // { value: 484, name: 'Union Ads' },
-          // { value: 300, name: 'Video Ads' }
         ],
       },
     ],
@@ -9582,177 +9195,177 @@ const echartInit_syd = () => {
   };
   myChart_syd2.setOption(option_syd2);
 };
-// const echartInit_cclj = () => {
-//   document
-//     .getElementById("container_cclj")
-//     .removeAttribute("_echarts_instance_");
-//   var myChart_cclj = echarts.init(document.getElementById("container_cclj"));
-//   document
-//     .getElementById("container_cclj1")
-//     .removeAttribute("_echarts_instance_");
-//   var myChart_cclj1 = echarts.init(document.getElementById("container_cclj1"));
-//   var option = {
-//     title: {
-//       text: "收运点位统计",
-//       textStyle: {
-//         color: "#ccc",
-//       },
-//     },
-//     tooltip: {
-//       trigger: "axis",
-//       axisPointer: {
-//         type: "shadow",
-//       },
-//     },
-//     xAxis: {
-//       type: "category",
-//       axisLabel: {
-//         //x轴文字的配置
-//         show: true,
-//         interval: 0, //使x轴文字显示全
-//         rotate: 20,
-//       },
-//       data: [
-//         cclj_sites.value[0].street,
-//         cclj_sites.value[1].street,
-//         cclj_sites.value[2].street,
-//         cclj_sites.value[3].street,
-//         cclj_sites.value[4].street,
-//         cclj_sites.value[5].street,
-//         cclj_sites.value[6].street,
-//         cclj_sites.value[7].street,
-//         cclj_sites.value[8].street,
-//         cclj_sites.value[9].street,
-//         cclj_sites.value[10].street,
-//         cclj_sites.value[11].street,
-//         cclj_sites.value[12].street,
-//       ],
-//     },
-//     yAxis: {
-//       type: "value",
-//     },
-//     series: [
-//       {
-//         data: [
-//           cclj_sites.value[0].street_site_num,
-//           cclj_sites.value[1].street_site_num,
-//           cclj_sites.value[2].street_site_num,
-//           cclj_sites.value[3].street_site_num,
-//           cclj_sites.value[4].street_site_num,
-//           cclj_sites.value[5].street_site_num,
-//           cclj_sites.value[6].street_site_num,
-//           cclj_sites.value[7].street_site_num,
-//           cclj_sites.value[8].street_site_num,
-//           cclj_sites.value[9].street_site_num,
-//           cclj_sites.value[10].street_site_num,
-//           cclj_sites.value[11].street_site_num,
-//           cclj_sites.value[12].street_site_num,
-//         ],
-//         type: "bar",
-//         showBackground: true,
-//         backgroundStyle: {
-//           color: "rgba(180, 180, 180, 0.2)",
-//         },
-//       },
-//     ],
-//   };
-//   var option1 = {
-//     title: {
-//       text: "收运点位统计",
-//       left: "center",
-//       textStyle: {
-//         color: "white",
-//       },
-//     },
-//     tooltip: {
-//       trigger: "item",
-//     },
-//     legend: {
-//       orient: "vertical",
-//       left: "left",
-//       textStyle: {
-//         color: "#ccc",
-//       },
-//     },
-//     series: [
-//       {
-//         name: "街道点位统计",
-//         type: "pie",
-//         radius: "50%",
-//         data: [
-//           {
-//             value: cclj_sites.value[0].street_site_num,
-//             name: cclj_sites.value[0].street,
-//           },
-//           {
-//             value: cclj_sites.value[1].street_site_num,
-//             name: cclj_sites.value[1].street,
-//           },
-//           {
-//             value: cclj_sites.value[2].street_site_num,
-//             name: cclj_sites.value[2].street,
-//           },
-//           {
-//             value: cclj_sites.value[3].street_site_num,
-//             name: cclj_sites.value[3].street,
-//           },
-//           {
-//             value: cclj_sites.value[4].street_site_num,
-//             name: cclj_sites.value[4].street,
-//           },
-//           {
-//             value: cclj_sites.value[5].street_site_num,
-//             name: cclj_sites.value[5].street,
-//           },
-//           {
-//             value: cclj_sites.value[6].street_site_num,
-//             name: cclj_sites.value[6].street,
-//           },
-//           {
-//             value: cclj_sites.value[7].street_site_num,
-//             name: cclj_sites.value[7].street,
-//           },
-//           {
-//             value: cclj_sites.value[8].street_site_num,
-//             name: cclj_sites.value[8].street,
-//           },
-//           {
-//             value: cclj_sites.value[9].street_site_num,
-//             name: cclj_sites.value[9].street,
-//           },
-//           {
-//             value: cclj_sites.value[10].street_site_num,
-//             name: cclj_sites.value[10].street,
-//           },
-//           {
-//             value: cclj_sites.value[11].street_site_num,
-//             name: cclj_sites.value[11].street,
-//           },
-//           {
-//             value: cclj_sites.value[12].street_site_num,
-//             name: cclj_sites.value[12].street,
-//           },
-//         ],
-//         label: {
-//           show: true,
-//           formatter(param) {
-//             // correct the percentage
-//             return param.name + " (" + param.percent + "%)";
-//           },
-//         },
-//         emphasis: {
-//           itemStyle: {
-//             shadowBlur: 10,
-//             shadowOffsetX: 0,
-//             shadowColor: "rgba(0, 0, 0, 0.5)",
-//           },
-//         },
-//       },
-//     ],
-//   };
-//   myChart_cclj.setOption(option);
-//   myChart_cclj1.setOption(option1);
-// };
+const echartInit_cclj = () => {
+  document
+    .getElementById("container_cclj")
+    .removeAttribute("_echarts_instance_");
+  var myChart_cclj = echarts.init(document.getElementById("container_cclj"));
+  document
+    .getElementById("container_cclj1")
+    .removeAttribute("_echarts_instance_");
+  var myChart_cclj1 = echarts.init(document.getElementById("container_cclj1"));
+  var option = {
+    title: {
+      text: "收运点位统计",
+      textStyle: {
+        color: "#ccc",
+      },
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow",
+      },
+    },
+    xAxis: {
+      type: "category",
+      axisLabel: {
+        //x轴文字的配置
+        show: true,
+        interval: 0, //使x轴文字显示全
+        rotate: 20,
+      },
+      data: [
+        cclj_sites.value[0].street,
+        cclj_sites.value[1].street,
+        cclj_sites.value[2].street,
+        cclj_sites.value[3].street,
+        cclj_sites.value[4].street,
+        cclj_sites.value[5].street,
+        cclj_sites.value[6].street,
+        cclj_sites.value[7].street,
+        cclj_sites.value[8].street,
+        cclj_sites.value[9].street,
+        cclj_sites.value[10].street,
+        cclj_sites.value[11].street,
+        cclj_sites.value[12].street,
+      ],
+    },
+    yAxis: {
+      type: "value",
+    },
+    series: [
+      {
+        data: [
+          cclj_sites.value[0].street_site_num,
+          cclj_sites.value[1].street_site_num,
+          cclj_sites.value[2].street_site_num,
+          cclj_sites.value[3].street_site_num,
+          cclj_sites.value[4].street_site_num,
+          cclj_sites.value[5].street_site_num,
+          cclj_sites.value[6].street_site_num,
+          cclj_sites.value[7].street_site_num,
+          cclj_sites.value[8].street_site_num,
+          cclj_sites.value[9].street_site_num,
+          cclj_sites.value[10].street_site_num,
+          cclj_sites.value[11].street_site_num,
+          cclj_sites.value[12].street_site_num,
+        ],
+        type: "bar",
+        showBackground: true,
+        backgroundStyle: {
+          color: "rgba(180, 180, 180, 0.2)",
+        },
+      },
+    ],
+  };
+  var option1 = {
+    title: {
+      text: "收运点位统计",
+      left: "center",
+      textStyle: {
+        color: "white",
+      },
+    },
+    tooltip: {
+      trigger: "item",
+    },
+    legend: {
+      orient: "vertical",
+      left: "left",
+      textStyle: {
+        color: "#ccc",
+      },
+    },
+    series: [
+      {
+        name: "街道点位统计",
+        type: "pie",
+        radius: "50%",
+        data: [
+          {
+            value: cclj_sites.value[0].street_site_num,
+            name: cclj_sites.value[0].street,
+          },
+          {
+            value: cclj_sites.value[1].street_site_num,
+            name: cclj_sites.value[1].street,
+          },
+          {
+            value: cclj_sites.value[2].street_site_num,
+            name: cclj_sites.value[2].street,
+          },
+          {
+            value: cclj_sites.value[3].street_site_num,
+            name: cclj_sites.value[3].street,
+          },
+          {
+            value: cclj_sites.value[4].street_site_num,
+            name: cclj_sites.value[4].street,
+          },
+          {
+            value: cclj_sites.value[5].street_site_num,
+            name: cclj_sites.value[5].street,
+          },
+          {
+            value: cclj_sites.value[6].street_site_num,
+            name: cclj_sites.value[6].street,
+          },
+          {
+            value: cclj_sites.value[7].street_site_num,
+            name: cclj_sites.value[7].street,
+          },
+          {
+            value: cclj_sites.value[8].street_site_num,
+            name: cclj_sites.value[8].street,
+          },
+          {
+            value: cclj_sites.value[9].street_site_num,
+            name: cclj_sites.value[9].street,
+          },
+          {
+            value: cclj_sites.value[10].street_site_num,
+            name: cclj_sites.value[10].street,
+          },
+          {
+            value: cclj_sites.value[11].street_site_num,
+            name: cclj_sites.value[11].street,
+          },
+          {
+            value: cclj_sites.value[12].street_site_num,
+            name: cclj_sites.value[12].street,
+          },
+        ],
+        label: {
+          show: true,
+          formatter(param) {
+            // correct the percentage
+            return param.name + " (" + param.percent + "%)";
+          },
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)",
+          },
+        },
+      },
+    ],
+  };
+  myChart_cclj.setOption(option);
+  myChart_cclj1.setOption(option1);
+};
 
 const echartInit_jgzm = () => {
   document
@@ -9892,7 +9505,6 @@ function toSystemHjws(item) {
   }
   if (permission.value == true) {
     var realURL = item.url + "?phone=" + params.username + "&realName=" + params.realname;
-    console.log("realURL:  " + realURL);
     window.open(realURL);
     uploadClickLog(item.systemName);
   } else {
@@ -9900,6 +9512,7 @@ function toSystemHjws(item) {
   }
   // permission.value = false;
 }
+
 const echartInit = () => {
   document.getElementById("container").removeAttribute("_echarts_instance_");
   document.getElementById("container1").removeAttribute("_echarts_instance_");
@@ -9931,7 +9544,6 @@ const echartInit = () => {
 
   // 指定图表的配置项和数据
   getTrend().then((data) => {
-    console.log(data);
     var option = {
       title: {
         text: "事件趋势分析",
@@ -10185,7 +9797,6 @@ const echartInit = () => {
     myChart4.setOption(option4);
   });
   getResourceSzcg().then((data) => {
-    console.log(data.length);
     if (data.length == 0) {
       var default_data = { value: 0, wtly: "城管平台" };
       data.push(default_data);
@@ -10685,8 +10296,6 @@ const DateTomorrow =
   "-" +
   new Date(time + 1 * 24 * 60 * 60 * 1000).getDate();
 const tomorrow = moment().add(+1, "d").format("YYYY-MM-DD");
-console.log("today:" + today + "  " + "tomorrow:" + tomorrow);
-console.log("DateToday:" + DateToday + "  " + "DateTomorrow:" + DateTomorrow);
 const token = ref("");
 const gxdc = reactive({ url: "" });
 const syd = reactive({ url: "" });
@@ -10726,7 +10335,6 @@ onBeforeMount(() => {
   //         "Content-Type": "application/json",
   //       },
   // }).then(function (resp) {
-  //     console.log("ddzh2",resp)
   //     var ddzh_token = resp.data.token;
   //     axios({
   //       url: "/diao/patrol-status/status/rate_period",
@@ -10742,7 +10350,6 @@ onBeforeMount(() => {
   //       },
   //     }).then(function (resp) {
   //       ddzh_tableData1.value = resp.data.data;
-  //       console.log("打卡率",resp);
   //       echartInit_ddzh();
   //     });
 
@@ -10815,7 +10422,6 @@ function toSystem(item) {
     }
   }
   //每个子系统登录方式不一样
-  console.log(item.systemId);
   if (permission.value == true) {
     if (
       item.systemId != "13" &&
@@ -10824,7 +10430,6 @@ function toSystem(item) {
       item.systemId != "4" &&
       item.systemId != "12"
     ) {
-      console.log(item.systemName);
       if (item.url === "") {
         ElMessage({
           showClose: true,
@@ -10833,11 +10438,9 @@ function toSystem(item) {
       } else if (item.systemId == "15") {
         //item.url = item.url + "?iphone=" + params.username;
         item.url = "http://171.221.172.74:6888/eUrbanMIS/main.htm" + "?iphone=" + params.username;
-        console.log("url:" + item.url);
         window.open(item.url);
       } else if (item.systemId == "19") {
         item.url = item.url + "?iphone=" + params.username;
-        console.log("url:" + item.url);
         window.open(item.url);
       } else if (
         item.systemId == "18" ||
@@ -10846,12 +10449,10 @@ function toSystem(item) {
       ) {
         // 这三个系统目前url无登录参数
         item.url = item.url + "?phone=" + params.username;
-        console.log("url:" + item.url);
         window.open(item.url);
       } else window.open(item.url + "&phone=" + params.username);
     }
 
-    console.log(item.systemName);
 
     if (item.systemId == "13") {
       //共享单车
@@ -10870,21 +10471,17 @@ function toSystem(item) {
         var sydUrl = "https://119.4.191.13:9580/#/login?token=";
         sydUrl = sydUrl + token.value + "&phone=" + params.username;
         syd.url = sydUrl;
-        console.log(syd.url);
         window.open(syd.url);
       });
     }
     if (item.systemId == "17" || item.systemId == "4") {
       getAiUrl().then((data) => {
         aiUrl.value = data.message + "&phone=" + params.username;
-        console.log("22222", aiUrl.value);
-        console.log("11111111", data, aiUrl);
         window.open(aiUrl.value);
       });
     }
     if (item.systemId == "12") {
       var ddzh_url = "https://119.4.191.13:8881/login/?token=" + params.token;
-      console.log("ddzh_url:  " + ddzh_url);
       window.open(ddzh_url);
     } //调度指挥
     uploadClickLog(item.systemName);
@@ -10901,14 +10498,11 @@ const depts = ref([]);
 onBeforeMount(() => {
   // getHwzyToken().then((data) => {
   //   hwzyToken.value = data;
-  //   console.log(418,hwzyToken.value)
   // });
   getDeptList().then((response) => {
     depts.value = response;
   });
   getCategory().then((data) => {
-    console.log("ggzp", data);
-    console.log("xxx", data[0]);
     retailCount.value = data[0];
     cateringCount.value = data[3];
     serviceCount.value = data[1];
@@ -10935,11 +10529,9 @@ onMounted(() => {
       if (system.api !== "") {
         if (system.systemId == "5" || system.systemId == "7") {
           //环卫作业和垃圾全生命周期的接口要传递token，这个token在登录城市管家的时候就获取并缓存
-          console.log(4182, params.hwzyToken);
           get(system.api + "?token=" + params.hwzyToken).then(
             (data) => (system.data = data)
           );
-          // console.log(ljz_table1)
         } else {
           get(system.api).then((data) => (system.data = data));
         }
@@ -10976,7 +10568,6 @@ const choosedSystems = computed(() => {
 
   return systems.value.filter(filterFun);
   // .filter(system => {
-  //   console.log(system)
   //   // 只显示有数据的子系统
   //   return system.data && system.data.length != 0
   // })
@@ -11083,16 +10674,13 @@ const szhcsImageUrl = ref(""); //
 const hovered = ref(false);
 const showText = () => {
   hovered.value = true;
-  console.log(hovered.value);
 };
 
 const hideText = () => {
   hovered.value = false;
-  console.log(hovered.value);
 };
 // const handleUploadSuccess = async (response, uploadFile) => {
 //   latestImageUrl.value = URL.createObjectURL(uploadFile.raw); // 更新最新头像 URL
-//   console.log("现在的图片" + latestImageUrl.value);
 //   // latestImageUrl.value = response.data.url;
 // };
 
@@ -11100,114 +10688,105 @@ const createBeforeUpload = (systemName) => (rawFile) =>
   beforeUpload(rawFile, systemName);
 
 const beforeUpload = async (rawFile, systemName) => {
-  const type = ["image/jpeg", "image/jpg", "image/png", "image/svg"];
-  const isJPG = type.includes(rawFile.type);
-  const isLt20M = rawFile.size / 1024 / 1024 < 20;
-  if (!isJPG) {
+  // --- 映射对象：将系统名称字符串映射到对应的图片 URL 响应式引用 ---
+  // 注意：您必须确保在外部作用域定义了这些响应式引用（例如：const hwzyImageUrl = ref('')）
+  const imageRefMap = {
+    "banner": latestImageUrl,
+    "mainBg": backgroundImageUrl,
+    "hwzy": hwzyImageUrl,
+    "cclj": ccljImageUrl,
+    "shlj": shljImageUrl,
+    "ljfl": ljflImageUrl,
+    "cyyy": cyyyImageUrl,
+    "ddzh": ddzhImageUrl,
+    "gxdc": gxdcImageUrl,
+    "yczl": yczlImageUrl,
+    "jgzm": jgzmImageUrl,
+    "new_jgzm": newJgzmImageUrl,
+    "ljdp": ljdpImageUrl,
+    "bottom_banner": bottomBannerImageUrl,
+    "tcwt": tcwtImageUrl,
+    "cgAI": cgAIImageUrl,
+    "cgsyd": cgsydImageUrl,
+    "szhcs": szhcsImageUrl,
+  };
+  // 校验允许的 MIME 类型
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg"];
+  // 校验文件大小 (5MB)
+  const maxFileSizeMB = 5;
+  const fileSizeMB = rawFile.size / 1024 / 1024;
+  if (!allowedTypes.includes(rawFile.type)) {
     ElMessage.error("图片仅支持jpeg,jpg,png,svg格式！");
     return false;
-  } else if (rawFile.size / 1024 / 1024 > 5) {
-    ElMessage.error("图片不能超过5MB!");
-    return false;
-  } else {
-    const formData = new FormData();
-    formData.append("file", rawFile); // 添加文件
-    formData.append("systemName", systemName);
-    // 使用 Axios 发送自定义上传请求
-    await axios
-      .post(uploadUrl, formData, {
-        headers: {
-          Authorization: "Bearer " + params.token, // 添加 token
-        },
-      })
-      .then((response) => {
-        console.log("上传成功", response);
-        // 在这里处理上传成功的逻辑，如更新页面等
-
-        // 更新最新头像 URL
-        if (systemName == "banner") {
-          latestImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "mainBg") {
-          backgroundImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "hwzy") {
-          hwzyImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "cclj") {
-          ccljImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "shlj") {
-          shljImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "ljfl") {
-          ljflImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "cyyy") {
-          cyyyImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "ddzh") {
-          ddzhImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "gxdc") {
-          gxdcImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "yczl") {
-          yczlImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "jgzm") {
-          jgzmImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "new_jgzm") {
-          newJgzmImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "ljdp") {
-          ljdpImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "bottom_banner") {
-          bottomBannerImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "tcwt") {
-          tcwtImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "cgAI") {
-          cgAIImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "cgsyd") {
-          cgsydImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "szhcs") {
-          szhcsImageUrl.value = "/homePicture/" + response.data.url;
-        }
-
-        //  latestImageUrl.value = require("@/assets/home/" + response.data.url);
-      })
-      .catch((error) => {
-        console.error("上传失败", error);
-        // 在这里处理上传失败的逻辑
-      });
+  } 
+  if (fileSizeMB > maxFileSizeMB) {
+    ElMessage.error(`图片不能超过${maxFileSizeMB}MB!`);
     return false;
   }
+  // --- 校验通过，执行自定义上传 ---
+  const formData = new FormData();
+  formData.append("file", rawFile); 
+  formData.append("systemName", systemName);
+  // 1. 获取目标响应式引用
+  const targetImageRef = imageRefMap[systemName];
+  if (!targetImageRef) {
+      console.warn(`SystemName: ${systemName} 未知，无法更新图片状态。`);
+      return false; 
+  }
+  await axios
+    .post(uploadUrl, formData, {
+      headers: {
+        Authorization: "Bearer " + params.token, // 添加 token
+      },
+    })
+    .then((response) => {
+      targetImageRef.value = "/homePicture/" + response.data.url;
+    })
+    .catch((error) => {
+      console.error("上传失败", error);
+      ElMessage.error("图片上传失败，请检查网络或联系管理员！");
+    });
+  return false;
 };
 
 // 获取最新头像的 URL
-const getLatestAvatar = async (systemName, latestImageUrl) => {
+const getLatestAvatar = async (systemName, targetRef) => {
   try {
     const response = await axios.get("/api/avatar-other/get-avatar-other", {
       params: {
         systemName: systemName,
       },
       headers: {
-        Authorization: "Bearer " + params.token, // 添加 token
+        Authorization: "Bearer " + params.token,
       },
     });
-    // latestImageUrl.value = require("@/assets/home/" + response.data);
-    latestImageUrl.value = "/homePicture/" + response.data;
-    // console.log("之前的图片" + latestImageUrl.value);
+    if (response.data && response.data !== "bg_box.jpg") {
+      targetRef.value = "/homePicture/" + response.data;
+    } else {
+      console.warn(`系统 ${systemName} 返回了默认或空图片名: ${response.data}`);
+      targetRef.value = null; 
+    }
   } catch (error) {
-    console.error("Error fetching latest avatar:", error);
+    console.error(`Error fetching latest avatar for ${systemName}:`, error);
+    targetRef.value = null; 
   }
 };
+
+// const getLatestAvatar = async (systemName, latestImageUrl) => {
+//   try {
+//     const response = await axios.get("/api/avatar-other/get-avatar-other", {
+//       params: {
+//         systemName: systemName,
+//       },
+//       headers: {
+//         Authorization: "Bearer " + params.token, // 添加 token
+//       },
+//     });
+//     latestImageUrl.value = "/homePicture/" + response.data;
+//   } catch (error) {
+//     console.error("Error fetching latest avatar:", error);
+//   }
+// };
 // 在组件加载后获取最新头像的 URL
 
 getLatestAvatar("banner", latestImageUrl);
@@ -11332,15 +10911,15 @@ getLatestAvatar("szhcs", szhcsImageUrl);
 }
 
 .text-week {
-  margin-left: -10vw;
+  margin-left: -35vw;
   font-size: large;
   color: #fff;
   line-height: 60px;
-  width: 100%;
+  flex-shrink: 0;
 }
 
 .text-title {
-  margin-left: 20px;
+  margin-left: -5px;
   font-size: large;
   color: #fff;
   line-height: 60px;
@@ -11348,6 +10927,11 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   padding: 5px;
 }
 
+.alarm-indicator {
+    margin-left: -260px;
+    display: flex; 
+    align-items: flex-start;
+}
 .text-logo {
   margin-left: 20px;
   font-size: large;
@@ -11419,7 +11003,6 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   flex-wrap: wrap;
   /*当屏幕尺寸变小时，各个子系统汇总模块自动换行*/
   justify-content: center;
-  /*background: url("/public/images/bg-box7.jpg") -30% center; */
 }
 
 .logo-title {

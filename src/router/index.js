@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 //1.定义路由组件
 import Login from '@/views/Login.vue'
 import Home from '@/views/home/Home.vue'
+// import Home from '@/views/home/HomeView.vue'
 import Gxdc from "@/views/gxdc/Gxdc.vue"
 import Jgzm from "@/views/jgzm/Jgzm.vue"
 import Syd from "@/views/syd/Syd.vue"
