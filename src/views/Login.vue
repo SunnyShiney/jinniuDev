@@ -4,168 +4,214 @@
       <div class="login-header-title">成都市金牛区综合行政执法局</div>
     </div>
     <div class="login-box">
-      <img class="login-box-logo" alt="" src="@/assets/login/login-logo.png" />
+      <img class="login-box-logo" alt="城市管家" src="@/assets/login/login-logo.png" />
       <div class="login-box-title">城市管家</div>
-      <input
-        v-model="params.username"
-        class="username-input"
-        type="text"
-        placeholder="请输入用户名"
-      />
-      <input
-        v-model="params.password"
-        class="password-input"
-        type="password"
-        placeholder="请输入密码"
-      />
-      <input
-        class="remember-password"
-        type="checkbox"
-        @change="changeRememberUser"
-      />
-      <div class="remember-password-text">记住密码</div>
-      <!-- <a href="#/forget-password" class="forget-password-text" >忘记密码？</a> -->
-      <el-button
-            class="forget-password-text"
+      
+      <el-form
+        ref="loginFormRef"
+        :model="loginForm"
+        :rules="rules"
+        class="login-form"
+        @keyup.enter="login(loginFormRef)"
+      >
+        <el-form-item prop="username" class="form-item-username">
+          <el-input 
+            v-model="loginForm.username" 
+            placeholder="请输入用户名" 
+            size="large"
+            clearable
+            class="username-input-el"
+          />
+        </el-form-item>
+        
+        <el-form-item prop="password" class="form-item-password">
+          <el-input 
+            v-model="loginForm.password" 
+            type="password" 
+            placeholder="请输入密码" 
+            size="large"
+            show-password
+            class="password-input-el"
+          />
+        </el-form-item>
+        
+        <el-form-item prop="captchaCode" class="form-item-captcha">
+          <el-input 
+            v-model="loginForm.captchaCode" 
+            placeholder="请输入验证码" 
+            class="captcha-input-el"
+            size="large"
+            @keyup.enter="login(loginFormRef)"
+          />
+          <CaptchaComponent ref="captchaRef" class="captcha-component"/>
+        </el-form-item>
+
+        <div class="form-bottom-actions">
+          <div class="remember-password-group">
+            <input
+              class="remember-password-checkbox"
+              type="checkbox"
+              v-model="rememberUser"
+            />
+            <span class="remember-password-text-label">记住密码</span>
+          </div>
+          <el-button
+            class="forget-password-btn"
             plain
             link
             color="#ffffff"
             @click="forgetPassword"
+          >忘记密码？</el-button>
+        </div>
+
+        <el-form-item class="form-item-login-btn">
+          <el-button 
+            class="login-btn" 
+            type="primary" 
+            color="#0B9ED9" 
+            @click="login(loginFormRef)"
             size="large"
-            >忘记密码？</el-button
           >
-      <el-button class="login-btn" type="primary" color="#0B9ED9" @click="login"
-        >登录</el-button
-      >
+            登录
+          </el-button>
+        </el-form-item>
+        
+      </el-form>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ElButton } from "element-plus";
+import { ElMessage, ElForm, ElInput } from "element-plus";
 import router from "@/router";
-import { ref, onMounted, reactive, h } from "vue";
-import { ElMessage, ElDialog, tabBarProps } from "element-plus";
+import { ref, onMounted, reactive } from "vue";
 import { params } from "@/store/store.js";
-import { getLogin, uploadClickLog } from "@/api/home.js";
-
-// import { useCookies } from '@vueuse/integrations/useCookies'
-import { setToken ,setHwzyToken} from "@/composables/auth";
+import { getLogin, uploadClickLog } from "@/api/home.js"; 
+import { setToken, setHwzyToken } from "@/composables/auth";
 import { useStore } from "vuex";
+import { Base64 } from "js-base64";
+// 导入前端验证码组件
+import CaptchaComponent from './CaptchaComponent.vue'; 
 
 const store = useStore();
+const loginFormRef = ref(null); 
+const captchaRef = ref(null); // 验证码组件实例 Ref
+const rememberUser = ref(false); 
 
-const Base64 = require("js-base64").Base64;
-// const params = reactive({
-//   username: "",
-//   password: "123"
-// })
-
-
-onMounted(() => {
-  // 获取整个哈希部分（包括 #）
-  const hash = window.location.hash;
-
-  // 如果哈希部分包含参数，则可以从中提取参数
-  if (hash.includes("?")) {
-    const paramsString = hash.split("?")[1]; // 获取问号后面的部分
-    const urlParams = new URLSearchParams(paramsString);
-    console.log("urlParams:" + urlParams);
-    // 获取参数值
-
-    const username = urlParams.get("username");
-    console.log("获取到的username!!=" + username);
-    const password = urlParams.get("password");
-    if (username && password) {
-      params.username = Base64.decode(username);
-      params.password = Base64.decode(password);
-      login();
-    }
-  } else {
-    if (localStorage.getItem("username"))
-      params.username = localStorage.getItem("username");
-    if (localStorage.getItem("password"))
-      params.password = localStorage.getItem("password");
-  }
+// 登录表单数据模型
+const loginForm = reactive({
+    username: params.username || "",
+    password: params.password || "",
+    captchaCode: "", // 验证码输入
 });
 
-const rememberUser = ref(false);
-const changeRememberUser = () => {
-  rememberUser.value = !rememberUser.value;
-  console.log(rememberUser.value);
-};
-const login = () => {
+// 表单验证规则
+const rules = reactive({
+    username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+    password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+    captchaCode: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+});
 
-
-  var user = {
-    name: params.username,
-    password: params.password,
-  };
-  getLogin(user).then((data) => {
-    if (data.error_message == "success") {
-      console.log("检验密码：" + data.isValidPassword);
-      if (data.isValidPassword == "false") {
-        
-        ElMessage({
-          message: h("p", null, [
-            h("span", null, "您的密码为初始密码，为保证登录安全请重设密码！"),
-          ]),
-          type: "error",
-        });
-        params.token = data.token;
-         setToken(data.token);
-
-        
-       router.push("/changepsw");
-        localStorage.setItem("username", params.username);
-      } else {
-        if (rememberUser.value == true) {
-          localStorage.setItem("username", params.username);
-          localStorage.setItem("password", params.password);
+// --- 初始化和记住密码逻辑 ---
+onMounted(() => {
+    // URL 参数提取逻辑
+    const hash = window.location.hash;
+    if (hash.includes("?")) {
+        const paramsString = hash.split("?")[1];
+        const urlParams = new URLSearchParams(paramsString);
+        const username = urlParams.get("username");
+        const password = urlParams.get("password");
+        if (username && password) {
+            loginForm.username = Base64.decode(username);
+            loginForm.password = Base64.decode(password);
+            login(loginFormRef.value); 
         }
-        params.isLogin = true;
-        params.token = data.token;
-        params.roleId = data.role_id;
-        params.hwzyToken = data.hwzyToken;
-        console.log(11111,params.hwzyToken )
-
-        // getHwzyToken().then((data) => {
-        // params.hwzyToken = data.access_token;
-        // console.log(418,params.hwzyToken)
-  // });
-
-        //将token存储到cookie里面
-        // const cookie = useCookies();
-        // cookie.set("token",data.token);
-        setToken(data.token);
-        setHwzyToken(data.hwzyToken);
-
-
-        if (data.role_id.includes("83")) {
-          params.role = "管理员";
-        } else {
-          params.role = "";
-        }
-        //console.log(data.role_id)
-        router.push({ name: "map" });
-        localStorage.setItem("username", params.username);
-      }
-      uploadClickLog("城市管家");
     } else {
-      ElMessage({
-        message: h("p", null, [h("span", null, data.error_message)]),
-        type: "error",
-      });
+        // 记住密码逻辑
+        if (localStorage.getItem("username")) {
+            loginForm.username = localStorage.getItem("username");
+            rememberUser.value = true;
+        }
+        if (localStorage.getItem("password")) {
+            loginForm.password = localStorage.getItem("password");
+        }
     }
-  });
+});
+
+// --- 核心登录逻辑 ---
+const login = (formEl) => {
+    if (!formEl) return;
+
+    formEl.validate(async (valid) => {
+        if (!valid) {
+            ElMessage.warning("请完整填写登录信息！");
+            return;
+        }
+        if (!captchaRef.value || !captchaRef.value.validate(loginForm.captchaCode)) {
+             ElMessage.error("验证码输入错误或已过期，请点击图片刷新！");
+             captchaRef.value.refreshCaptcha(); // 验证失败，刷新验证码
+             loginForm.captchaCode = ""; // 清空输入
+             return; 
+        }
+        var user = {
+            username: loginForm.username,
+            password: loginForm.password,
+        };
+
+        try {
+            const data = await getLogin(user);
+            if (data.error_message === "success") {
+                if (rememberUser.value) {
+                    localStorage.setItem("username", loginForm.username);
+                    localStorage.setItem("password", loginForm.password);
+                } else {
+                    localStorage.removeItem("username");
+                    localStorage.removeItem("password");
+                }
+                // 4. 初始密码强制重设/正常登录逻辑
+                if (data.isValidPassword === "false") {
+                    ElMessage.error({ message: "您的密码为初始密码，为保证登录安全请重设密码！" });
+                    params.token = data.token;
+                    setToken(data.token);
+                    router.push("/changepsw");
+                } else {
+                    // 正常登录成功
+                    params.isLogin = true;
+                    params.token = data.token;
+                    params.roleId = data.role_id;
+                    params.hwzyToken = data.hwzyToken;
+                    setToken(data.token);
+                    setHwzyToken(data.hwzyToken);
+
+                    params.role = data.role_id.includes("83") ? "管理员" : "";
+                    
+                    router.push({ name: "map" });
+                }
+                
+                uploadClickLog("城市管家"); // 登录成功后记录日志
+            } else {
+                // 登录失败
+                ElMessage.error(data.error_message || "登录失败，请检查您的凭证！");
+                captchaRef.value.refreshCaptcha(); // 登录失败刷新验证码
+            }
+        } catch (error) {
+            console.error("登录请求失败:", error);
+            ElMessage.error("登录请求发生错误，请稍后重试。");
+            captchaRef.value.refreshCaptcha(); // 失败后刷新验证码
+        }
+    });
 };
 
 const forgetPassword = () => {
-  router.push("/forget-password");
+    router.push("/forget-password");
 };
 </script>
 
 <style scoped>
+/* ========================================================================= */
+/* 样式部分：适配 EL-FORM 和验证码组件 */
+/* ========================================================================= */
+
 .login-container {
   width: 100vw;
   height: 100vh;
@@ -228,103 +274,139 @@ const forgetPassword = () => {
   margin-right: 0.4vw;
 }
 
-.username-input {
-  width: 18.7vw;
-  height: 1.8vh;
-  position: absolute;
-  top: 20.4vh;
-  left: 7.1vw;
-  background: rgba(62, 181, 228, 0.25);
-  border: 1px solid #22aee6;
-  outline: none;
-  color: #ffffff;
-  font-size: 1rem;
-  background-image: url("@/assets/login/username.png");
-  background-repeat: no-repeat;
-  background-position: left 0.8vw top 1.3vh;
-  padding-left: 2.1vw;
-  padding-top: 1.3vh;
-  padding-bottom: 1.3vh;
+/* 核心调整：EL-FORM 定位 */
+.login-form {
+    position: absolute; 
+    top: 20.4vh; 
+    left: 7.1vw;
+    width: 20.8vw; 
 }
 
-.username-input::-webkit-input-placeholder {
-  color: #ffffff;
-  font-size: 1rem;
+.login-form :deep(.el-form-item) {
+    margin-bottom: 0 !important; 
 }
 
-.password-input {
-  width: 18.7vw;
-  height: 1.8vh;
-  position: absolute;
-  top: 27vh;
-  left: 7.1vw;
-  background: rgba(62, 181, 228, 0.25);
-  border: 1px solid #22aee6;
-  outline: none;
-  color: #ffffff;
-  font-size: 1rem;
-
-  background-image: url("@/assets/login/password.png");
-  background-repeat: no-repeat;
-  background-position: left 0.8vw top 1.3vh;
-  padding-left: 2.1vw;
-  padding-top: 1.3vh;
-  padding-bottom: 1.3vh;
+/* --- 1. 用户名输入框定位 --- */
+.form-item-username {
+    position: absolute; 
+    top: 0; 
+    width: 100%;
+}
+.username-input-el :deep(.el-input__wrapper) {
+    background: rgba(62, 181, 228, 0.25) !important;
+    border: 1px solid #22aee6;
+    box-shadow: none; 
+    height: 4.4vh; 
+}
+.username-input-el :deep(.el-input__inner) {
+    color: #ffffff;
+    font-size: 1rem;
+    background-image: url("@/assets/login/username.png");
+    background-repeat: no-repeat;
+    background-position: left 0.8vw center;
+    padding-left: 2.1vw;
 }
 
-.password-input::-webkit-input-placeholder {
-  color: #ffffff;
-  font-size: 1rem;
+
+/* --- 2. 密码输入框定位 --- */
+.form-item-password {
+    position: absolute; 
+    top: 6.6vh; 
+    width: 100%;
+}
+.password-input-el :deep(.el-input__wrapper) {
+    background: rgba(62, 181, 228, 0.25) !important;
+    border: 1px solid #22aee6;
+    box-shadow: none;
+    height: 4.4vh;
+}
+.password-input-el :deep(.el-input__inner) {
+    color: #ffffff;
+    font-size: 1rem;
+    background-image: url("@/assets/login/password.png");
+    background-repeat: no-repeat;
+    background-position: left 0.8vw center;
+    padding-left: 2.1vw;
 }
 
-input[type="checkbox"] {
-  width: 0.7vw;
-  height: 1.3vh;
-  position: absolute;
-  top: 32.9vh;
-  left: 7.1vw;
-  background: rgba(62, 181, 228, 0.25) !important;
-  border: 1px solid #22aee6 !important;
+/* --- 3. 验证码输入框定位 --- */
+.form-item-captcha {
+    position: absolute; 
+    top: 13.2vh; 
+    width: 100%;
+    
+    display: flex; 
+    align-items: center;
+    justify-content: space-between;
 }
 
-input[type="checkbox"]::after {
-  width: 0.7vw;
-  height: 1.3vh;
-  position: absolute;
-  top: 32.9vh;
-  left: 7.1vw;
-  background: rgba(62, 181, 228, 0.25) !important;
-  border: 1px solid #22aee6;
+.captcha-input-el {
+    width: 63% !important; 
 }
 
-.remember-password-text {
-  width: 5vw;
-  height: 1.9vh;
-  position: absolute;
-  top: 32.6vh;
-  left: 8.2vw;
-  color: #ffffff;
-  font-size: 0.875rem;
-  font-family: PingFangSC-Regular;
+.captcha-input-el :deep(.el-input__wrapper) {
+    background: rgba(62, 181, 228, 0.25) !important;
+    border: 1px solid #22aee6;
+    box-shadow: none;
+    height: 4.4vh;
+}
+.captcha-input-el :deep(.el-input__inner) {
+    color: #ffffff; 
+    font-size: 1rem;
+    padding-left: 10px; 
 }
 
-.forget-password-text {
-  width: 5vw;
-  height: 1.9vh;
-  position: absolute;
-  top: 32.6vh;
-  left: 16.4vw;
-  color: #ffffff;
-  font-size: 0.875rem;
-  font-family: PingFangSC-Regular;
+.captcha-component {
+    width: 35%; 
+    height: 4.4vh; 
+}
+
+/* --- 4. 底部操作区域样式 --- */
+.form-bottom-actions {
+    position: absolute;
+    top: 19vh; 
+    width: 100%;
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.remember-password-group {
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+    font-size: 0.875rem;
+}
+
+.remember-password-text-label {
+    margin-left: 5px;
+}
+
+.remember-password-checkbox {
+    width: 0.7vw;
+    height: 1.3vh;
+}
+
+.forget-password-btn {
+    font-size: 0.875rem;
+}
+
+/* --- 5. 登录按钮样式 --- */
+.form-item-login-btn {
+    position: absolute; 
+    top: 23vh; 
+    width: 100%;
 }
 
 .login-btn {
-  width: 20.8vw;
-  height: 4.4vh;
-  position: absolute;
-  top: 36.7vh;
-  left: 7.1vw;
-  font-size: 0.875rem;
+    width: 100%; 
+    height: 4.4vh;
+    font-size: 0.875rem;
+}
+
+/* 清除 Element Plus 校验图标的颜色 */
+.login-form :deep(.el-input__suffix-inner) {
+    color: #fff;
 }
 </style>

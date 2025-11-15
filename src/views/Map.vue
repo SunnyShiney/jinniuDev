@@ -359,7 +359,7 @@
       v-model:strokeColor="polygonFuqin.strokeColor"
       :strokeStyle="polygonFuqin.strokeStyle"
     />
-
+    <!-- 区划图 -->
     <el-amap-polygon
       :visible="polygonVisible"
       :path="polygonFuqin.path"
@@ -2652,7 +2652,6 @@ const getwarningPersonList = (pageNum) => {
     },
   }).then(async (resp) => {
     var data = resp.data;
-    console.log("人员列表:" + data);
 
     for (var key in data) {
       if (data[key].telephone == "13880769883") {
@@ -2738,7 +2737,6 @@ const getwarningPersonList = (pageNum) => {
         };
       }
 
-      console.log("这里：" + resetPassword);
       warningPersonList.push(resetPassword);
     }
   });
@@ -2750,27 +2748,17 @@ let warningCurrentPage = ref(1);
 let warningPageCount = 0;
 
 let warningStart = moment("2023-03-01").format("YYYY-MM-DD");
-console.log(4211,warningStart)
 let warningEnd = moment().format("YYYY-MM-DD");
-console.log(4212,warningEnd)
-// const tomorrow = moment()
-//   .add(+1, "d")
-//   .format("YYYY-MM-DD");
-// const today = moment().format("YYYY-MM-DD");
 let changeValue = ref(["", ""]);
 // 禁选今天以后的日期以及没有数据的
 const disabledDate = (time) => {
   return (
-    // time.getTime() < new Date("2022-8-31").getTime() ||
     time.getTime() > new Date().getTime()
   );
 };
 function changeDate() {
   warningStart = moment(changeValue.value[0]).format("YYYY-MM-DD");
   warningEnd = moment(changeValue.value[1]).format("YYYY-MM-DD");
-  console.log(14211,warningStart)
-  console.log(14212,warningEnd)
-  // warningEnd =  new Date();
   queryAllWarning(warningStart, warningEnd, 1);
 }
 
@@ -2828,13 +2816,6 @@ const warningSubmitForm = async () => {
         }),
         method: "post",
       }).then(function (resp) {
-        console.log(2, resp);
-        console.log(
-          "发送给了电话为：" +
-            selectedValue.phone +
-            "，指令内容为：" +
-            warningRuleForm.content
-        );
       });
 
       axios({
@@ -2857,7 +2838,6 @@ const warningSubmitForm = async () => {
       }).then(function (resp) {
         systemData.out.println("event_uuid:" + event_uuid);
       });
-      console.log("submit!");
       alert("提交成功！");
       warningHandleEvent.value = false;
       // defaultList.pop(rowIndex);
@@ -2877,7 +2857,6 @@ const warningSubmitForm = async () => {
 const warningHandleClick = (index, row) => {
   event_uuid.value = row.event_id;
   rowIndex.value = index;
-  console.log("event_uuid:" + event_uuid.value);
   warningHandleEvent.value = true;
   warningRuleForm.phone = "";
   warningRuleForm.name = "";
@@ -2886,29 +2865,12 @@ const warningHandleClick = (index, row) => {
 };
 const fault_details = () => {
   var div = document.getElementById("dotClass");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
-    //     if (params.username="13752148440") {
-    //     document.getElementById('handleButton').style.display="block";
-
-    // }
     defaultVisible.value = true;
-    //   if (params.username="13752148440") {
-    //   document.getElementById('handleButton').style.display="block";
-
-    // }
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
-
     defaultVisible.value = true;
-    //   if (params.username="13752148440") {
-    //   document.getElementById('handleButton').style.display="block";
-
-    // }
-    console.log(defaultVisible.value);
   }
 };
 const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
@@ -2923,10 +2885,8 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
       endTime: warningEndTime,
     },
   }).then(function (resp) {
-    // console.log(222,"Bearer"+params.warningToken);
     var data = resp.data.data;
     EventHistoryList.splice(0, EventHistoryList.length);
-    console.log(111, resp.data.data);
     for (var key in data) {
       var default_site = {
         event_source: data[key].eventSource,
@@ -2966,9 +2926,7 @@ const changeColor = () => {
     },
   }).then(function (resp) {
     defaultList.splice(0, defaultList.length);
-    console.log(resp);
     var data = resp.data.data;
-    console.log("resp.code：" + data);
     for (var key in data) {
       var default_site = {
         event_time: data[key].eventTime,
@@ -2985,12 +2943,10 @@ const changeColor = () => {
     // };
     // defaultList.push(default_site);
 
-    // console.log(3, defaultList.length);
 
     // if (defaultList.length == 5) {
     //   cause.value = "数据采集服务器断开！";
     // }
-    console.log("data.length:" + defaultList.length);
     // 出现事故
     if (defaultList.length != 0) {
       document.getElementById("dotClass").title = "出现异常！请点击查看详情！";
@@ -3006,27 +2962,26 @@ changeColor();
 setInterval(changeColor, 60000);
 
 // =========================================================
+//切换地图显示
 function changeArea() {
   polygonVisible.value = !polygonVisible.value;
   jinniuVisible.value = !jinniuVisible.value;
 }
 onBeforeMount(() => {
-  axios({
-    url: "/ddzh/auth/login",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: JSON.stringify({
-      phone: "18008061151",
-      password: "123456",
-    }),
-    method: "post",
-  }).then(function (resp) {
-    console.log(1, resp);
-    var data = resp.data.data;
-    token.value = data.tokenHead + data.token;
-    console.log("得到的token:" + token.value);
-  });
+  // axios({
+  //   url: "/ddzh/auth/login",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   data: JSON.stringify({
+  //     phone: "18008061151",
+  //     password: "123456",
+  //   }),
+  //   method: "post",
+  // }).then(function (resp) {
+  //   var data = resp.data.data;
+  //   token.value = data.tokenHead + data.token;
+  // });
   // getMapDataSzcg().then(data => {
   //   tableInfoSzcg.value = data
   //   // 请求各个子系统要显示的数据
@@ -3046,7 +3001,6 @@ onBeforeMount(() => {
   // })
   // // getMapDataGgzp().then(data => {
   // //   tableInfoGgzp.value = data
-  // //   console.log(tableInfoGgzp)
   // //   // 请求各个子系统要显示的数据
   // //   infoFuqin.tableInfoGgzp = tableInfoGgzp.value[0]
   // //   infoYingmenkou.tableInfoGgzp = tableInfoGgzp.value[1]
@@ -3188,14 +3142,8 @@ function hoverbackTianhuizhen() {
   polygonTianhuizhen.fillColor = "00FFFF";
 }
 const init = (e) => {
-  // const marker = new AMap.Marker({
-  //   position: [104.05740358713781, 30.697356042874134],
-  // },
-  // );
-  // e.add(marker);
   map = e;
   map.setMapStyle("amap://styles/darkblue");
-  // console.log('map init: ', map)
 };
 const router = useRouter();
 

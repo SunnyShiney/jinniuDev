@@ -591,8 +591,6 @@ import { getCompanyDust, getOverSpeed } from "@/api/ycxt";
 import { getTokenGxdc, getMainGxdc } from "@/api/gxdc";
 import { getMainShlj } from "@/api/shlj";
 import { getMainToilet } from "@/api/toilet";
-import { getMainCclj } from "@/api/cclj";
-import { params } from "@/store/store.js";
 import {
   getMainLjz,
   getSum,
@@ -658,206 +656,104 @@ const ddzh_tableData1 = ref([]);
 const ycxt_tableData1 = ref([]);
 const syd_data = ref([]);
 
-// axios({
-//     url: "/ddzh2/auth/login",
-//     method: "post",
-//     data: JSON.stringify({
-//       phone: "18380195019",
-//       password: "",
-//     }),
-// }).then(function (resp) {
-//     console.log("ddzh2",resp)
-//     var ddzh_token = resp.data.token;
-//     axios({
-//       url: "/ddzh2/patrol-status/status/rate_period",
-//       method: "post",
-//       data: JSON.stringify({
-//         startDate: "2023-12-01 00:00:00",
-//         endDate:"2023-12-01 23:59:59",
-//         param: "2",
-//       }),
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: ddzh_token,
-//       },
-//     }).then(function (resp) {
-//       ddzh_tableData1.value = resp.data;
-//       console.log("打卡率",resp);
-//       echartInit_ddzh();
-//     });
-
-//   });
 const stations_table = ref([]); //道路告警
-// onBeforeMount(() => {
-//   getMainSyd().then((data) => {
-//     syd_data.value = data;
-//     echartInit_syd();
-//   });
-//   getCheckRate().then((data) => {
-//     ddzh_tableData1.value = data;
-//     console.log(ddzh_tableData1.value);
-//     echartInit_ddzh();
-//   });
-
-//   getCompanyDust().then((data) => {
-//     ycxt_tableData1.value = data;
-//   });
-//   getAllEvents(today, tomorrow).then((data) => {
-//     tcwtTableData.value = data;
-//   });
-
-//    getStations().then((data) => {
-//       stations_table.value = data;
-//      echartInit_ljz();
-//       console.log(4172, stations_table.value.monitor_roads)
-//     console.log(4171,stations_table.value);
-//    });
-//       getMainCclj().then((tableData) => {
-//     ccljTodayWeight.value = Number(tableData[4].infoVal);
-   
-//     console.log(421,tableData[3].infoVal);
-//     if (tableData[3].infoVal == "今日无数据【注意检查】") {
-//       aflTodayWeight.value="无数据"
-//     }else{
-//       aflTodayWeight.value = Number(tableData[3].infoVal);
-//     }
-    
-//     var cclj_option = {
-//       title: {
-//         text: "餐厨垃圾全生命周期管家管家",
-//         textStyle: {
-//           color: "#ccc",
-//         },
-//       },
-//       tooltip: {
-//         trigger: "axis",
-//         axisPointer: {
-//           type: "shadow",
-//         },
-//       },
-//       xAxis: {
-//         type: "category",
-//         data: [
-//           "年度收运量累积（吨）",
-//           "当月收运量累积（吨）",
-//           "当日收运量累积（吨）",
-//         ],
-//       },
-//       yAxis: {
-//         type: "value",
-//       },
-//       series: [
-//         {
-//           data: [
-//             tableData[0].infoVal,
-//             tableData[1].infoVal,
-//             tableData[2].infoVal,
-//           ],
-//           type: "bar",
-//           showBackground: true,
-//           backgroundStyle: {
-//             color: "rgba(180, 180, 180, 0.2)",
-//           },
-//         },
-//       ],
-//     };
-//     window.onresize = function () {
-//       mychar_cclj.resize();
-//     };
-//     mychar_cclj.setOption(cclj_option);
-//   });
-// });
  
 const alarmEvent = ref(false);
 
 let myChart_ljz1 = null;
 
 const echartInit_ljz = () => {
-  document
-    .getElementById("cqcl-Charts")
-    .removeAttribute("_echarts_instance_");
-  myChart_ljz1 = echarts.init(document.getElementById("cqcl-Charts"));
-
-     var cqcl_option = {
-      title: {
-        text: "道路情况",
-        left: "center",
-        textStyle: {
-          color: "#ccc",
-          fontSize: "15",
-        },
-        subtextStyle: {
-          color: "#ccc",
-          fontSize: "20",
-        },
-      },
-      tooltip: {
-        trigger: "item",
-        formatter: function (params) {
-          // 在 tooltip 中添加多行文本，包括标题和数值
-          return "道路数 <br>" + params.name + "   " + params.value + "条";
-        },
-      },
-      legend: {
-        bottom: "0%",
-        left: "left",
-        textStyle: {
-          color: "#ccc",
-          fontSize: "12",
-        },
-        itemWidth: 20, // 设置颜色条的宽度
-  itemHeight: 10, // 设置颜色条的高度
-      },
-      series: [
-        {
-          name: "道路数",
-          type: "pie",
-          radius: "80%",
-          data: [
-            {
-              value:
-                stations_table.value.monitor_roads -
-                stations_table.value.unwork_roads,
-              name: "已作业",
-            },
-            {
-              value: stations_table.value.unwork_roads,
-              name: "未作业",
-            },
-            {
-              value: stations_table.value.unmonitor_roads,
-              name: "未监测",
-            },
-            // { value: 111, name: 222 },
-            // { value: 111, name: 34 },
-          ],
-          label: {
-            normal: {
-              show: false,
-            },
-            labelLine: {
-              normal: {
-                position: "inner",
-                show: false,
-              },
-            },
-          },
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-            },
+    if (!stations_table.value) {
+        console.warn("echartInit_ljz: stations_table.value 数据为空，跳过图表初始化。");
+        return; 
+    }
+    const { 
+        monitor_roads = 0, 
+        unwork_roads = 0, 
+        unmonitor_roads = 0 
+    } = stations_table.value;
+    const chartDom = document.getElementById("cqcl-Charts");
+    if (chartDom) {
+        chartDom.removeAttribute("_echarts_instance_");
+        myChart_ljz1 = echarts.init(chartDom);
+    } else {
+        console.error("找不到 ID 为 'cqcl-Charts' 的 DOM 元素。");
+        return;
+    }
+    const cqcl_option = {
+        title: {
+            text: "道路情况",
+            left: "center",
             textStyle: {
-              color: "#ccc",
-              fontSize: "16",
+                color: "#ccc",
+                fontSize: "15",
             },
-          },
+            subtextStyle: {
+                color: "#ccc",
+                fontSize: "20",
+            },
         },
-      ],
+        tooltip: {
+            trigger: "item",
+            formatter: function (params) {
+                return "道路数 <br>" + params.name + "   " + params.value + "条";
+            },
+        },
+        legend: {
+            bottom: "0%",
+            left: "left",
+            textStyle: {
+                color: "#ccc",
+                fontSize: "12",
+            },
+            itemWidth: 20, // 设置颜色条的宽度
+            itemHeight: 10, // 设置颜色条的高度
+        },
+        series: [
+            {
+                name: "道路数",
+                type: "pie",
+                radius: "80%",
+                data: [
+                    {
+                        value: monitor_roads - unwork_roads, 
+                        name: "已作业",
+                    },
+                    {
+                        value: unwork_roads,
+                        name: "未作业",
+                    },
+                    {
+                        value: unmonitor_roads,
+                        name: "未监测",
+                    },
+                ],
+                label: {
+                    normal: {
+                        show: false,
+                    },
+                    labelLine: {
+                        normal: {
+                            position: "inner",
+                            show: false,
+                        },
+                    },
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                    },
+                    textStyle: {
+                        color: "#ccc",
+                        fontSize: "16",
+                    },
+                },
+            },
+        ],
     };
-  
-  myChart_ljz1.setOption(cqcl_option);
-
+    // 应用 ECharts 配置
+    myChart_ljz1.setOption(cqcl_option);
 };
 
 onBeforeUnmount(() => {
@@ -868,139 +764,80 @@ onBeforeUnmount(() => {
   }
 });
 const echartInit_ddzh = () => {
-  document.getElementById("ddzh-Charts").removeAttribute("_echarts_instance_");
-  var myChart_ddzh1 = echarts.init(document.getElementById("ddzh-Charts"));
+    const chartDomId = "ddzh-Charts";
+    const chartDom = document.getElementById(chartDomId);
 
-  var option1 = {
-    title: {
-      text: "打卡率统计",
-      textStyle: {
-        color: "#ccc",
-      },
-    },
-    tooltip: {
-      trigger: "axis",
-      axisPointer: {
-        type: "shadow",
-      },
-      formatter: function (params) {
-        // 获取横坐标的内容
-        let xAxisLabel = params[0].axisValue;
+    if (!chartDom) {
+        console.error(`找不到 ID 为 ${chartDomId} 的 DOM 元素!`);
+        return;
+    }
 
-        // 获取数据项的数值
-        let dataValue = params[0].value;
+    // 1. 消除冗余的实例操作 (推荐使用 dispose 代替 removeAttribute)
+    const existingChart = echarts.getInstanceByDom(chartDom);
+    if (existingChart) {
+        existingChart.dispose(); // 销毁旧实例，防止内存泄漏
+    }
+    // 原始代码: document.getElementById("ddzh-Charts").removeAttribute("_echarts_instance_");
+    
+    const myChart_ddzh1 = echarts.init(chartDom);
 
-        // 构建 tooltip 内容并换行显示
-        return xAxisLabel + "<br>打卡率 " + dataValue + "%";
-      },
-    },
-    yAxis: {
-      type: "category",
-      data: ddzh_tableData1.value.map(item => item.department),
-      // data: [
-      //   ddzh_tableData1.value[0].department,
-      //   ddzh_tableData1.value[1].department,
-      //   ddzh_tableData1.value[2].department,
-      //   ddzh_tableData1.value[3].department,
-      //   ddzh_tableData1.value[4].department,
-      //   ddzh_tableData1.value[5].department,
-      //   ddzh_tableData1.value[6].department,
-      //   ddzh_tableData1.value[7].department,
-      //   ddzh_tableData1.value[8].department,
-      //   ddzh_tableData1.value[9].department,
-      //   ddzh_tableData1.value[10].department,
-      //   ddzh_tableData1.value[11].department,
-      //   ddzh_tableData1.value[12].department,
-      //   ddzh_tableData1.value[13].department,
-      //   ddzh_tableData1.value[14].department,
-      //   ddzh_tableData1.value[15].department,
-      //   ddzh_tableData1.value[16].department,
-      //   ddzh_tableData1.value[17].department,
-      //   ddzh_tableData1.value[18].department,
-      //   ddzh_tableData1.value[19].department,
-      //   ddzh_tableData1.value[20].department,
-      //   ddzh_tableData1.value[21].department,
-      //   ddzh_tableData1.value[22].department,
-      //   ddzh_tableData1.value[23].department,
-      //   ddzh_tableData1.value[24].department,
-      //   ddzh_tableData1.value[25].department,
-      //   ddzh_tableData1.value[26].department,
-      //   ddzh_tableData1.value[27].department,
-      //   ddzh_tableData1.value[28].department,
-      // ],
-      axisLabel: {
-        //x轴文字的配置
-        show: true,
-        interval: 0, //使x轴文字显示全
-        rotate: 20,
-      },
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true,
-      textStyle: {
-        color: "white",
-      },
-    },
-    xAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        barWidth: '10%',
-        data: ddzh_tableData1.value.map(item => (item.checkRate * 100).toFixed(1)),
-        // data: [
-        //   (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
-        // ],
-        type: "bar",
-        showBackground: true,
-        backgroundStyle: {
-          color: "rgba(180, 180, 180, 0.2)",
-        },
-        emphasis: {
-          focus: "series",
-        },
-        textStyle: {
-          color: "white",
-        },
-        label: {
-          show: true,
-        },
-      },
-    ],
-  };
+    // 2. 数据预处理 (避免在 Option 中重复 map)
+    const tableData = ddzh_tableData1.value || []; // 增加空数组容错
+    const departmentData = tableData.map(item => item.department);
+    const checkRateData = tableData.map(item => (item.checkRate * 100).toFixed(1));
 
-  myChart_ddzh1.setOption(option1);
+    // 3. 修复轴配置错误 (Y轴应为类目轴，X轴应为数值轴，如果想做横向柱状图)
+    // 假设您想做横向柱状图（部门名在 Y 轴，打卡率在 X 轴），这符合原始代码的轴定义。
+    
+    const option1 = {
+        title: {
+            text: "打卡率统计",
+            textStyle: { color: "#ccc" },
+        },
+        tooltip: {
+            trigger: "axis",
+            axisPointer: { type: "shadow" },
+            // 模板字符串简化 formatter
+            formatter: (params) => {
+                let xAxisLabel = params[0].axisValue;
+                let dataValue = params[0].value;
+                return `${xAxisLabel}<br>打卡率 ${dataValue}%`;
+            },
+        },
+        // 修复：Y轴为类目轴 (部门名称)
+        yAxis: { 
+            type: "category",
+            data: departmentData, // 使用预处理数据
+            axisLabel: {
+                show: true,
+                interval: 0, 
+                rotate: 0, // Y轴标签通常不需要旋转
+            },
+        },
+        // 修复：X轴为数值轴 (打卡率百分比)
+        xAxis: {
+            type: "value",
+            name: "打卡率 (%)", // 添加轴名称
+            max: 100, // 最大值设为 100
+        },
+        grid: {
+            left: "3%", right: "4%", bottom: "3%", 
+            containLabel: true,
+            textStyle: { color: "white" },
+        },
+        series: [{
+            name: "打卡率", // 增加系列名称
+            barWidth: '10%',
+            data: checkRateData, // 使用预处理数据
+            type: "bar",
+            showBackground: true,
+            backgroundStyle: { color: "rgba(180, 180, 180, 0.2)" },
+            emphasis: { focus: "series" },
+            label: { show: true, position: 'right' }, // 横向柱状图标签靠右
+        }],
+    };
+
+    myChart_ddzh1.setOption(option1);
 };
 const echartInit_syd = () => {
   document.getElementById("syd-Charts").removeAttribute("_echarts_instance_");
@@ -1086,7 +923,6 @@ const disabledDate = (time) => {
 };
 
 function changeDate() {
-  console.log("changeDate:" + start + "sdf" + end);
   start =
     changeValue.value[0].getFullYear() +
     "-" +
@@ -1099,7 +935,6 @@ function changeDate() {
     (changeValue.value[1].getMonth() + 1) +
     "-" +
     changeValue.value[1].getDate();
-  console.log("changeDate:" + start + "sdf" + end);
   getAllWarning(start, end, 1, warningTitle.value);
 }
 
@@ -1117,7 +952,6 @@ const getAllWarning = (startTime, endTime, pageNum, warningType) => {
       var data = resp.data.data;
       data_total.splice(0, data_total.length);
       for (var i in data) {
-        console.log("modify_time:" + data[i].modify_time);
         var warningThings = {
           event_no: data[i].event_no,
           event_name: data[i].event_name,
@@ -1131,7 +965,6 @@ const getAllWarning = (startTime, endTime, pageNum, warningType) => {
         };
         data_total.push(warningThings);
       }
-      console.log("数据长度：" + data.length);
       totalRecords.value = data_total.length;
       pageCount = parseInt(data_total.length) % 6;
       currentPage.value = pageNum;
@@ -1175,7 +1008,6 @@ const handleEdit = (warningType) => {
 // 点击事件的uuid显示详细信息
 const warningDetail = (index, row) => {
   var uuid = row.uuid;
-  console.log("事件的uuid是：" + uuid);
   axios({
     url: "/api/event/getEventFromUuid",
     params: {
@@ -1184,7 +1016,6 @@ const warningDetail = (index, row) => {
     method: "get",
   }).then(function (resp) {
     if (resp.status == 200) {
-      console.log(777, resp.data.data.data);
       var data = resp.data.data.data;
 
       // uploadFiles= data.uploadFiles;
@@ -1208,7 +1039,6 @@ const warningDetail = (index, row) => {
       street.value = data.street;
       updateTime.value = data.updateTime;
 
-      console.log("数据长度：" + data.length);
       totalRecords.value = data_total.length;
       pageCount = parseInt(data_total.length) % 6;
       currentPage.value = pageNum;
@@ -1534,7 +1364,6 @@ const changeCyyyChart = (page) => {
 const changeSzcgChart = (page) => {
   currentPageSzcg.value = page;
   if (currentPageSzcg.value === 1) {
-    console.log(currentPageSzcg.value);
     document
       .getElementById("szcg-Charts")
       .removeAttribute("_echarts_instance_");
@@ -1613,13 +1442,10 @@ const changeSzcgChart = (page) => {
         ],
       };
       myChart_szcg.setOption(option2);
-      // window.onresize = function () {
-      //   myChart_szcg.resize();
-      // };
+
     });
   }
   if (currentPageSzcg.value === 2) {
-    console.log(currentPageSzcg.value);
 
     document
       .getElementById("szcg-Charts")
@@ -1742,8 +1568,6 @@ const changeSzcgChart = (page) => {
     });
   }
   if (currentPageSzcg.value === 3) {
-    console.log(currentPageSzcg.value);
-
     document
       .getElementById("szcg-Charts")
       .removeAttribute("_echarts_instance_");
@@ -1971,8 +1795,6 @@ const handleSelect_srzx = (key, keypath) => {
 };
 const handleSelect_szcg = (key, keypath) => {
   if (key === "1") {
-    console.log("来到这里：" + key);
-
     getTrend().then((data) => {
       var myChart_tcwt = echarts.init(document.getElementById("tcwt-Charts"));
 
@@ -2101,12 +1923,8 @@ const handleSelect_szcg = (key, keypath) => {
 const handleSelect_jgzm = (key, keyPath) => {
   if (key === "1") {
     echart_index_jgzm.value = 1;
-    //document.getElementById("hwzy-Charts").removeAttribute("_echarts_instance_");
-
     var myChart_jgzm1 = echarts.init(document.getElementById("jgzm-Charts"));
-
     getMainJgzm().then((data) => {
-      console.log(data);
       var option_jgzm1 = {
         title: {
           text: "用电量统计",
@@ -2214,167 +2032,11 @@ const handleSelect_jgzm = (key, keyPath) => {
     });
   }
 };
-// const handleSelect_hjws = (key, keyPath) => {
-//   console.log(key, keyPath);
-//   if (key === "1") {
-//     echart_index_hjws.value = 1;
-//     //document.getElementById("hwzy-Charts").removeAttribute("_echarts_instance_");
 
-//     var mychar_hjws = echarts.init(document.getElementById("hwzy-Charts"));
-//     var hjws_option = {
-//       title: {
-//         text: "环卫作业运行管家",
-//         textStyle: {
-//           color: "#ccc",
-//         },
-//       },
-//       tooltip: {
-//         trigger: "axis",
-//         axisPointer: {
-//           type: "shadow",
-//         },
-//       },
-//       xAxis: {
-//         type: "category",
-//         data: ["出勤车辆", "总车辆"],
-//       },
-//       yAxis: {
-//         type: "value",
-//       },
-//       series: [
-//         {
-//           data: [141, 145],
-//           type: "bar",
-//           showBackground: true,
-//           backgroundStyle: {
-//             color: "rgba(180, 180, 180, 0.2)",
-//           },
-//         },
-//       ],
-//     };
-//     window.onresize = function () {
-//       mychar_hjws.resize();
-//     };
-//     mychar_hjws.setOption(hjws_option);
-//   } else if (key === "2") {
-//     echart_index_hjws.value = 2;
-//     var mychar_cclj = echarts.init(document.getElementById("cclj-Charts"));
-//     getMainCclj().then((tableData) => {
-//       var cclj_option = {
-//         title: {
-//           text: "餐厨垃圾全生命周期管家管家",
-//           textStyle: {
-//             color: "#ccc",
-//           },
-//         },
-//         tooltip: {
-//           trigger: "axis",
-//           axisPointer: {
-//             type: "shadow",
-//           },
-//         },
-//         xAxis: {
-//           type: "category",
-//           data: [
-//             "年度收运量累积(吨)",
-//             "当月收运量累积(吨)",
-//             "当日收运量累积(吨)",
-//           ],
-//         },
-//         yAxis: {
-//           type: "value",
-//         },
-//         series: [
-//           {
-//             data: [
-//               tableData[0].infoVal,
-//               tableData[1].infoVal,
-//               tableData[2].infoVal,
-//             ],
-//             type: "bar",
-//             showBackground: true,
-//             backgroundStyle: {
-//               color: "rgba(180, 180, 180, 0.2)",
-//             },
-//           },
-//         ],
-//       };
-//       window.onresize = function () {
-//         mychar_cclj.resize();
-//       };
-//       mychar_cclj.setOption(cclj_option);
-//     });
-//   } else if (key === "3") {
-//     echart_index_hjws.value = 3;
-//     var mychar_shlj = echarts.init(document.getElementById("shlj-Charts"));
-//     getMainShlj().then((tableData) => {
-//       var data1 = tableData[1].infoVal;
-//       data1 = data1.substr(0, data1.length - 1) * 1;
-//       var data2 = tableData[2].infoVal;
-//       data2 = data2.substr(0, data2.length - 1) * 1;
-//       var shlj_option = {
-//         title: {
-//           text: "金牛区垃圾净重",
-//           subtext: "大站分布",
-//           left: "center",
-//           textStyle: {
-//             color: "#ccc",
-//             fontSize: "26",
-//           },
-//           subtextStyle: {
-//             color: "#ccc",
-//             fontSize: "20",
-//           },
-//         },
-//         tooltip: {
-//           trigger: "item",
-//         },
-//         legend: {
-//           orient: "vertical",
-//           left: "left",
-//           textStyle: {
-//             color: "#ccc",
-//             fontSize: "16",
-//           },
-//         },
-//         series: [
-//           {
-//             name: "站点名",
-//             type: "pie",
-//             radius: "70%",
-//             data: [
-//               { value: data1, name: "西华垃圾站数据" },
-//               { value: data2, name: "红星垃圾站数据" },
-//             ],
-//             emphasis: {
-//               itemStyle: {
-//                 shadowBlur: 10,
-//                 shadowOffsetX: 0,
-//               },
-//               textStyle: {
-//                 color: "#ccc",
-//                 fontSize: "16",
-//               },
-//             },
-//           },
-//         ],
-//       };
-//       window.onresize = function () {
-//         mychar_shlj.resize();
-//       };
-//       mychar_shlj.setOption(shlj_option);
-//     });
-//   }
-// };
 onMounted(() => {
-  //===========================================sunny 告警事件
-  console.log(111, today);
-  console.log(222, tomorrow);
    getStations().then((data) => {
       stations_table.value = data;
-     echartInit_ljz();
-      console.log(4172, stations_table.value.monitor_roads)
-    console.log(4171,stations_table.value);
+      echartInit_ljz();
     });
   axios({
     url: "/api/event/getEventsStatusNum",
@@ -2384,21 +2046,20 @@ onMounted(() => {
     },
     method: "get",
   }).then(function (resp) {
-    console.log(555, resp);
     if (resp.status == 200) {
       var data = resp.data.data;
-
+      if(data==null){
+        data={待立案:0,已立案:0,已上报:0,已派发:0,待处置:0,已处置:0,已核查:0}
+      }
       (unregisteredNum.value = data.待立案),
-        (registeredNum.value = data.已立案),
-        (reportedNum.value = data.已上报),
-        (distributedNum.value = data.已派发),
-        (undisposedNum.value = data.待处置),
-        (disposedNum.value = data.已处置),
-        (verifiedNum.value = data.已核查),
-        console.log("数据长度：" + data.length);
+      (registeredNum.value = data.已立案),
+      (reportedNum.value = data.已上报),
+      (distributedNum.value = data.已派发),
+      (undisposedNum.value = data.待处置),
+      (disposedNum.value = data.已处置),
+      (verifiedNum.value = data.已核查),
       totalRecords.value = data_total.length;
       pageCount = parseInt(data_total.length) % 10;
-      currentPage.value = pageNum;
     }
   });
 
@@ -2484,12 +2145,9 @@ onMounted(() => {
 
   // const stations_table = ref([]); //道路告警
   // getStations().then((data) => {
-  //   console.log(4172,data);
   //   var stations_table = data;
     
-  //   console.log(666,params.hwzyToken)
   //   // echartInit_ljz();
-  //   console.log(4171, stations_table);
   //   var cqcl_option = {
   //     title: {
   //       text: "车辆出勤情况",
@@ -2651,63 +2309,59 @@ onMounted(() => {
     // mychar_cqcl.setOption(cqcl_option);
   });
   getMainLjz().then((tableData) => {
-    console.log(4211,tableData[0])
-   otherTodayWeight.value = tableData[0].infoVal;
+    otherTodayWeight.value = tableData[0].infoVal;
 })
-  getMainCclj().then((tableData) => {
-    ccljTodayWeight.value = tableData[4].infoVal;
-   
-    console.log(421,tableData[3].infoVal);
-    if (tableData[3].infoVal == "今日无数据【注意检查】") {
-      aflTodayWeight.value="无数据"
-    }else{
-      aflTodayWeight.value = tableData[3].infoVal;
-    }
-    
-    var cclj_option = {
-      title: {
-        text: "餐厨垃圾全生命周期管家管家",
-        textStyle: {
-          color: "#ccc",
-        },
-      },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "shadow",
-        },
-      },
-      xAxis: {
-        type: "category",
-        data: [
-          "年度收运量累积（吨）",
-          "当月收运量累积（吨）",
-          "当日收运量累积（吨）",
-        ],
-      },
-      yAxis: {
-        type: "value",
-      },
-      series: [
-        {
-          data: [
-            tableData[0].infoVal,
-            tableData[1].infoVal,
-            tableData[2].infoVal,
-          ],
-          type: "bar",
-          showBackground: true,
-          backgroundStyle: {
-            color: "rgba(180, 180, 180, 0.2)",
-          },
-        },
-      ],
-    };
-    window.onresize = function () {
-      mychar_cclj.resize();
-    };
-    mychar_cclj.setOption(cclj_option);
-  });
+// getMainCclj().then((tableData) => {
+//     ccljTodayWeight.value = tableData[4].infoVal;
+//     if (tableData[3].infoVal == "今日无数据【注意检查】") {
+//       aflTodayWeight.value="无数据"
+//     }else{
+//       aflTodayWeight.value = tableData[3].infoVal;
+//     }
+//     var cclj_option = {
+//       title: {
+//         text: "餐厨垃圾全生命周期管家管家",
+//         textStyle: {
+//           color: "#ccc",
+//         },
+//       },
+//       tooltip: {
+//         trigger: "axis",
+//         axisPointer: {
+//           type: "shadow",
+//         },
+//       },
+//       xAxis: {
+//         type: "category",
+//         data: [
+//           "年度收运量累积（吨）",
+//           "当月收运量累积（吨）",
+//           "当日收运量累积（吨）",
+//         ],
+//       },
+//       yAxis: {
+//         type: "value",
+//       },
+//       series: [
+//         {
+//           data: [
+//             tableData[0].infoVal,
+//             tableData[1].infoVal,
+//             tableData[2].infoVal,
+//           ],
+//           type: "bar",
+//           showBackground: true,
+//           backgroundStyle: {
+//             color: "rgba(180, 180, 180, 0.2)",
+//           },
+//         },
+//       ],
+//     };
+//     window.onresize = function () {
+//       mychar_cclj.resize();
+//     };
+//     mychar_cclj.setOption(cclj_option);
+//   });
 
   getOverStandard().then((tableData) => {
     document
@@ -2794,7 +2448,6 @@ onMounted(() => {
     year_electricity.value = data[3].infoVal;
     month_electricity.value = data[2].infoVal;
     day_electricity.value = data[1].infoVal;
-    console.log(data);
     var option_jgzm1 = {
       title: {
         text: "用电量统计",
@@ -2831,90 +2484,140 @@ onMounted(() => {
       myChart_jgzm1.resize();
     };
   });
-  // var mychar_hjws = echarts.init(document.getElementById("hwzy-Charts"));
-  // var hjws_option = {
-  //   title: {
-  //     text: "环卫作业运行管家",
-  //     textStyle: {
-  //       color: "#ccc",
-  //     },
-  //   },
-  //   xAxis: {
-  //     type: "category",
-  //     data: ["出勤车辆", "总车辆"],
-  //   },
-  //   yAxis: {
-  //     type: "value",
-  //   },
-  //   series: [
-  //     {
-  //       data: [141, 145],
-  //       type: "bar",
-  //       showBackground: true,
-  //       backgroundStyle: {
-  //         color: "rgba(180, 180, 180, 0.2)",
-  //       },
-  //     },
-  //   ],
-  // };
-  // window.onresize = function () {
-  //   mychar_hjws.resize();
-  // };
-  // mychar_hjws.setOption(hjws_option);
-
-  getTrend().then((data) => {
-    var myChart_tcwt = echarts.init(document.getElementById("tcwt-Charts"));
-
-    echart_index_szcg.value = 1;
-    var option = {
-      title: {
-        text: "事件趋势分析",
-        textStyle: {
-          color: "#ccc",
-        },
-      },
-      tooltip: {
-        trigger: "item",
-      },
-      //这里的yAxis就是竖轴，xAxis就是横轴
-      // yAxis and xAxis 交换可以改变横向或竖向
-      xAxis: {
-        axisLabel: {
-          //x轴文字的配置
-          show: true,
-          interval: 0, //使x轴文字显示全
-          rotate: 20,
-        },
-        data: data.map((item) => item.type),
-      },
-      yAxis: {},
-      // 数据的来源
-      series: [
-        {
-          name: "来源",
-          // bar就是柱状图
-          type: "bar",
-          color: "#dd6b66",
-          label: {
-            show: true,
+  getTrend()
+    .then((data) => {
+      if (!Array.isArray(data) || data.length === 0) {
+        console.warn("事件趋势分析数据为空或格式不正确。");
+        // 可以在这里清空图表或显示无数据提示
+        // myChart_tcwt.clear(); 
+        return; 
+      }
+      const xAxisData = data.map((item) => item.type);
+      const seriesData = data.map((item) => item.lian_value);
+      const chartDom = document.getElementById("tcwt-Charts");
+      if (!chartDom) {
+          console.error("找不到 ID 为 'tcwt-Charts' 的 DOM 元素。");
+          return;
+      }
+      const myChart_tcwt = echarts.init(chartDom);
+      echart_index_szcg.value = 1; // 假设这个是业务逻辑需要
+      const option = {
+        title: {
+          text: "事件趋势分析",
+          textStyle: {
+            color: "#ccc",
           },
-          emphasis: {
+        },
+        tooltip: {
+          trigger: "axis", 
+          axisPointer: {
+            type: 'shadow' 
+          }
+        },
+        xAxis: {
+          type: 'category', // 明确设置类型为类目轴
+          data: xAxisData, // 使用预处理的数据
+          axisLabel: {
+            show: true,
+            interval: 0, 
+            rotate: 20,
+          },
+          // 优化：增加分割线配置，使图表更易读
+          splitLine: { show: false }
+        },
+        yAxis: {
+          type: 'value', // 明确设置类型为数值轴
+          name: '事件数量', // 增加 Y 轴名称，提升可读性
+          axisLabel: {
+              formatter: '{value}' // 统一标签格式
+          }
+        },
+        series: [
+          {
+            name: "来源",
+            type: "bar",
+            color: "#dd6b66",
             label: {
               show: true,
-              fontSize: 35,
-              fontWeight: "bold",
+              position: 'top', // 明确标签位置
+              formatter: '{c}' // 标签内容只显示数值
             },
+            emphasis: {
+              // label: { ... } // 原始代码将大字号放在这里，如果不需要鼠标悬停时才变大，则应移到上一级的 label
+            },
+            data: seriesData, // 使用预处理的数据
           },
-          // 数据
-          data: data.map((item) => item.lian_value),
+        ],
+        // 6. **布局调整：** 确保图表有足够的空间展示
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true // 确保坐标轴标签完全显示
         },
-      ],
-    };
-    myChart_tcwt.setOption(option);
-    window.onresize = function () {
-      myChart_cyyy.resize();
-    };
-  });
+      };
+      myChart_tcwt.setOption(option);
+      window.addEventListener('resize', myChart_tcwt.resize);
+
+    })
+    .catch(error => {
+        console.error("获取事件趋势数据失败:", error);
+    });
+  // getTrend().then((data) => {
+  //   // var myChart_cyyy = echarts.init(document.getElementById("cyyy-Charts"));
+  //   var myChart_tcwt = echarts.init(document.getElementById("tcwt-Charts"));
+
+  //   echart_index_szcg.value = 1;
+  //   var option = {
+  //     title: {
+  //       text: "事件趋势分析",
+  //       textStyle: {
+  //         color: "#ccc",
+  //       },
+  //     },
+  //     tooltip: {
+  //       trigger: "item",
+  //     },
+  //     //这里的yAxis就是竖轴，xAxis就是横轴
+  //     // yAxis and xAxis 交换可以改变横向或竖向
+  //     xAxis: {
+  //       axisLabel: {
+  //         //x轴文字的配置
+  //         show: true,
+  //         interval: 0, //使x轴文字显示全
+  //         rotate: 20,
+  //       },
+  //       data: data.map((item) => item.type),
+  //     },
+  //     yAxis: {},
+  //     // 数据的来源
+  //     series: [
+  //       {
+  //         name: "来源",
+  //         // bar就是柱状图
+  //         type: "bar",
+  //         color: "#dd6b66",
+  //         label: {
+  //           show: true,
+  //         },
+  //         emphasis: {
+  //           label: {
+  //             show: true,
+  //             fontSize: 35,
+  //             fontWeight: "bold",
+  //           },
+  //         },
+  //         // 数据
+  //         data: data.map((item) => item.lian_value),
+  //       },
+  //     ],
+  //   };
+  //   myChart_tcwt.setOption(option);
+  //   window.onresize = function () {
+  //     myChart_tcwt.resize();
+  //   };
+  // });
+
 });
 
   onBeforeMount(() => {
@@ -2924,7 +2627,6 @@ onMounted(() => {
   });
   getCheckRate().then((data) => {
     ddzh_tableData1.value = data;
-    console.log(ddzh_tableData1.value);
     echartInit_ddzh();
   });
 
@@ -2936,10 +2638,8 @@ onMounted(() => {
   });
 
    getStations().then((data) => {
-      stations_table.value = data;
-     echartInit_ljz();
-      console.log(4172, stations_table.value.monitor_roads)
-    console.log(4171,stations_table.value);
+    stations_table.value = data;
+    echartInit_ljz();
    });
 
 });

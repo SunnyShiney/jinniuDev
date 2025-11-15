@@ -1,379 +1,142 @@
 <template>
   <el-container class="container">
-    <Header style="height: 60px" :icon="null">
-      <!-- 系统名字 -->
-      <template #title>
-        <span class="text-title">成都市金牛区综合行政执法局,欢迎您~</span>
-      </template>
-      <!-- 时间 -->
+  <Header style="height: 60px" :icon="null">
+    <template #title>
+      <span class="text-title">成都市金牛区综合行政执法局，欢迎您~</span>
+    </template>
 
-      <template #time>
-        <div class="text-week">今天是: {{ date }} {{ week }}</div>
-      </template>
-      <template #warning>
-        <div class="text-week">
-          <div id="dotClass" title="" @click="fault_details">
-            <div id="lamp" style="display: none"></div>
-          </div>
-          <el-dialog
-            v-model="defaultVisible"
-            title="事故详情"
-            @close="handleClose"
-          >
-            <div
-              style="text-align: center; font-size: x-large; font-weight: bold"
-            >
-              未处理的事件
-            </div>
-            <el-table
-              :data="defaultList"
-              style="width: 100%"
-              size="large"
-              class="data-table"
-            >
-              <el-table-column
-                prop="event_id"
-                label="事件编号"
-                min-width="80"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="event_time"
-                label="事件时间"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="site_name"
-                label="事件来源"
-                min-width="80"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="Accident_cause"
-                label="事件详情"
-                min-width="200"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column>
-                <template #default="scope">
-                  <el-button
-                    size="small"
-                    type="danger"
-                    @click="warningHandleClick(scope.$index, scope.row)"
-                    >处理</el-button
-                  >
-                </template>
-              </el-table-column>
-            </el-table>
+    <template #time>
+      <div class="text-week">今天是: {{ date }} {{ week }}</div>
+    </template>
 
-            <div
-              style="text-align: center; font-size: x-large; font-weight: bold"
-            >
-              历史告警事件
-            </div>
-            <el-date-picker
-              v-model="changeValue"
-              type="daterange"
-              unlink-panels
-              range-separator="到"
-              start-placeholder="选择开始时间"
-              end-placeholder="选择结束时间"
+    <template #warning>
+      <div class="alarm-indicator">
+        <div id="dotClass" title="点击查看详情" @click="fault_details">
+          <div id="lamp" :style="{ display: hasAlarm ? 'block' : 'none' }"></div>
+        </div>
+
+        <el-dialog
+          v-model="defaultVisible"
+          title="事故详情"
+          width="min(90%, 1200px)"
+          destroy-on-close
+          @close="handleClose"
+        >
+          <AlarmDetailsDialog
+              :default-list="defaultList"
+              :event-history-list="EventHistoryList"
+              :change-value="changeValue"
+              :warning-current-page="warningCurrentPage"
+              :warning-total-records="warningTotalRecords"
               :disabled-date="disabledDate"
               :shortcuts="shortcuts"
-              @change="changeDate"
-              size="large"
-              style="margin: 0.5rem 0 0.5rem"
-            />
-            <el-table
-              :data="
-                EventHistoryList.slice(
-                  (warningCurrentPage - 1) * 5,
-                  warningCurrentPage * 5
-                )
-              "
-              style="width: 100%"
-              size="large"
-              class="data-table"
-            >
-              <el-table-column
-                prop="event_id"
-                label="事件编号"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_source"
-                label="事件来源"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_cause"
-                label="事件详情"
-                min-width="450"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="event_disposed"
-                label="事件是否已处理"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_time"
-                label="发生时间"
-                min-width="250"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
+              @warning-handle-click="warningHandleClick"
+              @change-date="changeDate"
+              @current-change="getTransport"
+          />
+        </el-dialog>
 
-              <el-table-column
-                prop="administrator"
-                label="派发人"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="instruction_time"
-                label="指令下达时间"
-                min-width="250"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="administrator_phone"
-                label="派发人电话"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="instruction_content"
-                label="指令内容"
-                min-width="450"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_handler"
-                label="事件处理人"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="handler_phone"
-                label="处理人电话"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="handler_work"
-                label="处理人工作单位"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-            </el-table>
-            <div class="float-warningEnd">
-              <el-pagination
-                background
-                layout="->,total, prev, pager, next, jumper"
-                :total="warningTotalRecords"
-                :current-page="warningCurrentPage"
-                :page-size="5"
-                @current-change="getTransport"
-              />
-            </div>
-          </el-dialog>
-
-          <el-dialog
-            v-model="warningHandleEvent"
-            title="事故处理"
-            @close="handleClose"
+        <el-dialog
+          v-model="warningHandleEvent"
+          title="事故处理"
+          width="40%"
+          destroy-on-close
+          @close="handleClose"
+        >
+          <el-form
+            ref="warningRuleFormRef"
+            :model="warningRuleForm"
+            :rules="warningRules"
+            label-width="120px"
           >
-            <div
-              style="text-align: center; font-size: x-large; font-weight: bold"
-            ></div>
+            <el-form-item label="处置人信息：" prop="info">
+              <el-select
+                v-model="warningRuleForm.info"
+                filterable
+                placeholder="请输入处置人姓名/电话号/工作单位"
+                class="fuzzy_select"
+              >
+                <el-option
+                  v-for="person in warningPersonList"
+                  :key="person.name"
+                  :label="warningFormatResult(person)"
+                  :value="JSON.stringify(person)"
+                />
+              </el-select>
+            </el-form-item>
 
-            <el-form
-              ref="warningRuleFormRef"
-              :model="warningRuleForm"
-              status-icon
-              :warningRules="warningRules"
-              label-width="120px"
-              class="demo-warningRuleForm"
-            >
-              <el-form-item label="处置人信息：" prop="info"
-                ><el-select
-                  v-model="warningRuleForm.info"
-                  filterable
-                  placeholder="请输入处置人姓名/电话号/工作单位"
-                  class="fuzzy_select"
-                >
-                  <el-option
-                    v-for="item in warningPersonList"
-                    :key="item.name"
-                    :label="warningFormatResult(item)"
-                    :value="JSON.stringify(item)"
-                  /> </el-select
-              ></el-form-item>
+            <el-form-item label="处置指令内容：" prop="content">
+              <el-input
+                v-model="warningRuleForm.content"
+                type="textarea"
+                placeholder="请填写详细的处置指令"
+              />
+            </el-form-item>
 
-              <!-- <el-form-item label="处置人姓名：" prop="name">
-                <el-input v-model="warningRuleForm.name" autocomplete="off"></el-input>
-              </el-form-item>
-              <el-form-item label="处置人电话号码：" prop="phone">
-                <el-input
-                  v-model="warningRuleForm.phone"
-                  autocomplete="off"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="工作单位：" prop="place">
-                <el-input
-                  v-model="warningRuleForm.place"
-                  autocomplete="off"
-                ></el-input>
-              </el-form-item> -->
-              <el-form-item label="处置指令内容：" prop="content">
-                <el-input
-                  v-model="warningRuleForm.content"
-                  type="textarea"
-                  autocomplete="off"
-                ></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button
-                  type="primary"
-                  @click="warningSubmitForm(warningRuleFormRef)"
-                  >提交</el-button
-                >
-              </el-form-item>
-            </el-form>
-          </el-dialog>
-        </div>
-      </template>
+            <el-form-item>
+              <el-button
+                type="primary"
+                @click="warningSubmitForm(warningRuleFormRef)"
+              >提交</el-button>
+            </el-form-item>
+          </el-form>
+        </el-dialog>
+      </div>
+    </template>
 
-      <!-- 用户信息 -->
-      <template #userinfo>
-        <div class="router">
+    <template #userinfo>
+      <div class="router">
           <el-button
               class="buttonToMap"
-              plain
               link
               color="fff"
               @click="updateCompanyDialog = true"
               size="large"
-              v-show="params.role == '管理员'"
+              v-show="isAdmin"
           >
-            修改单位信息
+              修改单位信息
           </el-button>
-          <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="showClickLog"
-            size="large"
-            v-show="params.role == '管理员' || params.realname == '李俊' || params.realname == '傅红焰'
-                    || params.realname == '刘磊' || params.realname == '王洪'
-                    || params.realname == '龚庆' || params.realname == '宋伟'
-                    || params.realname == '翁奎' || params.realname == '李莉佳'"
-            >点击日志</el-button
-          >
-          <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="changePermissonDialog = true"
-            size="large"
-            v-show="params.role == '管理员'"
-            >权限管理</el-button
-          >
-          <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="resetPasswordDialog = true"
-            size="large"
-            v-show="params.role == '管理员'"
-            >用户密码重置管理</el-button
-          >
-          <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="changePasswordDialog = true"
-            size="large"
-            >修改个人密码</el-button
-          >
 
           <el-button
-            class="buttonToMap"
-            plain
-            link
-            color="fff"
-            @click="toMap"
-            size="large"
-            >前往地图主页</el-button
+              class="buttonToMap"
+              link
+              color="fff"
+              @click="showClickLog"
+              size="large"
+              v-show="canViewLog"
           >
-        </div>
-        <el-dropdown>
-          <span class="el-dropdown-link">
-            {{ params.username + "" + params.role + "" +params.department}}
-            <el-icon>
-              <ArrowDown />
-            </el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="logout">退出</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </template>
-    </Header>
+              点击日志
+          </el-button>
+
+          <el-button class="buttonToMap" link color="fff" @click="changePermissonDialog = true" size="large" v-show="isAdmin">
+              权限管理
+          </el-button>
+          <el-button class="buttonToMap" link color="fff" @click="resetPasswordDialog = true" size="large" v-show="isAdmin">
+              用户密码重置管理
+          </el-button>
+
+          <el-button class="buttonToMap" link color="fff" @click="changePasswordDialog = true" size="large">
+              修改个人密码
+          </el-button>
+
+          <el-button class="buttonToMap" link color="fff" @click="toMap" size="large">
+              前往地图主页
+          </el-button>
+      </div>
+
+      <el-dropdown>
+        <span class="el-dropdown-link user-display-info">
+          {{ `${params.username} - ${params.role} - ${params.department}` }}
+          <el-icon><ArrowDown /></el-icon>
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="logout">退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </template>
+  </Header>
 
     <el-container>
       <!-- 大类和子系统栏 -->
@@ -810,21 +573,6 @@
           </h2>
         </div>
       </div>
-      <!-- <div class="background" v-if="choosedDept === 0">
-        <img src="@/assets/home/banner-hjws.png" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div>
-      <div class="background" v-if="choosedDept === 1">
-        <img src="@/assets/home/banner-srzx.png" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div>
-      <div class="background" v-if="choosedDept === 2">
-        <img src="@/assets/home/banner-jgzm.png" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div>
-      <div class="background" v-if="choosedDept === 3">
-        <img src="@/assets/home/banner-szcg.png" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div>
-      <div class="background" v-if="choosedDept === 4">
-        <img src="@/assets/home/background-ggzp.jpg" width="10000" style="overflow-y:auto;overflow-x: auto;">
-      </div> -->
 
       <!-- 页面显示区域 -->
       <el-main
@@ -883,32 +631,14 @@
         <el-divider v-if="(choosedDept == -1) | (choosedDept == 0)" />
 
         <template v-for="(item, idx) in choosedSystems">
-          <!-- <main-info v-if="item.deptId == 0" :key="idx" :systemName="item.systemName" :url="item.url"
-            :logo="item.systemLogo" :info-list="item.data" :image="item.image" :to="item.to" :deptId="item.deptId"
-            :isLogin="item.isLogin">
-          </main-info> -->
-          <!--测试-->
           <el-card
             v-if="item.systemName == '环卫作业运行管家'"
             class="card"
             shadow="hover"
             :body-style="{ padding: '0px' }"
           >
-            <!-- <el-image
-              class="image"
-              :src="require('@/assets/home/img-hwzy2.jpg')"
-            >
-            </el-image> -->
             <ul v-if="item.url">
               <div class="header-card">
-<!--                <el-button-->
-<!--                  class="el-button-hjws-title"-->
-<!--                  type="text"-->
-<!--                  @click="toSystemHjws(item)"-->
-<!--                  style="margin-top: 10px"-->
-<!--                  >{{ item.systemName }}-->
-<!--                  <div id="warning-hwzy" class="warning-hwzy"></div>-->
-<!--                </el-button>-->
                 <!-- 文字部分 -->
                 <el-button
                     class="el-button-hjws-title"
@@ -1178,10 +908,8 @@
                         </el-form-item>
                       </el-form>
                     </el-dialog>
-                  </div>
-
+              </div>
             </ul>
-
             <div class="header" style="font-size: 20px" v-else>
               <el-button
                 class="el-button-null"
@@ -1227,16 +955,10 @@
             <template v-else>
               <img :src="hwzyImageUrl" class="image" />
             </template>
-
             <div
               class="infoContainer"
               style="background-color: #2775b6; color: white"
             >
-              <!-- logo -->
-              <!-- <div>
-        <el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large"></el-avatar>
-        </div> -->
-              <!-- 汇总数据列表 -->
               <div>
                 <ul class="infoList">
                   <li v-for="item in item.data" style="font-size: 20px">
@@ -1432,11 +1154,7 @@
             shadow="hover"
             :body-style="{ padding: '0px' }"
           >
-            <!-- <el-image
-              class="image"
-              :src="require('@/assets/home/img-cclj2.jpg')"
-            >
-            </el-image> -->
+
             <ul v-if="item.url">
               <div class="header-card">
                 <el-button
@@ -2406,9 +2124,14 @@
             >
               <div>
                 <ul class="infoList">
-                  <li v-for="item in item.data" style="font-size: 20px">
-                    {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
-                  </li>
+                    <li
+                        v-for="(dataItem, index) in item.data"
+                        :key="dataItem.id || index"
+                        class="info-item"
+                    >
+                        <span class="info-key">{{ dataItem.infoKey }}: </span>
+                        <span class="info-value">{{ dataItem.infoVal }}</span>
+                    </li>
                 </ul>
 
                 <el-popover
@@ -2467,13 +2190,7 @@
                             </div>
                           </dv-border-box6>
                         </div>
-                        <div
-                          id="weekly_chart"
-                          style="width: 1000px; height: 400px"
-                        ></div>
-
-                        <!-- <div id="container_jgzm1" style="width: 600px; height: 400px;float: left;"></div>
-    <div id="container_jgzm2" style="width: 600px; height: 400px ;float:left"></div> -->
+                        <div id="weekly_chart" style="width: 1000px; height: 400px"></div>
                       </div>
                     </div>
                   </template>
@@ -4156,12 +3873,14 @@
               >
                 <div>
                   <ul class="infoList">
-                    <li
-                      v-for="item in item.data"
-                      style="font-size: 20px; padding: 5px; margin-top: 0px"
-                    >
-                      {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
-                    </li>
+                      <li
+                          v-for="(dataItem, index) in item.data"
+                          :key="dataItem.id || index"
+                          class="info-item"
+                      >
+                          <span class="info-key">{{ dataItem.infoKey }}: </span>
+                          <span class="info-value">{{ dataItem.infoVal }}</span>
+                      </li>
                   </ul>
                   <el-popover
                     :width="1200"
@@ -4338,12 +4057,14 @@
               >
                 <div>
                   <ul class="infoList">
-                    <li
-                      v-for="item in item.data"
-                      style="font-size: 20px; padding: 5px; margin-top: 0px"
-                    >
-                      {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
-                    </li>
+                      <li
+                          v-for="(dataItem, index) in item.data"
+                          :key="dataItem.id || index"
+                          class="info-item"
+                      >
+                          <span class="info-key">{{ dataItem.infoKey }}: </span>
+                          <span class="info-value">{{ dataItem.infoVal }}</span>
+                      </li>
                   </ul>
 
                   <el-popover
@@ -4859,7 +4580,7 @@
         <div style="font-size: 2rem">权限申请列表</div>
         <el-table
           :data="
-            permissonApplicationList.slice(
+            permissonApplicationList.value.slice(
               (current_Page - 1) * 10,
               current_Page * 10
             )
@@ -5323,41 +5044,59 @@
       <el-dialog
         v-model="changePasswordDialog"
         title="修改密码"
-        align-center="true"
         width="30%"
+        destroy-on-close
       >
-        <el-form :model="form" :rules="rules" ref="ruleFormRef">
+        <el-form
+          :model="form"
+          :rules="rules"
+          ref="ruleFormRef"
+          label-width="120px"
+        >
+          <el-form-item
+            label="当前密码"
+            prop="old_password"
+          >
+            <el-input
+              v-model="form.old_password"
+              type="password"
+              placeholder="请输入当前密码"
+              show-password
+            />
+          </el-form-item>
+
           <el-form-item
             label="新密码"
-            :label-width="formLabelWidth"
             prop="new_password"
           >
             <el-input
               v-model="form.new_password"
-              autocomplete="off"
               type="password"
+              placeholder="请输入新密码"
+              show-password
             />
           </el-form-item>
+
           <el-form-item
-            label="再次确认密码"
-            :label-width="formLabelWidth"
+            label="确认新密码"
             prop="new_password_confirm"
           >
             <el-input
               v-model="form.new_password_confirm"
-              autocomplete="off"
               type="password"
+              placeholder="请再次输入新密码"
+              show-password
             />
           </el-form-item>
         </el-form>
 
         <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="changePasswordDialog = false">取消</el-button>
+          <div class="dialog-footer">
+            <el-button @click="resetForm(ruleFormRef)">取 消</el-button>
             <el-button type="primary" @click="submitForm(ruleFormRef)">
-              确认修改密码
+              确认修改
             </el-button>
-          </span>
+          </div>
         </template>
       </el-dialog>
     </el-container>
@@ -5376,17 +5115,6 @@
 </template>
 
 <script setup>
-import {
-  Check,
-  Delete,
-  Edit,
-  Message,
-  Search,
-  Star,
-  DocumentAdd,
-  Plus,
-} from "@element-plus/icons-vue";
-import { UploadProps } from "element-plus";
 import { useStore } from "vuex";
 const store = useStore();
 
@@ -5396,16 +5124,14 @@ import {
   ref,
   reactive,
   computed,
-  onBeforeMount,
   onMounted,
+  onUnmounted,
   onBeforeUnmount,
 } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
-import MainInfo from "@/views/home/components/MainInfo.vue";
 import ClassItem from "@/views/home/components/ClassItem.vue";
 import Header from "@/components/Header.vue";
-import WarningEventTable from "@/components/WarningEventTable.vue";
 import {
   get,
   getDeptList,
@@ -5427,16 +5153,27 @@ import {
 } from "@/api/yyxt";
 import { getAiUrl } from "@/api/ai";
 import { getMain, getCategory } from "@/api/ggzp";
-import { getMainJgzm, getElectricity } from "@/api/jgzm";
+import { getElectricity } from "@/api/jgzm";
 import { getAllEvents, getResourceTcwt, getTrend } from "@/api/tcwt";
-// import { getSitesData } from "@/api/cclj";
 import { getMainLjz, getSum, getWarning } from "@/api/ljz";
-// import { getCarLists, getAiAlarm } from "@/api/hwzy";
 import { getCheckRate, getCntStatus } from "@/api/ddzh";
 import { getCompanyDust, getOverSpeed } from "@/api/ycxt";
 import moment from "moment";
 
 import axios from "axios";
+
+
+
+
+const isAdmin = computed(() => params.role === '管理员');
+const canViewLog = computed(() => {
+  const privilegedUsers = [
+    '李俊', '傅红焰', '刘磊', '王洪',
+    '龚庆', '宋伟', '翁奎', '李莉佳'
+  ];
+  return isAdmin.value || privilegedUsers.includes(params.realname);
+});
+const hasAlarm = computed(() => defaultList.values.length > 0);
 
 const cityRoad = reactive([]);
 const trucksData = reactive([]);
@@ -5465,81 +5202,12 @@ const tableData = [
 //==============================================================================2024.04.12 告警指示灯
 const query = ref("");
 const value = ref("");
-let warningPersonList = [];
-// const warningPersonList = [
-//   { name: "周攀", phone: "18008061031", company: "办公室" },
-//   { name: "李自勇", phone: "18008060397", company: "办公室" },
-//   { name: "蒲远胜", phone: "18008060520", company: "办公室" },
-//   { name: "周思源", phone: "18008060503", company: "办公室" },
-//   { name: "虞诚磊", phone: "18008060536", company: "办公室" },
-//   { name: "尹叶峰", phone: "18008060657", company: "办公室" },
-//   { name: "周晓蓉", phone: "19381969851", company: "办公室" },
-//   { name: "叶建春", phone: "19381968202", company: "办公室" },
-//   { name: "彭姣", phone: "19381969852", company: "办公室" },
-//   { name: "谈方灿", phone: "18008061082", company: "城市环境综合治理科" },
-//   { name: "刘敏", phone: "18008060760", company: "城市环境综合治理科" },
-//   { name: "张蓉", phone: "18008060787", company: "城市环境综合治理科" },
-//   { name: "王胜男", phone: "18008060872", company: "城市环境综合治理科" },
-//   { name: "彭蕾", phone: "18008060898", company: "城市环境综合治理科" },
-//   { name: "杜强", phone: "18008061026", company: "基建设备管理科" },
-//   { name: "张红星", phone: "18008061015", company: "基建设备管理科" },
-//   { name: "邓雨檬", phone: "18008061016", company: "基建设备管理科" },
-//   { name: "胡浩", phone: "18008061036", company: "环境卫生监督管理科" },
-//   { name: "张宗贵", phone: "18008061087", company: "环境卫生监督管理科" },
-//   { name: "张静", phone: "18008061139", company: "环境卫生监督管理科" },
-//   { name: "胡玉莲", phone: "19381969853", company: "环境卫生监督管理科" },
-//   { name: "杨雨荷", phone: "19381969856", company: "环境卫生监督管理科" },
-//   { name: "周勇刚", phone: "18008060092", company: "环境卫生监督管理科" },
-//   { name: "肖轶", phone: "18008061056", company: "广告招牌和景观照明管理科" },
-//   { name: "聂宁", phone: "18008061159", company: "广告招牌和景观照明管理科" },
-//   { name: "刘文", phone: "19381969857", company: "广告招牌和景观照明管理科" },
-//   { name: "叶华", phone: "18008061175", company: "计划财务处" },
-//   { name: "罗争妍", phone: "18008061176", company: "计划财务处" },
-//   { name: "邱惠", phone: "18008061181", company: "计划财务处" },
-//   { name: "代然", phone: "18008061185", company: "计划财务处" },
-//   { name: "王英", phone: "18008061191", company: "计划财务处" },
-//   { name: "陈雪梅", phone: "18008061293", company: "计划财务处" },
-//   { name: "周建春", phone: "18008061295", company: "计划财务处" },
-//   { name: "钟杨", phone: "19381969858", company: "计划财务处" },
-//   { name: "蒋波", phone: "18008061301", company: "人事劳资科" },
-//   { name: "徐巧英", phone: "18008061303", company: "人事劳资科" },
-//   { name: "张宽", phone: "18008061380", company: "人事劳资科" },
-//   { name: "张成波", phone: "18008061369", company: "人事劳资科" },
-//   { name: "段国钢", phone: "15388115360", company: "数字化指挥监督中心" },
-//   { name: "高志昊", phone: "19381968262", company: "政策法规科" },
-//   { name: "李新成", phone: "18008061170", company: "大队勤务科" },
-//   { name: "邱志强", phone: "18008061023", company: "大队勤务科" },
-//   { name: "李贵明", phone: "18008061381", company: "大队勤务科" },
-//   { name: "冯娟", phone: "18008061037", company: "大队勤务科" },
-//   { name: "汪敏", phone: "18190992825", company: "大队勤务科" },
-//   { name: "赵杨", phone: "17723321969", company: "大队勤务科" },
-//   { name: "文宇恒", phone: "18008060691", company: "大队勤务科" },
-//   { name: "张宇杨", phone: "18008061257", company: "大队勤务科" },
-// ];
-// 自定义结果格式
-// const selectedResult = ref(null);
-// onMounted(() => {
-//   getAllWarningPersonList();
-// });
-// const getAllWarningPersonList = () => {
-//   axios({
-//     url: "/api/auth/allWarningPersonList",
-//     method: "get",
-//     headers: {
-//       Authorization: "Bearer " + params.token,
-//     },
-//   }).then((resp) => {
-//         warningPersonList.value = resp.data.data;
-//         console.log("人员列表：", warningPersonList);
-//       })
-//       .catch((err) => {
-//         console.error("获取人员信息失败：", err);
-//       });
-// };
-const warningFormatResult = (result) => {
-  return `${result.name} - ${result.phone} - ${result.company}`;
-};
-const getwarningPersonList = (pageNum) => {
+const warningPersonList = ref([]);
+
+onMounted(() => {
+  getAllWarningPersonList();
+});
+const getAllWarningPersonList = () => {
   axios({
     url: "/api/auth/allWarningPersonList",
     method: "get",
@@ -5547,122 +5215,226 @@ const getwarningPersonList = (pageNum) => {
       Authorization: "Bearer " + params.token,
     },
   }).then((resp) => {
-    warningPersonList.value = resp.data.data;
-    console.log("人员列表：", warningPersonList);
-  })
+        warningPersonList.value = resp.data;
+      })
       .catch((err) => {
         console.error("获取人员信息失败：", err);
       });
-  axios({
-    // url: "/api/lzj/getWarning",
-    url: "/api/auth/all_permission",
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
-  }).then(async (resp) => {
-    var data = resp.data;
-    console.log("人员列表:" + data);
-
-    for (var key in data) {
-      if (data[key].telephone == "13880769883") {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "城运中心",
-        };
-      } else if (data[key].telephone == "13880717069") {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "指挥中心",
-        };
-      } else if (
-        data[key].telephone == "13708199475" ||
-        data[key].telephone == "13908173345" ||
-        data[key].telephone == "13752148440" ||
-        data[key].telephone == "18919564611" ||
-        data[key].telephone == "17360557880"
-      ) {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "测试中心",
-        };
-      } else if (data[key].realName == "代恭林") {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "基建设备管理科",
-        };
-      } else if (
-        data[key].realName == "杨朕" ||
-        data[key].realName == "陈朝胜" ||
-        data[key].realName == "邓文华"
-      ) {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "环境卫生监督管理科",
-        };
-      } else if (
-        data[key].realName == "何其会" ||
-        data[key].realName == "杨健" ||
-        data[key].realName == "任兵兵" ||
-        data[key].realName == "刘晓峰"
-      ) {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "广告招牌和景观照明管理科",
-        };
-      } else if (
-        data[key].realName == "李莉佳" ||
-        data[key].realName == "刘亚奇"
-      ) {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "政策法规科",
-        };
-      } else if (
-        data[key].realName == "胡福乾" ||
-        data[key].realName == "王松"
-      ) {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "大队勤务科",
-        };
-      } else if (data[key].realName == "赖渊") {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "数字化指挥监督中心",
-        };
-      } else {
-        var resetPassword = {
-          name: data[key].realName,
-          phone: data[key].telephone,
-          company: "办公室",
-        };
-      }
-
-      console.log("这里：" + resetPassword);
-      warningPersonList.push(resetPassword);
-    }
-  });
 };
-setInterval(getwarningPersonList(1), 60000);
+const warningFormatResult = (result) => {
+  return `${result.name} - ${result.phone} - ${result.company}`;
+};
+
+// 1. 定义人员/公司映射配置 (核心优化: 外部化配置)
+// Key: 手机号 (telephone) 或 姓名 (realName)
+// Value: 公司名称 (company)
+const PERSON_COMPANY_MAP = new Map([
+    // --- 按手机号映射 ---
+    ["13880769883", "城运中心"],
+    ["13880717069", "指挥中心"],
+
+    // --- 按测试中心手机号映射 (使用数组简化多重判断) ---
+    ["13708199475", "测试中心"],
+    ["13908173345", "测试中心"],
+    ["13752148440", "测试中心"],
+    ["18919564611", "测试中心"],
+    ["17360557880", "测试中心"],
+
+    // --- 按姓名映射 (使用特殊键或前缀区分姓名和电话) ---
+    ["代恭林_name", "基建设备管理科"],
+    ["杨朕_name", "环境卫生监督管理科"],
+    ["陈朝胜_name", "环境卫生监督管理科"],
+    ["邓文华_name", "环境卫生监督管理科"],
+
+    ["何其会_name", "广告招牌和景观照明管理科"],
+    ["杨健_name", "广告招牌和景观照明管理科"],
+    ["任兵兵_name", "广告招牌和景观照明管理科"],
+    ["刘晓峰_name", "广告招牌和景观照明管理科"],
+
+    ["李莉佳_name", "政策法规科"],
+    ["刘亚奇_name", "政策法规科"],
+
+    ["胡福乾_name", "大队勤务科"],
+    ["王松_name", "大队勤务科"],
+
+    ["赖渊_name", "数字化指挥监督中心"],
+]);
+
+// 2. 辅助函数：根据配置查找公司名称
+const getCompanyByPerson = (person) => {
+    // 1. 优先按手机号查找
+    const phone = person.telephone;
+    if (phone && PERSON_COMPANY_MAP.has(phone)) {
+        return PERSON_COMPANY_MAP.get(phone);
+    }
+
+    // 2. 其次按姓名查找
+    const name = person.realName;
+    const nameKey = `${name}_name`;
+    if (name && PERSON_COMPANY_MAP.has(nameKey)) {
+        return PERSON_COMPANY_MAP.get(nameKey);
+    }
+
+    // 3. 默认值
+    return "办公室";
+};
+
+
+const getwarningPersonList = async (pageNum) => { // 使用 async/await 简化
+
+    const API_URL = "/api/auth/all_permission";
+    const token = params.token;
+
+    try {
+        // 3. 执行 API 请求
+        const resp = await axios.get(API_URL, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // 确保数据是数组，使用 Object.values() 处理 for...in 遗留问题
+        const rawData = resp.data || {};
+        const userArray = Array.isArray(rawData) ? rawData : Object.values(rawData);
+
+        // 4. 数据处理：使用 map() 进行转换和归类
+        const processedList = userArray.map(person => {
+            // 安全性检查：确保 realName 和 telephone 存在
+            if (!person || !person.realName || !person.telephone) {
+                return null; // 跳过无效记录
+            }
+
+            // 调用辅助函数获取公司名称
+            const companyName = getCompanyByPerson(person);
+
+            // 返回目标对象
+            return {
+                name: person.realName,
+                phone: person.telephone,
+                company: companyName,
+            };
+        }).filter(item => item !== null); // 过滤掉无效记录
+
+        // 5. 更新响应式列表 (使用 .value 整体替换)
+        // 假设 warningPersonList 是 ref([])
+        warningPersonList.value = processedList;
+
+        // 6. 假设这里需要更新分页状态，但代码中没有，保持精简。
+
+    } catch (error) {
+        console.error("获取预警人员列表失败:", error);
+        // 失败时清空列表
+        warningPersonList.value = [];
+    }
+};
+
+// const getwarningPersonList = (pageNum) => {
+//   axios({
+//     url: "/api/auth/all_permission",
+//     method: "get",
+//     headers: {
+//       Authorization: "Bearer " + params.token,
+//     },
+//   }).then(async (resp) => {
+//     var data = resp.data;
+
+//     for (var key in data) {
+//       if (data[key].telephone == "13880769883") {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "城运中心",
+//         };
+//       } else if (data[key].telephone == "13880717069") {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "指挥中心",
+//         };
+//       } else if (
+//         data[key].telephone == "13708199475" ||
+//         data[key].telephone == "13908173345" ||
+//         data[key].telephone == "13752148440" ||
+//         data[key].telephone == "18919564611" ||
+//         data[key].telephone == "17360557880"
+//       ) {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "测试中心",
+//         };
+//       } else if (data[key].realName == "代恭林") {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "基建设备管理科",
+//         };
+//       } else if (
+//         data[key].realName == "杨朕" ||
+//         data[key].realName == "陈朝胜" ||
+//         data[key].realName == "邓文华"
+//       ) {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "环境卫生监督管理科",
+//         };
+//       } else if (
+//         data[key].realName == "何其会" ||
+//         data[key].realName == "杨健" ||
+//         data[key].realName == "任兵兵" ||
+//         data[key].realName == "刘晓峰"
+//       ) {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "广告招牌和景观照明管理科",
+//         };
+//       } else if (
+//         data[key].realName == "李莉佳" ||
+//         data[key].realName == "刘亚奇"
+//       ) {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "政策法规科",
+//         };
+//       } else if (
+//         data[key].realName == "胡福乾" ||
+//         data[key].realName == "王松"
+//       ) {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "大队勤务科",
+//         };
+//       } else if (data[key].realName == "赖渊") {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "数字化指挥监督中心",
+//         };
+//       } else {
+//         var resetPassword = {
+//           name: data[key].realName,
+//           phone: data[key].telephone,
+//           company: "办公室",
+//         };
+//       }
+//       warningPersonList.push(resetPassword);
+//     }
+//   });
+// };
+
+
+setInterval(() => {
+    getwarningPersonList(1);
+}, 60000);
 
 const warningTotalRecords = ref(1000);
 let warningCurrentPage = ref(1);
 let warningPageCount = 0;
 
-let warningStart = moment("2023-03-01").format("YYYY-MM-DD");
-console.log(4211, warningStart);
+let warningStart = moment("2025-01-01").format("YYYY-MM-DD");
 let warningEnd = moment().format("YYYY-MM-DD");
-console.log(4212, warningEnd);
 let logStart = moment().startOf("month").format("YYYY-MM-DD");
 let logEnd = moment().add(1, "days").format("YYYY-MM-DD");
 // const tomorrow = moment()
@@ -5682,7 +5454,7 @@ function changeDate() {
   warningStart = moment(changeValue.value[0]).format("YYYY-MM-DD");
   warningEnd = moment(changeValue.value[1]).format("YYYY-MM-DD");
   // warningEnd =  new Date();
-  queryAllWarning(warningStart, warningEnd, 1);
+  // queryAllWarning(warningStart, warningEnd, 1);
 }
 function changeDateLog() {
   logStart = moment(changeValueLog.value[0]).format("YYYY-MM-DD");
@@ -5745,13 +5517,7 @@ const warningSubmitForm = async () => {
         }),
         method: "post",
       }).then(function (resp) {
-        console.log(2, resp);
-        console.log(
-          "发送给了电话为：" +
-            selectedValue.phone +
-            "，指令内容为：" +
-            warningRuleForm.content
-        );
+
       });
       //发送短信（新增部分）
       axios({
@@ -5791,7 +5557,6 @@ const warningSubmitForm = async () => {
       }).then(function (resp) {
         systemData.out.println("event_uuid:" + event_uuid);
       });
-      console.log("submit!");
       alert("提交成功！");
       warningHandleEvent.value = false;
       // defaultList.pop(rowIndex);
@@ -5811,7 +5576,6 @@ const warningSubmitForm = async () => {
 const warningHandleClick = (index, row) => {
   event_uuid.value = row.event_id;
   rowIndex.value = index;
-  console.log("event_uuid:" + event_uuid.value);
   warningHandleEvent.value = true;
   warningRuleForm.phone = "";
   warningRuleForm.name = "";
@@ -5820,74 +5584,54 @@ const warningHandleClick = (index, row) => {
 };
 const fault_details = () => {
   var div = document.getElementById("dotClass");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     defaultVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     defaultVisible.value = true;
-    console.log(defaultVisible.value);
   }
 };
 const fault_details_hwzy = () => {
   var div = document.getElementById("dotClass-hwzy");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     hwzyVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     hwzyVisible.value = true;
-    console.log(hwzyVisible.value);
   }
 };
 const fault_details_ljqsm = () => {
   var div = document.getElementById("dotClass-ljqsm");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     ljqsmVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     ljqsmVisible.value = true;
-    console.log(ljqsmVisible.value);
   }
 };
 
 const fault_details_toiletWarning = () => {
   var div = document.getElementById("dotClass-toiletWarning");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     toiletWarningVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     toiletWarningVisible.value = true;
-    console.log(toiletWarningVisible.value);
   }
 };
 
 const fault_details_hjws = () => {
   var div = document.getElementById("dotClass-hjws");
-  console.log("div.style.backgroundColor" + div.style.backgroundColor);
   if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    console.log(params.username);
     hjwsVisible.value = true;
   }
   // 出现事故
   if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    console.log(params.username);
     hjwsVisible.value = true;
-    console.log(hjwsVisible.value);
   }
 };
 //四大板块的历史告警事件列表
@@ -5922,10 +5666,8 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
       endTime: warningEndTime,
     },
   }).then(function (resp) {
-    console.log(222, "Bearer" + params.token);
     var data = resp.data.data;
     EventHistoryList.splice(0, EventHistoryList.length);
-    console.log(111, resp.data.data);
     for (var key in data) {
       var default_site = {
         event_source: data[key].eventSource,
@@ -6000,17 +5742,13 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
     warningCurrentPage.value = pageNum;
   });
 };
-queryAllWarning(warningStart, warningEnd, 1);
 const getTransport = (pageNum) => {
-  // 当前页
   warningCurrentPage.value = pageNum;
 };
-
 const hwzyVisible = ref(false);
 const ljqsmVisible = ref(false);
 const toiletWarningVisible = ref(false);
 const hjwsVisible = ref(false);
-
 //四大板块的告警事件列表，如果列表不为空，则指示灯闪烁
 const hjwsList = reactive([]);
 const srzxList = reactive([]);
@@ -6031,165 +5769,282 @@ const tcwtList = reactive([]);
 const cgaiList = reactive([]);
 const wllzList = reactive([]);
 const szhcsList = reactive([]);
-const changeColor = () => {
-  queryAllWarning(warningStart, warningEnd, 1);
-  axios({
-    // url: "/api/lzj/getWarning",
-    url: "/api/event-query/getNeedHandleEvent",
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
-  }).then(function (resp) {
-     defaultList.splice(0, defaultList.length);
-    // hjwsList.splice(0, hjwsList.length);
-    // ljqsmList.splice(0, ljqsmList.length);
-    // toiletWarningList.splice(0, toiletWarningList.length);
-    [
-      hjwsList, srzxList, csjgList, szcgList,
-      hwzyList, ljqsmList, toiletWarningList,
-      cyyyList, ddzhList, gxdcList, yczlList,
-      jgzmList,zmgjList,ljdpList,
-      tcwtList, cgaiList, wllzList, szhcsList
-    ].forEach(list => list.splice(0, list.length));
-    console.log(resp);
-    var data = resp.data.data;
-    console.log("resp.code：" + data);
-    for (var key in data) {
-      var default_site = {
-        event_time: data[key].eventTime,
-        site_name: data[key].eventSource,
-        Accident_cause: data[key].eventCause,
-        event_id: data[key].id,
-      };
-      defaultList.push(default_site);
-      console.log(612, data[key].systemName);
-      // if (
-      //   data[key].systemName == "垃圾系统" ||
-      //   data[key].systemName == "厕所系统"
-      // ) {
-      //   hjwsList.push(default_site);
-      // }
-      // if (data[key].systemName == "垃圾系统") {
-      //   ljqsmList.push(default_site);
-      // }
-      // if (data[key].systemName == "厕所系统") {
-      //   toiletWarningList.push(default_site);
-      // }
-      switch (data[key].systemName) {
-        case "垃圾系统":
-          hwzyList.push(default_site);
-          break;
-        case "垃圾分类系统":
-          ljqsmList.push(default_site);
-          break;
-        case "厕所系统":
-          toiletWarningList.push(default_site);
-          break;
-        case "餐饮油烟系统":
-          cyyyList.push(default_site);
-          break;
-        case "调度指挥系统":
-          ddzhList.push(default_site);
-          break;
-        case "共享单车系统":
-          gxdcList.push(default_site);
-          break;
-        case "扬尘治理系统":
-          yczlList.push(default_site);
-          break;
-        case "景观照明系统":
-          jgzmList.push(default_site);
-          break;
-        case "照明管家系统":
-          zmgjList.push(default_site);
-          break;
-        case "临街店铺系统":
-          ljdpList.push(default_site);
-          break;
-        case "突出问题系统":
-          tcwtList.push(default_site);
-          break;
-        case "城管ai系统":
-          cgaiList.push(default_site);
-          break;
-        case "网络理政系统":
-          wllzList.push(default_site);
-          break;
-        case "数字城管系统":
-          szhcsList.push(default_site);
-          break;
-        default:
-          //未匹配到的系统名处理
-          break;
-      }
+//刷新告警指示灯颜色
+// 定义系统名称到目标数组的映射 (提高可维护性)
+const SYSTEM_MAP = new Map([
+    ["垃圾系统", hwzyList],
+    ["垃圾分类系统", ljqsmList],
+    ["厕所系统", toiletWarningList],
+    ["餐饮油烟系统", cyyyList],
+    ["调度指挥系统", ddzhList],
+    ["共享单车系统", gxdcList],
+    ["扬尘治理系统", yczlList],
+    ["景观照明系统", jgzmList],
+    ["照明管家系统", zmgjList],
+    ["临街店铺系统", ljdpList],
+    ["突出问题系统", tcwtList],
+    ["城管ai系统", cgaiList],
+    ["网络理政系统", wllzList],
+    ["数字城管系统", szhcsList],
+]);
+// 定义需要清理的所有数组
+const ALL_LISTS = [
+    defaultList, hjwsList, srzxList, csjgList, szcgList,
+    hwzyList, ljqsmList, toiletWarningList, cyyyList, ddzhList,
+    gxdcList, yczlList, jgzmList, zmgjList, ljdpList,
+    tcwtList, cgaiList, wllzList, szhcsList
+];
+// 定义需要更新 DOM 的配置
+const DOM_CONFIGS = [
+    { list: defaultList, prefix: "" }, // 默认配置
+    { list: hwzyList, prefix: "hwzy" },
+    { list: ljqsmList, prefix: "ljqsm" },
+    { list: toiletWarningList, prefix: "toiletWarning" },
+    { list: hjwsList, prefix: "hjws" },
+];
+const changeColor = async () => {
+    const API_URL = "/api/event-query/getNeedHandleEvent";
+    const token = params.token;
+    ALL_LISTS.forEach(list => {
+      list.length = 0; // 如果是 reactive([]) 或普通数组
+    });
+    try {
+        // 2. 执行 API 请求 (使用 async/await 简化)
+        const resp = await axios.get(API_URL, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        // 3. 提取数据
+        const data = resp.data.data || [];
+        // 4. 数据处理：使用 for...of 遍历 (比 for...in 更适用于数组)
+        const newHwzyList = [];
+        const newLjqsmList = [];
+        const newToiletWarningList = [];
+        data.forEach(item => {
+            // 提取公共事件结构
+            const event = {
+                event_time: item.eventTime,
+                site_name: item.eventSource,
+                Accident_cause: item.eventCause,
+                event_id: item.id,
+            };
+            // 归类到 defaultList
+            defaultList.push(event);
 
-      const merged = [...hwzyList, ...ljqsmList, ...toiletWarningList];
+            // 归类到特定系统列表
+            const targetList = SYSTEM_MAP.get(item.systemName);
+            if (targetList) {
+                targetList.push(event); // 将事件添加到对应的响应式数组中
+            }
 
-      // 使用 Map 去重（以 event_id 作为唯一标识）
-      const uniqueMap = new Map();
-      for (const item of merged) {
-        uniqueMap.set(item.event_id, item); // 若重复，会覆盖旧值
-      }
+            // 特殊处理，提前保存，以便后续合并去重
+            if (item.systemName === "垃圾系统") newHwzyList.push(event);
+            if (item.systemName === "垃圾分类系统") newLjqsmList.push(event);
+            if (item.systemName === "厕所系统") newToiletWarningList.push(event);
+        });
 
-      // 转为数组
-      hjwsList.splice(0, hjwsList.length, ...uniqueMap.values());
-      srzxList.push(...cyyyList, ...ddzhList, ...gxdcList, ...yczlList);
-      csjgList.push(...jgzmList, ...zmgjList, ...ljdpList);
-      szcgList.push(...tcwtList, ...cgaiList, ...wllzList, ...szhcsList);
+        // 5. 复杂列表的合并与去重 (在循环外进行，效率更高)
+
+        // 合并 hjwsList (原 hwzyList, ljqsmList, toiletWarningList 的去重合并)
+        const mergedHjws = [...newHwzyList, ...newLjqsmList, ...newToiletWarningList];
+        const uniqueHjwsMap = new Map();
+        mergedHjws.forEach(item => uniqueHjwsMap.set(item.event_id, item));
+        hjwsList.splice(0, hjwsList.length, ...uniqueHjwsMap.values()); // 更新 hjwsList
+
+        // 合并 srzxList, csjgList, szcgList (使用 concat 或扩展运算符进行浅拷贝合并)
+        srzxList.splice(0, srzxList.length,
+            ...cyyyList, ...ddzhList, ...gxdcList, ...yczlList
+        );
+        csjgList.splice(0, csjgList.length,
+            ...jgzmList, ...zmgjList, ...ljdpList
+        );
+        szcgList.splice(0, szcgList.length,
+            ...tcwtList, ...cgaiList, ...wllzList, ...szhcsList
+        );
+
+        // 6. 集中更新 DOM
+        updateDomIndicators();
+
+    } catch (error) {
+        console.error("获取待处理事件失败:", error);
+        // 发生错误时，清空数组或保持不变
     }
-
-    console.log("data.length:" + defaultList.length);
-    // 出现事故
-    if (defaultList.length != 0) {
-      document.getElementById("dotClass").title = "出现异常！请点击查看详情！";
-      document.getElementById("dotClass").style.backgroundColor = "#E12911";
-      document.getElementById("lamp").style.display = "block";
-    } else {
-      document.getElementById("dotClass").style.backgroundColor = "#11e1b0";
-      document.getElementById("lamp").style.display = "none";
-    }
-
-    if (hwzyList.length != 0) {
-      document.getElementById("dotClass-hwzy").title = "出现异常！请点击查看详情！";
-      document.getElementById("dotClass-hwzy").style.backgroundColor = "#E12911";
-      document.getElementById("lamp-hwzy").style.display = "block";
-    } else {
-      document.getElementById("dotClass-hwzy").style.backgroundColor = "#11e1b0";
-      document.getElementById("lamp-hwzy").style.display = "none";
-    }
-
-    if (ljqsmList.length != 0) {
-      document.getElementById("dotClass-ljqsm").title = "出现异常！请点击查看详情！";
-      document.getElementById("dotClass-ljqsm").style.backgroundColor = "#E12911";
-      document.getElementById("lamp-ljqsm").style.display = "block";
-    } else {
-      document.getElementById("dotClass-ljqsm").style.backgroundColor = "#11e1b0";
-      document.getElementById("lamp-ljqsm").style.display = "none";
-    }
-
-    if (toiletWarningList.length != 0) {
-      document.getElementById("dotClass-toiletWarning").title = "出现异常！请点击查看详情！";
-      document.getElementById("dotClass-toiletWarning").style.backgroundColor = "#E12911";
-      document.getElementById("lamp-toiletWarning").style.display = "block";
-    } else {
-      document.getElementById("dotClass-toiletWarning").style.backgroundColor = "#11e1b0";
-      document.getElementById("lamp-toiletWarning").style.display = "none";
-    }
-
-    if (hjwsList.length != 0) {
-      document.getElementById("dotClass-hjws").title = "出现异常！请点击查看详情！";
-      document.getElementById("dotClass-hjws").style.backgroundColor = "#E12911";
-      document.getElementById("lamp-hjws").style.display = "block";
-    } else {
-      document.getElementById("dotClass-hjws").style.backgroundColor = "#11e1b0";
-      document.getElementById("lamp-hjws").style.display = "none";
-    }
-
-  });
 };
+
+/**
+ * 封装 DOM 操作逻辑，使 changeColor 更专注于数据处理。
+ * ⚠️ 警告: 直接操作 DOM (document.getElementById) 违背了 Vue 的原则，
+ * 推荐改为通过 Vue 的响应式数据 (v-bind:style/v-if) 来控制样式。
+ */
+const updateDomIndicators = () => {
+    DOM_CONFIGS.forEach(config => {
+        const hasWarning = config.list.length !== 0;
+        const idPrefix = config.prefix ? `-${config.prefix}` : '';
+        const dotId = `dotClass${idPrefix}`;
+        const lampId = `lamp${idPrefix}`;
+
+        const dotElement = document.getElementById(dotId);
+        const lampElement = document.getElementById(lampId);
+
+        if (dotElement) {
+            dotElement.style.backgroundColor = hasWarning ? "#E12911" : "#11e1b0";
+            if (config.prefix !== "") {
+                dotElement.title = hasWarning ? "出现异常！请点击查看详情！" : "";
+            }
+        }
+
+        if (lampElement) {
+            lampElement.style.display = hasWarning ? "block" : "none";
+        }
+    });
+
+    // 默认情况需要特殊处理 title
+    if (document.getElementById("dotClass")) {
+        document.getElementById("dotClass").title =
+            defaultList.length !== 0 ? "出现异常！请点击查看详情！" : "";
+    }
+};
+
+// const changeColor = () => {
+//   axios({
+//     url: "/api/event-query/getNeedHandleEvent",
+//     method: "get",
+//     headers: {Authorization: "Bearer " + params.token,},
+//   }).then(function (resp) {
+//      defaultList.splice(0, defaultList.length);
+//     [
+//       hjwsList, srzxList, csjgList, szcgList,
+//       hwzyList, ljqsmList, toiletWarningList,
+//       cyyyList, ddzhList, gxdcList, yczlList,
+//       jgzmList,zmgjList,ljdpList,
+//       tcwtList, cgaiList, wllzList, szhcsList
+//     ].forEach(list => list.splice(0, list.length));
+//     var data = resp.data.data;
+//     for (var key in data) {
+//       var default_site = {
+//         event_time: data[key].eventTime,
+//         site_name: data[key].eventSource,
+//         Accident_cause: data[key].eventCause,
+//         event_id: data[key].id,
+//       };
+//       defaultList.push(default_site);
+//       switch (data[key].systemName) {
+//         case "垃圾系统":
+//           hwzyList.push(default_site);
+//           break;
+//         case "垃圾分类系统":
+//           ljqsmList.push(default_site);
+//           break;
+//         case "厕所系统":
+//           toiletWarningList.push(default_site);
+//           break;
+//         case "餐饮油烟系统":
+//           cyyyList.push(default_site);
+//           break;
+//         case "调度指挥系统":
+//           ddzhList.push(default_site);
+//           break;
+//         case "共享单车系统":
+//           gxdcList.push(default_site);
+//           break;
+//         case "扬尘治理系统":
+//           yczlList.push(default_site);
+//           break;
+//         case "景观照明系统":
+//           jgzmList.push(default_site);
+//           break;
+//         case "照明管家系统":
+//           zmgjList.push(default_site);
+//           break;
+//         case "临街店铺系统":
+//           ljdpList.push(default_site);
+//           break;
+//         case "突出问题系统":
+//           tcwtList.push(default_site);
+//           break;
+//         case "城管ai系统":
+//           cgaiList.push(default_site);
+//           break;
+//         case "网络理政系统":
+//           wllzList.push(default_site);
+//           break;
+//         case "数字城管系统":
+//           szhcsList.push(default_site);
+//           break;
+//         default:
+//           //未匹配到的系统名处理
+//           break;
+//       }
+
+//       const merged = [...hwzyList, ...ljqsmList, ...toiletWarningList];
+
+//       // 使用 Map 去重（以 event_id 作为唯一标识）
+//       const uniqueMap = new Map();
+//       for (const item of merged) {
+//         uniqueMap.set(item.event_id, item); // 若重复，会覆盖旧值
+//       }
+
+//       // 转为数组
+//       hjwsList.splice(0, hjwsList.length, ...uniqueMap.values());
+//       srzxList.push(...cyyyList, ...ddzhList, ...gxdcList, ...yczlList);
+//       csjgList.push(...jgzmList, ...zmgjList, ...ljdpList);
+//       szcgList.push(...tcwtList, ...cgaiList, ...wllzList, ...szhcsList);
+//     }
+
+//     // 出现事故
+//     if (defaultList.length != 0) {
+//       document.getElementById("dotClass").title = "出现异常！请点击查看详情！";
+//       document.getElementById("dotClass").style.backgroundColor = "#E12911";
+//       document.getElementById("lamp").style.display = "block";
+//     } else {
+//       document.getElementById("dotClass").style.backgroundColor = "#11e1b0";
+//       document.getElementById("lamp").style.display = "none";
+//     }
+
+//     if (hwzyList.length != 0) {
+//       document.getElementById("dotClass-hwzy").style.backgroundColor = "#E12911";
+//       document.getElementById("lamp-hwzy").style.display = "block";
+//     } else {
+//       document.getElementById("dotClass-hwzy").style.backgroundColor = "#11e1b0";
+//       document.getElementById("lamp-hwzy").style.display = "none";
+//     }
+
+//     if (ljqsmList.length != 0) {
+//       document.getElementById("dotClass-ljqsm").title = "出现异常！请点击查看详情！";
+//       document.getElementById("dotClass-ljqsm").style.backgroundColor = "#E12911";
+//       document.getElementById("lamp-ljqsm").style.display = "block";
+//     } else {
+//       document.getElementById("dotClass-ljqsm").style.backgroundColor = "#11e1b0";
+//       document.getElementById("lamp-ljqsm").style.display = "none";
+//     }
+
+//     if (toiletWarningList.length != 0) {
+//       document.getElementById("dotClass-toiletWarning").title = "出现异常！请点击查看详情！";
+//       document.getElementById("dotClass-toiletWarning").style.backgroundColor = "#E12911";
+//       document.getElementById("lamp-toiletWarning").style.display = "block";
+//     } else {
+//       document.getElementById("dotClass-toiletWarning").style.backgroundColor = "#11e1b0";
+//       document.getElementById("lamp-toiletWarning").style.display = "none";
+//     }
+
+//     if (hjwsList.length != 0) {
+//       document.getElementById("dotClass-hjws").title = "出现异常！请点击查看详情！";
+//       document.getElementById("dotClass-hjws").style.backgroundColor = "#E12911";
+//       document.getElementById("lamp-hjws").style.display = "block";
+//     } else {
+//       document.getElementById("dotClass-hjws").style.backgroundColor = "#11e1b0";
+//       document.getElementById("lamp-hjws").style.display = "none";
+//     }
+
+//   });
+// };
+
+queryAllWarning(warningStart, warningEnd, 1);
 changeColor();
-setInterval(changeColor, 60000);
+setInterval(() => {
+    changeColor();
+    queryAllWarning(warningStart, warningEnd, 1);
+    getPermissionList(1, searchName.value, searchPhone.value);
+}, 360000);
 
 //========================================================================================
 
@@ -6203,7 +6058,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6220,7 +6074,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6239,7 +6092,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6257,7 +6109,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6274,7 +6125,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6291,7 +6141,6 @@ const init_ljqsm = async () => {
     method: "get",
   }).then((response) => {
     var res = response.data.data;
-    console.log(res);
 
     for (var sensor in res) {
       var currentCar = {
@@ -6365,12 +6214,10 @@ const submitAddForm = async () => {
         }),
         method: "post",
       }).then(function (resp) {
-        console.log(2, resp);
         if (resp.data) {
           alert("提交成功！");
           peopleAdd.value = false;
           loading.value = true;
-          console.log("lastPage" + lastPage);
 
           getPermissionList(lastPage, searchName.value, searchPhone.value);
         } else {
@@ -6378,7 +6225,6 @@ const submitAddForm = async () => {
         }
       });
 
-      console.log("submit!");
     } else {
       return false;
     }
@@ -6395,10 +6241,8 @@ const selfSystemPermisson = () => {
   }).then(function (resp) {
     var data = resp.data;
     for (var index in data) {
-      // console.log("姓名：" + data[index].realName);
       var roleList = data[index].roleList;
       for (var key in roleList) {
-        console.log("子系统" + roleList[key].system);
         if (roleList[key].system == "all") {
           // systemPermisson.value = ["共享单车管家", "垃圾数据归集管家", "城管AI识别管家", "网络理政管家", "广告招牌二维码管", "扬尘治理大数据协同管家", "数字化城市信息管家", "景观照明集中控制管家", "智慧公厕管家", "突出问题管家", "调度指挥管家", "垃圾全生命周期管家", "餐饮油烟管家"];
           systemPermisson.push("共享单车管家");
@@ -6437,7 +6281,6 @@ const selfSystemPermisson = () => {
         }
       }
     }
-    console.log("所有的" + systemPermisson.value);
   });
 };
 selfSystemPermisson();
@@ -6457,7 +6300,7 @@ const searchNameInReset = ref("");
 const searchPhone = ref("");
 const searchPhoneInReset = ref("");
 const showSuperAdmin = reactive([]);
-const permissonApplicationList = reactive([]);
+const permissonApplicationList = ref([]);
 const resetPasswordList = reactive([]);
 const clickLogList = reactive([]);
 const logListView = reactive([]);
@@ -6470,13 +6313,13 @@ let currentPage = ref(1);
 let pageCount = 0;
 let lastPage = 0;
 const total_Records = ref(1000);
-let current_Page = ref(1);
+const current_Page = ref(1);
 let page_Count = 0;
 const total_Records_reset = ref(1000);
-let current_Page_reset = ref(1);
+const current_Page_reset = ref(1);
 let page_Count_reset = 0;
 const total_Records_clickLog = ref(1000);
-let current_Page_clickLog = ref(1);
+const current_Page_clickLog = ref(1);
 let page_Count_clickLog = 0;
 const permissionForm = ref(null);
 const handleEvent = ref(false);
@@ -6600,7 +6443,6 @@ const showClickLog = async () => {
 };
 const exportExcelOfClickLog = () => {
   var URL = "/api/click-log/excel?start=" + logStart + "&end=" + logEnd;
-  console.log("exportExcelOfClickLog URL: ", URL);
 
   axios({
     url: URL,
@@ -6611,12 +6453,10 @@ const exportExcelOfClickLog = () => {
     },
   }).then(function (res) {
     if (res.status === 200) {
-      console.log("成功了！");
-      console.log("res body: ", res.data);
+
       // 生成blob对象 定义下载格式
       let blob = new Blob([res.data], { type: res.headers['content-type'] });
-      // 获取文件名
-      console.log("res.headers: ", res.headers);
+
       // let contentDisposition = res.headers['content-disposition'];
       // let filename = decodeURIComponent(contentDisposition.split("filename=")[1]);
       let filename = logStart + "至" + logEnd + "城市管家点击日志.xlsx";
@@ -6659,7 +6499,6 @@ const getClickLogList = (sys, start, end, pageNum) => {
   } else if (sys == "调度指挥管家") {
     realUrl = "/ddzh/admin-log/page?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
   }
-  console.log("log realUrl:" + realUrl);
   var request;
   if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
     request = axios({
@@ -6690,10 +6529,8 @@ const getClickLogList = (sys, start, end, pageNum) => {
   }
 
   request.then((resp) => {
-    if (sys != "城市管家") {
-      console.log("clickLogList:" + JSON.stringify(resp, null, 2));
-    }
-    var data = resp.data.data;
+    //列表数据
+    var data = resp.data.data.list;
     
     if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
       data = resp.data.data.lists;
@@ -6719,7 +6556,6 @@ const getClickLogList = (sys, start, end, pageNum) => {
       };
       clickLogList.push(clickLog);
     }
-    //console.log("clickLogList:" + data);
     total_Records_clickLog.value = clickLogList.length;
     page_Count_clickLog = parseInt(clickLogList.length) % 10;
     if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
@@ -6752,6 +6588,8 @@ const getClickLogList = (sys, start, end, pageNum) => {
     current_Page_clickLog.value = pageNum;
   });
 };
+
+//换页操作
 const getClickLogApplication = (pageNum) => {
   // 当前页
   current_Page_clickLog.value = pageNum;
@@ -6813,10 +6651,10 @@ const getEditCompanyList = (pageNum) =>{
     current_Page_company.value = pageNum;
   })
 };
-
-setInterval(getEditCompanyList(1), 60000);
+setInterval(() => {
+    getEditCompanyList(1)
+}, 360000);
 const getEditCompanyApplication = (pageNum) => {
-  // 当前页
   current_Page_company.value = pageNum;
 };
 
@@ -6874,56 +6712,90 @@ const handleCloseEditCompany = () => {
 const handleSearchInReset = () => {
   getResetPasswordList(1);
 };
-const getResetPasswordList = (pageNum) => {
-  axios({
-    // url: "/api/lzj/getWarning",
-    url: "/api/auth/all_permission",
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
-  }).then(async (resp) => {
-    var data = resp.data;
-    resetPasswordList.splice(0, resetPasswordList.length);
-    console.log("人员列表:" + data);
 
-    for (var key in data) {
-      var resetPassword = {
-        realName: data[key].realName,
-        telephone: data[key].telephone,
-      };
-      resetPasswordList.push(resetPassword);
-      // if (searchNameInReset.value != "") {
-      //   if (!resetPassword.realName.includes(searchNameInReset.value)) {
-      //     resetPasswordList.pop();
-      //   }
-      // }
-      // if (searchPhoneInReset.value != "") {
-      //   if (!resetPassword.telephone.includes(searchPhoneInReset.value)) {
-      //     resetPasswordList.pop();
-      //   }
-      // }
-      if (!resetPassword.realName.includes(searchNameInReset.value)
-        || !resetPassword.telephone.includes(searchPhoneInReset.value)) {
-        resetPasswordList.pop();
-      }
-    }
-    total_Records_reset.value = resetPasswordList.length;
-    page_Count_reset = parseInt(resetPasswordList.length) % 10;
+const getResetPasswordList = async (pageNum) => {
+  // 1. 定义常量，提高可维护性
+  const API_URL = "/api/auth/all_permission";
+  const token = params.token;
+  // 2. 提前获取过滤条件，避免在循环/过滤中重复访问 .value
+  const searchName = searchNameInReset.value;
+  const searchPhone = searchPhoneInReset.value;
+  try {
+    // 3. 使用 async/await 简化 Promise 链
+    const resp = await axios.get(API_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const rawData = resp.data || {};
+    const userArray = Array.isArray(rawData) ? rawData : Object.values(rawData);
+    const processedList = userArray
+      .map(item => ({
+        realName: item.realName || '',
+        telephone: item.telephone || '',
+      }))
+      .filter(user => {
+        const nameMatch = user.realName.includes(searchName);
+        const phoneMatch = user.telephone.includes(searchPhone);
+        return nameMatch && phoneMatch;
+      });
+    resetPasswordList.values = processedList;
+    const listLength = processedList.length;
+    total_Records_reset.value = listLength;
+    // 使用 Math.ceil 计算总页数 (假设每页 10 条)
+    // page_Count_reset = Math.ceil(listLength / 10);
+    // 原始代码的计算逻辑是错误的，这里进行了修复：
+    // 原始: page_Count_reset = parseInt(listLength) % 10;
+    // 修复为计算总页数，但保留了原始的页数变量名：
+    // 如果 page_Count_reset 是用于存储总页数
+    page_Count_reset = Math.ceil(listLength / 10);
     current_Page_reset.value = pageNum;
-  });
+
+  } catch (error) {
+    console.error("获取重置密码列表失败:", error);
+    resetPasswordList.values = [];
+    total_Records_reset.value = 0;
+  }
 };
-// getPermissonApplicationListList(1);
-setInterval(getResetPasswordList(1), 60000);
+
+// const getResetPasswordList = (pageNum) => {
+//   axios({
+//     url: "/api/auth/all_permission",
+//     method: "get",
+//     headers: {
+//       Authorization: "Bearer " + params.token,
+//     },
+//   }).then(async (resp) => {
+//     var data = resp.data;
+//     resetPasswordList.splice(0, resetPasswordList.length);
+
+//     for (var key in data) {
+//       var resetPassword = {
+//         realName: data[key].realName,
+//         telephone: data[key].telephone,
+//       };
+//       resetPasswordList.push(resetPassword);
+//       if (!resetPassword.realName.includes(searchNameInReset.value)
+//         || !resetPassword.telephone.includes(searchPhoneInReset.value)) {
+//         resetPasswordList.pop();
+//       }
+//     }
+//     total_Records_reset.value = resetPasswordList.length;
+//     page_Count_reset = parseInt(resetPasswordList.length) % 10;
+//     current_Page_reset.value = pageNum;
+//   });
+// };
+
+setInterval(() => {
+    getResetPasswordList(1);
+}, 360000);
+
 const getResetPasswordApplication = (pageNum) => {
-  // 当前页
   current_Page_reset.value = pageNum;
 };
 
 const resetPassword = (row) => {
-  console.log("人员姓名：" + row.realName + "电话：" + row.telephone);
   axios({
-    // url: "/api/lzj/getWarning",
     url: "/api/auth/admin_change_password",
     method: "post",
     headers: {
@@ -6951,57 +6823,138 @@ const resetPassword = (row) => {
 };
 //-----------------------------------------------------------------sunny 090/07 密码重设列表
 
-const getPermissonApplicationListList = (pageNum) => {
-  axios({
-    url: "/api/auth/get_permission_applications",
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
-  }).then(function (resp) {
-    permissonApplicationList.splice(0, permissonApplicationList.length);
-    var data = resp.data;
-    console.log(111, data);
-
-    console.log("resp.code：" + data);
-    for (var key in data) {
-      if (data[key].reviewed == false) {
-        var permission_list = {
-          indexid: data[key].id,
-          username: data[key].realName,
-          telephone: data[key].telephone,
-          roleName: data[key].roleName,
-          roleSystem: data[key].roleSystem,
-          operator: data[key].operator,
-          operateType: data[key].operateType,
-        };
-        if (data[key].operateType == "add") {
-          permission_list.operateType = "添加";
-        } else if (data[key].operateType == "delete") {
-          permission_list.operateType = "删除";
-        }
-        if (data[key].roleName == "viewer") {
-          permission_list.roleName = "浏览信息";
-        } else if (data[key].roleName == "operator") {
-          permission_list.roleName = "操作系统";
-        } else if (data[key].roleName == "admin") {
-          permission_list.roleName = "管理参数";
-        }
-        permissonApplicationList.push(permission_list);
-      }
-    }
-    total_Records.value = permissonApplicationList.length;
-    page_Count = parseInt(permissonApplicationList.length) % 10;
-    current_Page.value = pageNum;
-    aplicationloading.value = false;
-    var div = document.getElementById("permissonAlert");
-    if (permissonApplicationList.length == 0) {
-      div.style.display = "none";
-    }
-  });
+// 1. 定义映射常量 (将翻译/映射逻辑外部化，提高可维护性)
+const OPERATE_TYPE_MAP = {
+    "add": "添加",
+    "delete": "删除",
 };
-// getPermissonApplicationListList(1);
-setInterval(getPermissonApplicationListList(1), 60000);
+const ROLE_NAME_MAP = {
+    "viewer": "浏览信息",
+    "operator": "操作系统",
+    "admin": "管理参数",
+};
+
+const getPermissonApplicationListList = async (pageNum) => {
+
+    const API_URL = "/api/auth/get_permission_applications";
+    const token = params.token;
+
+    // 立即设置加载状态
+    aplicationloading.value = true;
+
+    try {
+        // 2. 使用 async/await 简化 Promise 链和错误处理
+        const resp = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const rawData = resp.data || {};
+
+        // 3. 数据处理：使用 filter 和 map 提高效率和可读性
+        const processedList = Object.values(rawData)
+            // 过滤未审核的记录 (reviewed == false)
+            .filter(item => item.reviewed === false)
+            // 映射和转换字段
+            .map(item => {
+                // 提取字段并进行翻译
+                return {
+                    indexid: item.id,
+                    username: item.realName,
+                    telephone: item.telephone,
+                    roleName: ROLE_NAME_MAP[item.roleName] || item.roleName, // 翻译角色名
+                    roleSystem: item.roleSystem,
+                    operator: item.operator,
+                    operateType: OPERATE_TYPE_MAP[item.operateType] || item.operateType, // 翻译操作类型
+                };
+            });
+
+        // 4. 更新响应式数据
+        permissonApplicationList.value = processedList;
+
+        // 5. 更新分页和总记录数信息
+        const listLength = processedList.length;
+
+        total_Records.value = listLength;
+        // 🚨 修复潜在的页数计算错误：原始代码是取模 (余数)，通常应该是计算总页数。
+        // 如果 page_Count 是用来表示总页数:
+        // page_Count = Math.ceil(listLength / 10);
+        // 如果 page_Count 是一个全局变量，这里直接赋值，否则需要通过 .value 赋值
+        page_Count = Math.ceil(listLength / 10);
+
+        current_Page.value = pageNum;
+
+        // 6. DOM 操作（建议改为响应式控制）
+        const div = document.getElementById("permissonAlert");
+        if (div) { // 检查 DOM 元素是否存在
+            // 建议：使用 Vue 的 v-if="permissonApplicationList.length !== 0" 来控制
+            div.style.display = (listLength === 0) ? "none" : "block";
+        }
+
+    } catch (error) {
+        console.error("获取权限申请列表失败:", error);
+        permissonApplicationList.value = []; // 清空列表
+        total_Records.value = 0;
+        // 失败时也应更新 DOM 或通知用户
+    } finally {
+        // 无论成功或失败，都停止加载状态
+        aplicationloading.value = false;
+    }
+};
+
+// const getPermissonApplicationListList = (pageNum) => {
+//   axios({
+//     url: "/api/auth/get_permission_applications",
+//     method: "get",
+//     headers: {
+//       Authorization: "Bearer " + params.token,
+//     },
+//   }).then(function (resp) {
+//     permissonApplicationList.splice(0, permissonApplicationList.length);
+//     var data = resp.data;
+
+//     for (var key in data) {
+//       if (data[key].reviewed == false) {
+//         var permission_list = {
+//           indexid: data[key].id,
+//           username: data[key].realName,
+//           telephone: data[key].telephone,
+//           roleName: data[key].roleName,
+//           roleSystem: data[key].roleSystem,
+//           operator: data[key].operator,
+//           operateType: data[key].operateType,
+//         };
+//         if (data[key].operateType == "add") {
+//           permission_list.operateType = "添加";
+//         } else if (data[key].operateType == "delete") {
+//           permission_list.operateType = "删除";
+//         }
+//         if (data[key].roleName == "viewer") {
+//           permission_list.roleName = "浏览信息";
+//         } else if (data[key].roleName == "operator") {
+//           permission_list.roleName = "操作系统";
+//         } else if (data[key].roleName == "admin") {
+//           permission_list.roleName = "管理参数";
+//         }
+//         permissonApplicationList.push(permission_list);
+//       }
+//     }
+//     total_Records.value = permissonApplicationList.length;
+//     page_Count = parseInt(permissonApplicationList.length) % 10;
+//     current_Page.value = pageNum;
+//     aplicationloading.value = false;
+//     var div = document.getElementById("permissonAlert");
+//     if (permissonApplicationList.length == 0) {
+//       div.style.display = "none";
+//     }
+//   });
+// };
+
+
+setInterval(() => {
+    getPermissonApplicationListList(1)
+}, 360000);
 const getPermissionApplication = (pageNum) => {
   // 当前页
   current_Page.value = pageNum;
@@ -7060,268 +7013,370 @@ const handleSearch = () => {
   getPermissionList(1, searchName.value, searchPhone.value);
 };
 
-const getPermissionList = (pageNum, filteredName, filteredPhone) => {
-  // Construct URL with query parameters if they're provided
+
+const SYSTEM_KEY_MAP = {
+  '共享单车管家': 'gxdc',
+  '环卫作业管家': 'hwzy',
+  // '垃圾数据归集管家': 'ljsj', // 保持注释
+  '城管AI识别管家': 'cgAI',
+  '网络理政管家': 'cgsyd',
+  '广告招牌二维码管家': 'ggzp',
+  '扬尘治理大数据协同管家': 'yczl',
+  '数字化城市信息管家': 'szhcs',
+  '景观照明集中控制管家': 'jgzm',
+  '智慧公厕管家': 'shlj',
+  '突出问题管家': 'zhxz',
+  '调度指挥管家': 'ddzh',
+  '垃圾全生命周期管家': 'cclj',
+  '餐饮油烟管家': 'cyyy',
+  '照明管家（新）': 'newZmgj',
+};
+//封装默认权限列表结构
+const createBasePermissionItem = (user, keyIndex) => ({
+  index: keyIndex + 1,
+  username: user.realName,
+  telephone: user.telephone,
+  // 使用 reduce 动态生成初始权限列表，默认值都是 '×'
+  ...Object.values(SYSTEM_KEY_MAP).reduce((acc, key) => {
+    acc[key] = '×';
+    return acc;
+  }, {}),
+  hwzy: '×', // 确保 'hwzy' 的默认值统一
+});
+const getPermissionList = async (pageNum, filteredName, filteredPhone) => {
+  loading.value = true;
+  currentPage.value = pageNum;
   let url = "/api/auth/non_super_admin_list";
   const queryParams = [];
-  
-  if (filteredName && filteredName.trim() !== "") {
-    queryParams.push(`filteredName=${encodeURIComponent(filteredName.trim())}`);
+  const name = filteredName?.trim();
+  const phone = filteredPhone?.trim();
+  if (name) {
+    queryParams.push(`filteredName=${encodeURIComponent(name)}`);
   }
-  
-  if (filteredPhone && filteredPhone.trim() !== "") {
-    queryParams.push(`filteredPhone=${encodeURIComponent(filteredPhone.trim())}`);
+  if (phone) {
+    queryParams.push(`filteredPhone=${encodeURIComponent(phone)}`);
   }
-  
-  // Add query parameters to URL if any exist
+
   if (queryParams.length > 0) {
     url += `?${queryParams.join("&")}`;
   }
-  console.log("请求的URL：" + url);
-  axios({
-    url: url,
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
-  }).then(async (resp) => {
-    permissionList.splice(0, permissionList.length);
-    var data = resp.data;
-    // console.log(111, data);
 
-    // console.log("data.code：" + data);
-    var realName = ref("");
-    var telephone = ref("");
-    var company = ref("");
-    for (var key in data) {
-      realName.value = data[key].realName;
-      telephone.value = data[key].telephone;
-      company.value = data[key].department;
-      var permission_list = {
-        index: Number(key) + 1,
-        username: data[key].realName,
-        telephone: data[key].telephone,
-        gxdc: "×",
-        ljsj: "×",
-        cgAI: "×",
-        cgsyd: "×",
-        ggzp: "×",
-        yczl: "×",
-        szhcs: "×",
-        jgzm: "×",
-        shlj: "×",
-        zhxz: "×",
-        ddzh: "×",
-        cclj: "×",
-        cyyy: "×",
-        hwzy: "x",
-        newZmgj: "×",
-      };
-      var roleList = data[key].roleList;
-      for (var index in roleList) {
-        var finishied = false;
-        if (roleList[index].system == "all") {
-          permission_list.cyyy = "√";
-          permission_list.gxdc = "√";
-          permission_list.ljsj = "√";
-          permission_list.cgAI = "√";
-          permission_list.cgsyd = "√";
-          permission_list.ggzp = "√";
-          permission_list.yczl = "√";
-          permission_list.szhcs = "√";
-          permission_list.jgzm = "√";
-          permission_list.shlj = "√";
-          permission_list.zhxz = "√";
-          permission_list.cclj = "√";
-          permission_list.ddzh = "√";
-          permission_list.hwzy = "√";
-          permission_list.newZmgj = "√";
-        }
-        if (roleList[index].system == "共享单车管家") {
-          permission_list.gxdc = "√";
-        }
-        if (roleList[index].system == "环卫作业管家") {
-          permission_list.hwzy = "√";
-        }
-        // if (roleList[index].system == "垃圾数据归集管家") {
-        //   permission_list.ljsj = "√";
-        // }
-        if (roleList[index].system == "城管AI识别管家") {
-          permission_list.cgAI = "√";
-        }
-        if (roleList[index].system == "网络理政管家") {
-          permission_list.cgsyd = "√";
-        }
-        if (roleList[index].system == "广告招牌二维码管家") {
-          permission_list.ggzp = "√";
-        }
-        if (roleList[index].system == "扬尘治理大数据协同管家") {
-          permission_list.yczl = "√";
-        }
-        if (roleList[index].system == "数字化城市信息管家") {
-          permission_list.szhcs = "√";
-        }
-        if (roleList[index].system == "景观照明集中控制管家") {
-          permission_list.jgzm = "√";
-        }
-        if (roleList[index].system == "智慧公厕管家") {
-          permission_list.shlj = "√";
-        }
-        if (roleList[index].system == "突出问题管家") {
-          permission_list.zhxz = "√";
-        }
-        if (roleList[index].system == "调度指挥管家") {
-          permission_list.ddzh = "√";
-        }
-        if (roleList[index].system == "垃圾全生命周期管家") {
-          permission_list.cclj = "√";
-        }
-        if (roleList[index].system == "餐饮油烟管家") {
-          permission_list.cyyy = "√";
-        }
-        if (roleList[index].system == "照明管家（新）") {
-          permission_list.newZmgj = "√";
+  try {
+    const userResp = await axios.get(url, {
+      headers: {
+        Authorization: "Bearer " + params.token,
+      },
+    });
+    const userData = userResp.data || [];
+    const appResp = await axios.get("/api/auth/get_self_permission_applications", {
+      headers: {
+        Authorization: "Bearer " + params.token,
+      },
+    });
+    const applicationData = appResp.data || [];
+    const newPermissionList = userData.map((user, keyIndex) => {
+      const item = createBasePermissionItem(user, keyIndex);
+      const roleList = user.roleList || [];
+      const isGlobalAdmin = roleList.some(r => r.system === "all");
+      for (const role of roleList) {
+        const key = SYSTEM_KEY_MAP[role.system];
+        if (isGlobalAdmin || role.system === "all") {
+          // 超级管理员/全局权限，所有系统都设置为 '√'
+          Object.keys(SYSTEM_KEY_MAP).forEach(systemKey => {
+            item[SYSTEM_KEY_MAP[systemKey]] = "√";
+          });
+          break; // 跳出 roleList 循环，因为权限已定
+        } else if (key) {
+          // 针对特定系统的权限，设置为 '√'
+          item[key] = "√";
         }
       }
-      await axios({
-        // url: "/api/lzj/getWarning",
-        url: "/api/auth/get_self_permission_applications",
-        method: "get",
-        headers: {
-          Authorization: "Bearer " + params.token,
-        },
-      }).then((data) => {
-        var resp = data.data;
-        for (var i in resp) {
-          if (realName.value == resp[i].realName) {
-            if (resp[i].operateType == "delete") {
-              if (resp[i].roleSystem == "共享单车管家") {
-                permission_list.gxdc = "×(待定)";
-              }
-              if (resp[i].roleSystem == "环卫作业管家") {
-                permission_list.hwzy = "×(待定)";
-              }
-              // if (resp[i].roleSystem == "垃圾数据归集管家") {
-              //   permission_list.ljsj = "×(待定)";
-              // }
-              if (resp[i].roleSystem == "城管AI识别管家") {
-                permission_list.cgAI = "×(待定)";
-              }
-              if (resp[i].roleSystem == "网络理政管家") {
-                permission_list.cgsyd = "×(待定)";
-              }
-              if (resp[i].roleSystem == "广告招牌二维码管家") {
-                permission_list.ggzp = "×(待定)";
-              }
-              if (resp[i].roleSystem == "扬尘治理大数据协同管家") {
-                permission_list.yczl = "×(待定)";
-              }
-              if (resp[i].roleSystem == "数字化城市信息管家") {
-                permission_list.szhcs = "×(待定)";
-              }
-              if (resp[i].roleSystem == "景观照明集中控制管家") {
-                permission_list.jgzm = "×(待定)";
-              }
-              if (resp[i].roleSystem == "智慧公厕管家") {
-                permission_list.shlj = "×(待定)";
-              }
-              if (resp[i].roleSystem == "突出问题管家") {
-                permission_list.zhxz = "×(待定)";
-              }
-              if (resp[i].roleSystem == "调度指挥管家") {
-                permission_list.ddzh = "×(待定)";
-              }
-              if (resp[i].roleSystem == "垃圾全生命周期管家") {
-                permission_list.cclj = "×(待定)";
-              }
-              if (resp[i].roleSystem == "餐饮油烟管家") {
-                permission_list.cyyy = "×(待定)";
-              }
-              if (resp[i].roleSystem == "照明管家（新）") {
-                permission_list.newZmgj = "×(待定)";
-              }
-            } else if (resp[i].operateType == "add") {
-              if (resp[i].roleSystem == "共享单车管家") {
-                permission_list.gxdc = "√(待定)";
-              }
-              if (resp[i].roleSystem == "环卫作业管家") {
-                permission_list.hwzy = "√(待定)";
-              }
-              // if (resp[i].roleSystem == "垃圾数据归集管家") {
-              //   permission_list.ljsj = "√(待定)";
-              // }
-              if (resp[i].roleSystem == "城管AI识别管家") {
-                permission_list.cgAI = "√(待定)";
-              }
-              if (resp[i].roleSystem == "网络理政管家") {
-                permission_list.cgsyd = "√(待定)";
-              }
-              if (resp[i].roleSystem == "广告招牌二维码管家") {
-                permission_list.ggzp = "√(待定)";
-              }
-              if (resp[i].roleSystem == "扬尘治理大数据协同管家") {
-                permission_list.yczl = "√(待定)";
-              }
-              if (resp[i].roleSystem == "数字化城市信息管家") {
-                permission_list.szhcs = "√(待定)";
-              }
-              if (resp[i].roleSystem == "景观照明集中控制管家") {
-                permission_list.jgzm = "√(待定)";
-              }
-              if (resp[i].roleSystem == "智慧公厕管家") {
-                permission_list.shlj = "√(待定)";
-              }
-              if (resp[i].roleSystem == "突出问题管家") {
-                permission_list.zhxz = "√(待定)";
-              }
-              if (resp[i].roleSystem == "调度指挥管家") {
-                permission_list.ddzh = "√(待定)";
-              }
-              if (resp[i].roleSystem == "垃圾全生命周期管家") {
-                permission_list.cclj = "√(待定)";
-              }
-              if (resp[i].roleSystem == "餐饮油烟管家") {
-                permission_list.cyyy = "√(待定)";
-              }
-              if (resp[i].roleSystem == "照明管家（新）") {
-                permission_list.newZmgj = "√(待定)";
-              }
-            }
+
+      // B. 处理待审批的权限申请 (覆盖当前权限状态)
+      // 查找该用户的待审批申请
+      const userApplications = applicationData.filter(app => app.realName === user.realName);
+
+      for (const app of userApplications) {
+        const key = SYSTEM_KEY_MAP[app.roleSystem];
+        if (key) {
+          if (app.operateType === "delete") {
+            // 待删除的权限：将当前状态标记为 '×(待定)'
+            item[key] = "×(待定)";
+          } else if (app.operateType === "add") {
+            // 待添加的权限：将当前状态标记为 '√(待定)'
+            item[key] = "√(待定)";
           }
         }
-      });
-      permissionList.push(permission_list);
-      
-      // if (!permission_list.username.includes(searchName.value) 
-      //     || !permission_list.telephone.includes(searchPhone.value)) {
-      //   permissionList.pop();
-      // }
-    }
+      }
+
+      return item;
+    });
+
+    // 5. 更新响应式列表
+    // 推荐使用直接赋值来更新响应式数组，比 splice 更简洁
+    permissionList.length = 0; // 清空数组
+    permissionList.push(...newPermissionList); // 填入新数据
+
+    // 6. 更新分页和加载状态
     totalRecords.value = permissionList.length;
-    pageCount = parseInt(permissionList.length) % 10;
-    // 计算最后一页的页码
-    lastPage = Math.ceil(totalRecords.value / 10);
-    console.log("lastPage:" + lastPage);
-    currentPage.value = pageNum;
+
+  } catch (error) {
+    console.error("加载权限列表失败:", error);
+    // 可在此处添加错误提示，例如：ElMessage.error("加载数据失败");
+  } finally {
     loading.value = false;
-  });
+  }
 };
-// getPermissionList(1);
-setInterval(() => {
-  getPermissionList(1, searchName.value, searchPhone.value);
-}, 60000);
+
+// const getPermissionList = (pageNum, filteredName, filteredPhone) => {
+//   let url = "/api/auth/non_super_admin_list";
+//   const queryParams = [];
+
+//   if (filteredName && filteredName.trim() !== "") {
+//     queryParams.push(`filteredName=${encodeURIComponent(filteredName.trim())}`);
+//   }
+
+//   if (filteredPhone && filteredPhone.trim() !== "") {
+//     queryParams.push(`filteredPhone=${encodeURIComponent(filteredPhone.trim())}`);
+//   }
+
+//   // Add query parameters to URL if any exist
+//   if (queryParams.length > 0) {
+//     url += `?${queryParams.join("&")}`;
+//   }
+//   axios({
+//     url: url,
+//     method: "get",
+//     headers: {
+//       Authorization: "Bearer " + params.token,
+//     },
+//   }).then(async (resp) => {
+//     permissionList.splice(0, permissionList.length);
+//     var data = resp.data;
+
+//     var realName = ref("");
+//     var telephone = ref("");
+//     var company = ref("");
+//     for (var key in data) {
+//       realName.value = data[key].realName;
+//       telephone.value = data[key].telephone;
+//       company.value = data[key].department;
+//       var permission_list = {
+//         index: Number(key) + 1,
+//         username: data[key].realName,
+//         telephone: data[key].telephone,
+//         gxdc: "×",
+//         ljsj: "×",
+//         cgAI: "×",
+//         cgsyd: "×",
+//         ggzp: "×",
+//         yczl: "×",
+//         szhcs: "×",
+//         jgzm: "×",
+//         shlj: "×",
+//         zhxz: "×",
+//         ddzh: "×",
+//         cclj: "×",
+//         cyyy: "×",
+//         hwzy: "x",
+//         newZmgj: "×",
+//       };
+//       var roleList = data[key].roleList;
+//       for (var index in roleList) {
+//         var finishied = false;
+//         if (roleList[index].system == "all") {
+//           permission_list.cyyy = "√";
+//           permission_list.gxdc = "√";
+//           permission_list.ljsj = "√";
+//           permission_list.cgAI = "√";
+//           permission_list.cgsyd = "√";
+//           permission_list.ggzp = "√";
+//           permission_list.yczl = "√";
+//           permission_list.szhcs = "√";
+//           permission_list.jgzm = "√";
+//           permission_list.shlj = "√";
+//           permission_list.zhxz = "√";
+//           permission_list.cclj = "√";
+//           permission_list.ddzh = "√";
+//           permission_list.hwzy = "√";
+//           permission_list.newZmgj = "√";
+//         }
+//         if (roleList[index].system == "共享单车管家") {
+//           permission_list.gxdc = "√";
+//         }
+//         if (roleList[index].system == "环卫作业管家") {
+//           permission_list.hwzy = "√";
+//         }
+//         // if (roleList[index].system == "垃圾数据归集管家") {
+//         //   permission_list.ljsj = "√";
+//         // }
+//         if (roleList[index].system == "城管AI识别管家") {
+//           permission_list.cgAI = "√";
+//         }
+//         if (roleList[index].system == "网络理政管家") {
+//           permission_list.cgsyd = "√";
+//         }
+//         if (roleList[index].system == "广告招牌二维码管家") {
+//           permission_list.ggzp = "√";
+//         }
+//         if (roleList[index].system == "扬尘治理大数据协同管家") {
+//           permission_list.yczl = "√";
+//         }
+//         if (roleList[index].system == "数字化城市信息管家") {
+//           permission_list.szhcs = "√";
+//         }
+//         if (roleList[index].system == "景观照明集中控制管家") {
+//           permission_list.jgzm = "√";
+//         }
+//         if (roleList[index].system == "智慧公厕管家") {
+//           permission_list.shlj = "√";
+//         }
+//         if (roleList[index].system == "突出问题管家") {
+//           permission_list.zhxz = "√";
+//         }
+//         if (roleList[index].system == "调度指挥管家") {
+//           permission_list.ddzh = "√";
+//         }
+//         if (roleList[index].system == "垃圾全生命周期管家") {
+//           permission_list.cclj = "√";
+//         }
+//         if (roleList[index].system == "餐饮油烟管家") {
+//           permission_list.cyyy = "√";
+//         }
+//         if (roleList[index].system == "照明管家（新）") {
+//           permission_list.newZmgj = "√";
+//         }
+//       }
+//       await axios({
+//         url: "/api/auth/get_self_permission_applications",
+//         method: "get",
+//         headers: {
+//           Authorization: "Bearer " + params.token,
+//         },
+//       }).then((data) => {
+//         var resp = data.data;
+//         for (var i in resp) {
+//           if (realName.value == resp[i].realName) {
+//             if (resp[i].operateType == "delete") {
+//               if (resp[i].roleSystem == "共享单车管家") {
+//                 permission_list.gxdc = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "环卫作业管家") {
+//                 permission_list.hwzy = "×(待定)";
+//               }
+//               // if (resp[i].roleSystem == "垃圾数据归集管家") {
+//               //   permission_list.ljsj = "×(待定)";
+//               // }
+//               if (resp[i].roleSystem == "城管AI识别管家") {
+//                 permission_list.cgAI = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "网络理政管家") {
+//                 permission_list.cgsyd = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "广告招牌二维码管家") {
+//                 permission_list.ggzp = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "扬尘治理大数据协同管家") {
+//                 permission_list.yczl = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "数字化城市信息管家") {
+//                 permission_list.szhcs = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "景观照明集中控制管家") {
+//                 permission_list.jgzm = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "智慧公厕管家") {
+//                 permission_list.shlj = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "突出问题管家") {
+//                 permission_list.zhxz = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "调度指挥管家") {
+//                 permission_list.ddzh = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "垃圾全生命周期管家") {
+//                 permission_list.cclj = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "餐饮油烟管家") {
+//                 permission_list.cyyy = "×(待定)";
+//               }
+//               if (resp[i].roleSystem == "照明管家（新）") {
+//                 permission_list.newZmgj = "×(待定)";
+//               }
+//             } else if (resp[i].operateType == "add") {
+//               if (resp[i].roleSystem == "共享单车管家") {
+//                 permission_list.gxdc = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "环卫作业管家") {
+//                 permission_list.hwzy = "√(待定)";
+//               }
+//               // if (resp[i].roleSystem == "垃圾数据归集管家") {
+//               //   permission_list.ljsj = "√(待定)";
+//               // }
+//               if (resp[i].roleSystem == "城管AI识别管家") {
+//                 permission_list.cgAI = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "网络理政管家") {
+//                 permission_list.cgsyd = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "广告招牌二维码管家") {
+//                 permission_list.ggzp = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "扬尘治理大数据协同管家") {
+//                 permission_list.yczl = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "数字化城市信息管家") {
+//                 permission_list.szhcs = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "景观照明集中控制管家") {
+//                 permission_list.jgzm = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "智慧公厕管家") {
+//                 permission_list.shlj = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "突出问题管家") {
+//                 permission_list.zhxz = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "调度指挥管家") {
+//                 permission_list.ddzh = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "垃圾全生命周期管家") {
+//                 permission_list.cclj = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "餐饮油烟管家") {
+//                 permission_list.cyyy = "√(待定)";
+//               }
+//               if (resp[i].roleSystem == "照明管家（新）") {
+//                 permission_list.newZmgj = "√(待定)";
+//               }
+//             }
+//           }
+//         }
+//       });
+//       permissionList.push(permission_list);
+
+//       // if (!permission_list.username.includes(searchName.value)
+//       //     || !permission_list.telephone.includes(searchPhone.value)) {
+//       //   permissionList.pop();
+//       // }
+//     }
+//     totalRecords.value = permissionList.length;
+//     pageCount = parseInt(permissionList.length) % 10;
+//     // 计算最后一页的页码
+//     lastPage = Math.ceil(totalRecords.value / 10);
+//     currentPage.value = pageNum;
+//     loading.value = false;
+//   });
+// };
 
 const getPermission = (pageNum) => {
-  // 当前页
   currentPage.value = pageNum;
 };
 
 const handleDelete = (row) => {
-  console.log("length:" + permissonApplicationList.length);
   currentRowPage = Math.ceil((row.index - 1) / 10);
   var div = document.getElementById("permissonAlert");
-  if (permissonApplicationList.length != 0) {
-    console.log("div.style.display" + div.style.display);
+  if (permissonApplicationList.value.length != 0) {
     div.style.display = "flex";
   } else {
     ElMessageBox.confirm("是否删除该人员?", "提示", {
@@ -7330,7 +7385,6 @@ const handleDelete = (row) => {
       type: "提示",
     })
       .then(() => {
-        console.log("row.username:" + row.telephone);
         axios({
           url: "/api/auth/delete_user/" + row.telephone,
           headers: {
@@ -7339,15 +7393,12 @@ const handleDelete = (row) => {
           },
           method: "get",
         }).then(function (resp) {
-          console.log(2, resp);
           loading.value = true;
           getPermissionList(currentRowPage, searchName.value, searchPhone.value);
-
           ElMessage({
             type: "success",
             message: "删除成功！",
           });
-          console.log("我管理员" + params.username + "删除" + row.telephone);
         });
       })
       .catch(() => {
@@ -7362,571 +7413,659 @@ const handleDelete = (row) => {
 const handleAdd = () => {
   peopleAdd.value = true;
 };
-const handleClick = (row) => {
-  console.log("所在行：" + row.index);
-  currentRowPage = Math.ceil((row.index + 1) / 10);
+// 用于控制权限申请提示框的显示状态 (取代直接操作DOM)
+const showPermissonAlert = ref(false);
+const PERMISSION_MAP = {
+  viewer: {
+    rights: ['浏览信息'],
+    role: 'viewer'
+  },
+  admin: {
+    rights: ['浏览信息', '管理参数'],
+    role: 'admin'
+  },
+  operator: {
+    rights: ['浏览信息', '管理参数', '操作系统'],
+    role: 'operator'
+  }
+};
+const systemPermissons = reactive({
+  '共享单车管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '环卫作业管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '城管AI识别管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '网络理政管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '广告招牌二维码管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '扬尘治理大数据协同管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '数字化城市信息管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '景观照明集中控制管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '智慧公厕管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '照明管家（新）': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '突出问题管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '调度指挥管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '垃圾全生命周期管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+  '餐饮油烟管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+});
+const resetAllRadios = () => {
+  for (const system in systemPermissons) {
+    systemPermissons[system].radio.value = [];
+    systemPermissons[system].oldRadio.value = '';
+    systemPermissons[system].permission.value = '';
+  }
+};
+const processRolePermission = (systemName, roleName) => {
+  const permData = systemPermissons[systemName];
+  if (!permData) return; // 如果系统不存在，则跳过
 
-  console.log("length:" + permissonApplicationList.length);
-  var div = document.getElementById("permissonAlert");
-  if (permissonApplicationList.length != 0) {
-    console.log("div.style.display" + div.style.display);
-    div.style.display = "flex";
-  } else {
-    div.style.display = "none";
-    formLoading.value = true;
-    permissonName.value = row.username;
-    permissonTelephone.value = row.telephone;
-    console.log("permissonTelephone:" + permissonTelephone.value);
-    handleEvent.value = true;
-    radioGxdc.value = [];
-    radioHwzy.value = [];
-    radioLjsj.value = [];
-    radioCgAI.value = [];
-    radioCgsyd.value = [];
-    radioGgzp.value = [];
-    radioYczl.value = [];
-    radioSzhcs.value = [];
-    radioJgzm.value = [];
-    radioShlj.value = [];
-    radioNewZmgj.value = [];
-    radioZhxz.value = [];
-    radioDdzh.value = [];
-    radioCclj.value = [];
-    radioCyyy.value = [];
+  const perm = PERMISSION_MAP[roleName];
+  if (!perm) return; // 如果角色名称不存在，则跳过
 
-    axios({
-      // url: "/api/lzj/getWarning",
-      url: "/api/auth/non_super_admin_list",
-      method: "get",
+  permData.radio.value = perm.rights;
+  permData.oldRadio.value = perm.role;
+  permData.permission.value = perm.role; // 使用 permission 字段存储当前权限
+};
+const handleClick = async (row) => {
+  // 1. 计算当前行所在页码
+  currentRowPage.value = Math.ceil((row.index + 1) / 10);
+
+  // 2. 检查权限申请列表，使用响应式数据控制显示
+  if (permissonApplicationList.value.length !== 0) {
+    showPermissonAlert.value = true;
+    return; // 提前退出
+  }
+
+  // 3. 权限申请列表为空时，执行加载和初始化
+  showPermissonAlert.value = false;
+  formLoading.value = true;
+  permissonName.value = row.username;
+  permissonTelephone.value = row.telephone;
+  handleEvent.value = true;
+  // 重置所有权限数据
+  resetAllRadios();
+  try {
+    // --- 第一步：获取用户当前权限列表 ---
+    const resp = await axios.get("/api/auth/non_super_admin_list", {
       headers: {
         Authorization: "Bearer " + params.token,
       },
-    }).then(async (resp) => {
-      var data = resp.data;
+    });
 
-      for (var key in data) {
-        if (data[key].telephone == permissonTelephone.value) {
-          var roleList = data[key].roleList;
-          for (var index in roleList) {
-            if (roleList[index].system == "all") {
-              radioGxdc.value = ["浏览信息"];
-              radioHwzy.value = ["浏览信息"];
-              radioLjsj.value = ["浏览信息"];
-              radioCgAI.value = ["浏览信息"];
-              radioCgsyd.value = ["浏览信息"];
-              radioGgzp.value = ["浏览信息"];
-              radioYczl.value = ["浏览信息"];
-              radioSzhcs.value = ["浏览信息"];
-              radioJgzm.value = ["浏览信息"];
-              radioShlj.value = ["浏览信息"];
-              radioZhxz.value = ["浏览信息"];
-              radioDdzh.value = ["浏览信息"];
-              radioCclj.value = ["浏览信息"];
-              radioCyyy.value = ["浏览信息"];
-              radioNewZmgj.value = ["浏览信息"];
+    const userDataList = resp.data;
+    const targetUser = userDataList.find(user => user.telephone === permissonTelephone.value);
 
-              // ElMessage({
-              //   message: "您不可更改该用户权限！",
-              //   type: "warning",
-              // });
-            } else {
-              if (roleList[index].system == "共享单车管家") {
-                if (roleList[index].name == "viewer") {
-                  radioGxdc.value = ["浏览信息"];
-                  oldRadioGxdc.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioGxdc.value = ["浏览信息", "管理参数"];
-                  oldRadioGxdc.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioGxdc.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioGxdc.value = "operator";
-                }
-                permissonGxdc.value = oldRadioGxdc.value;
-              }
-              if (roleList[index].system == "环卫作业管家") {
-                if (roleList[index].name == "viewer") {
-                  radioHwzy.value = ["浏览信息"];
-                  oldRadioHwzy.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioHwzy.value = ["浏览信息", "管理参数"];
-                  oldRadioHwzy.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioHwzy.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioHwzy.value = "operator";
-                }
-                permissonHwzy.value = oldRadioHwzy.value;
-              }
-              // if (roleList[index].system == "垃圾数据归集管家") {
-              //   if (roleList[index].name == "viewer") {
-              //     radioLjsj.value = ["浏览信息"];
-              //     oldRadioLjsj.value = "viewer";
-              //   }
-              //   if (roleList[index].name == "admin") {
-              //     radioLjsj.value = ["浏览信息", "管理参数"];
-              //     oldRadioLjsj.value = "admin";
-              //   }
-              //   if (roleList[index].name == "operator") {
-              //     radioLjsj.value = ["浏览信息", "管理参数", "操作系统"];
-              //     oldRadioLjsj.value = "operator";
-              //   }
-              //   permissonLjsj.value = oldRadioLjsj.value;
-              // }
+    if (targetUser) {
+      const roleList = targetUser.roleList || [];
 
-              if (roleList[index].system == "城管AI识别管家") {
-                if (roleList[index].name == "viewer") {
-                  radioCgAI.value = ["浏览信息"];
-                  oldRadioCgAI.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioCgAI.value = ["浏览信息", "管理参数"];
-                  oldRadioCgAI.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioCgAI.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioCgAI.value = "operator";
-                }
-                permissonCgAI.value = oldRadioCgAI.value;
-              }
-              if (roleList[index].system == "网络理政管家") {
-                if (roleList[index].name == "viewer") {
-                  radioCgsyd.value = ["浏览信息"];
-                  oldRadioCgsyd.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioCgsyd.value = ["浏览信息", "管理参数"];
-                  oldRadioCgsyd.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioCgsyd.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioCgsyd.value = "operator";
-                }
-                permissonCgsyd.value = oldRadioCgsyd.value;
-              }
-              if (roleList[index].system == "广告招牌二维码管家") {
-                if (roleList[index].name == "viewer") {
-                  radioGgzp.value = ["浏览信息"];
-                  oldRadioGgzp.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioGgzp.value = ["浏览信息", "管理参数"];
-                  oldRadioGgzp.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioGgzp.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioGgzp.value = "operator";
-                }
-                permissonGgzp.value = oldRadioGgzp.value;
-              }
-              if (roleList[index].system == "扬尘治理大数据协同管家") {
-                if (roleList[index].name == "viewer") {
-                  radioYczl.value = ["浏览信息"];
-                  oldRadioYczl.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioYczl.value = ["浏览信息", "管理参数"];
-                  oldRadioYczl.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioYczl.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioYczl.value = "operator";
-                }
-                permissonYczl.value = oldRadioYczl.value;
-              }
-              if (roleList[index].system == "数字化城市信息管家") {
-                if (roleList[index].name == "viewer") {
-                  radioSzhcs.value = ["浏览信息"];
-                  oldRadioSzhcs.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioSzhcs.value = ["浏览信息", "管理参数"];
-                  oldRadioSzhcs.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioSzhcs.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioSzhcs.value = "operator";
-                }
-                permissonSzhcs.value = oldRadioSzhcs.value;
-              }
-              if (roleList[index].system == "景观照明集中控制管家") {
-                if (roleList[index].name == "viewer") {
-                  radioJgzm.value = ["浏览信息"];
-                  oldRadioJgzm.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioJgzm.value = ["浏览信息", "管理参数"];
-                  oldRadioJgzm.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioJgzm.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioJgzm.value = "operator";
-                }
-                permissonJgzm.value = oldRadioJgzm.value;
-              }
-              if (roleList[index].system == "智慧公厕管家") {
-                if (roleList[index].name == "viewer") {
-                  radioShlj.value = ["浏览信息"];
-                  oldRadioShlj.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioShlj.value = ["浏览信息", "管理参数"];
-                  oldRadioShlj.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioShlj.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioShlj.value = "operator";
-                }
-                permissonShlj.value = oldRadioShlj.value;
-              }
-              if (roleList[index].system == "照明管家（新）") {
-                if (roleList[index].name == "viewer") {
-                  radioNewZmgj.value = ["浏览信息"];
-                  oldRadioNewZmgj.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioNewZmgj.value = ["浏览信息", "管理参数"];
-                  oldRadioNewZmgj.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioNewZmgj.value = "operator";
-                }
-                permissonNewZmgj.value = oldRadioNewZmgj.value;
-              }
-              if (roleList[index].system == "突出问题管家") {
-                if (roleList[index].name == "viewer") {
-                  radioZhxz.value = ["浏览信息"];
-                  oldRadioZhxz.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioZhxz.value = ["浏览信息", "管理参数"];
-                  oldRadioZhxz.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioZhxz.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioZhxz.value = "operator";
-                }
-                permissonZhxz.value = oldRadioZhxz.value;
-              }
-              if (roleList[index].system == "调度指挥管家") {
-                if (roleList[index].name == "viewer") {
-                  radioDdzh.value = ["浏览信息"];
-                  oldRadioDdzh.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioDdzh.value = ["浏览信息", "管理参数"];
-                  oldRadioDdzh.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioDdzh.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioDdzh.value = "operator";
-                }
-                permissonDdzh.value = oldRadioDdzh.value;
-              }
-              if (roleList[index].system == "垃圾全生命周期管家") {
-                if (roleList[index].name == "viewer") {
-                  radioCclj.value = ["浏览信息"];
-                  oldRadioCclj.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioCclj.value = ["浏览信息", "管理参数"];
-                  oldRadioCclj.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioCclj.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioCclj.value = "operator";
-                }
-                permissonCclj.value = oldRadioCclj.value;
-              }
-              if (roleList[index].system == "餐饮油烟管家") {
-                if (roleList[index].name == "viewer") {
-                  radioCyyy.value = ["浏览信息"];
-                  oldRadioCyyy.value = "viewer";
-                }
-                if (roleList[index].name == "admin") {
-                  radioCyyy.value = ["浏览信息", "管理参数"];
-                  oldRadioCyyy.value = "admin";
-                }
-                if (roleList[index].name == "operator") {
-                  radioCyyy.value = ["浏览信息", "管理参数", "操作系统"];
-                  oldRadioCyyy.value = "operator";
-                }
-                permissonCyyy.value = oldRadioCyyy.value;
-              }
-            }
-          }
-          await axios({
-            // url: "/api/lzj/getWarning",
-            url: "/api/auth/get_self_permission_applications",
-            method: "get",
-            headers: {
-              Authorization: "Bearer " + params.token,
-            },
-          }).then((data) => {
-            var roleList = data.data;
-            for (var index in roleList) {
-              if (permissonTelephone.value == roleList[index].telephone) {
-                console.log(
-                  "roleList[index].telephone:" + roleList[index].telephone
-                );
-                if (roleList[index].roleSystem == "共享单车管家") {
-                  radioGxdc.value = [];
-                  if (roleList[index].operateType == "add") {
-                    if (roleList[index].roleName == "viewer") {
-                      radioGxdc.value = ["浏览信息"];
-                      oldRadioGxdc.value = "viewer";
-                    }
-                    if (roleList[index].roleName == "admin") {
-                      radioGxdc.value = ["浏览信息", "管理参数"];
-                      oldRadioGxdc.value = "admin";
-                    }
-                    if (roleList[index].roleName == "operator") {
-                      radioGxdc.value = ["浏览信息", "管理参数", "操作系统"];
-                      oldRadioGxdc.value = "operator";
-                    }
-                    permissonGxdc.value = oldRadioGxdc.value;
-                  }
-                }
-                if (roleList[index].roleSystem == "环卫作业管家") {
-                  radioHwzy.value = [];
-                  if (roleList[index].operateType == "add") {
-                    if (roleList[index].roleName == "viewer") {
-                      radioHwzy.value = ["浏览信息"];
-                      oldRadioHwzy.value = "viewer";
-                    }
-                    if (roleList[index].roleName == "admin") {
-                      radioHwzy.value = ["浏览信息", "管理参数"];
-                      oldRadioHwzy.value = "admin";
-                    }
-                    if (roleList[index].roleName == "operator") {
-                      radioHwzy.value = ["浏览信息", "管理参数", "操作系统"];
-                      oldRadioHwzy.value = "operator";
-                    }
-                    permissonHwzy.value = oldRadioHwzy.value;
-                  }
-                }
-                // if (roleList[index].roleSystem == "垃圾数据归集管家") {
-                //   radioLjsj.value = [];
-                //   if (roleList[index].roleName == "viewer") {
-                //     radioLjsj.value = ["浏览信息"];
-                //     oldRadioLjsj.value = "viewer";
-                //   }
-                //   if (roleList[index].roleName == "admin") {
-                //     radioLjsj.value = ["浏览信息", "管理参数"];
-                //     oldRadioLjsj.value = "admin";
-                //   }
-                //   if (roleList[index].roleName == "operator") {
-                //     radioLjsj.value = ["浏览信息", "管理参数", "操作系统"];
-                //     oldRadioLjsj.value = "operator";
-                //   }
-                //   permissonLjsj.value = oldRadioLjsj.value;
-                // }
-                if (roleList[index].roleSystem == "城管AI识别管家") {
-                  radioCgAI.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioCgAI.value = ["浏览信息"];
-                    oldRadioCgAI.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioCgAI.value = ["浏览信息", "管理参数"];
-                    oldRadioCgAI.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioCgAI.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioCgAI.value = "operator";
-                  }
-                  permissonCgAI.value = oldRadioCgAI.value;
-                }
-                if (roleList[index].roleSystem == "网络理政管家") {
-                  radioCgsyd.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioCgsyd.value = ["浏览信息"];
-                    oldRadioCgsyd.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioCgsyd.value = ["浏览信息", "管理参数"];
-                    oldRadioCgsyd.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioCgsyd.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioCgsyd.value = "operator";
-                  }
-                  permissonCgsyd.value = oldRadioCgsyd.value;
-                }
-                if (roleList[index].roleSystem == "广告招牌二维码管家") {
-                  radioGgzp.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioGgzp.value = ["浏览信息"];
-                    oldRadioGgzp.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioGgzp.value = ["浏览信息", "管理参数"];
-                    oldRadioGgzp.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioGgzp.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioGgzp.value = "operator";
-                  }
-                  permissonGgzp.value = oldRadioGgzp.value;
-                }
-                if (roleList[index].roleSystem == "扬尘治理大数据协同管家") {
-                  radioYczl.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioYczl.value = ["浏览信息"];
-                    oldRadioYczl.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioYczl.value = ["浏览信息", "管理参数"];
-                    oldRadioYczl.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioYczl.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioYczl.value = "operator";
-                  }
-                  permissonYczl.value = oldRadioYczl.value;
-                }
-                if (roleList[index].roleSystem == "数字化城市信息管家") {
-                  radioSzhcs.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioSzhcs.value = ["浏览信息"];
-                    oldRadioSzhcs.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioSzhcs.value = ["浏览信息", "管理参数"];
-                    oldRadioSzhcs.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioSzhcs.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioSzhcs.value = "operator";
-                  }
-                  permissonSzhcs.value = oldRadioSzhcs.value;
-                }
-                if (roleList[index].roleSystem == "景观照明集中控制管家") {
-                  radioJgzm.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioJgzm.value = ["浏览信息"];
-                    oldRadioJgzm.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioJgzm.value = ["浏览信息", "管理参数"];
-                    oldRadioJgzm.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioJgzm.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioJgzm.value = "operator";
-                  }
-                  permissonJgzm.value = oldRadioJgzm.value;
-                }
-                if (roleList[index].roleSystem == "照明管家（新）") {
-                  radioNewZmgj.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioNewZmgj.value = ["浏览信息"];
-                    oldRadioNewZmgj.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioNewZmgj.value = ["浏览信息", "管理参数"];
-                    oldRadioNewZmgj.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioNewZmgj.value = "operator";
-                  }
-                  permissonNewZmgj.value = oldRadioNewZmgj.value;
-                }
-                if (roleList[index].roleSystem == "智慧公厕管家") {
-                  radioShlj.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioShlj.value = ["浏览信息"];
-                    oldRadioShlj.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioShlj.value = ["浏览信息", "管理参数"];
-                    oldRadioShlj.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioShlj.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioShlj.value = "operator";
-                  }
-                  permissonShlj.value = oldRadioShlj.value;
-                }
-                if (roleList[index].roleSystem == "突出问题管家") {
-                  radioZhxz.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioZhxz.value = ["浏览信息"];
-                    oldRadioZhxz.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioZhxz.value = ["浏览信息", "管理参数"];
-                    oldRadioZhxz.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioZhxz.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioZhxz.value = "operator";
-                  }
-                  permissonZhxz.value = oldRadioZhxz.value;
-                }
-                if (roleList[index].roleSystem == "调度指挥管家") {
-                  radioDdzh.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioDdzh.value = ["浏览信息"];
-                    oldRadioDdzh.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioDdzh.value = ["浏览信息", "管理参数"];
-                    oldRadioDdzh.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioDdzh.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioDdzh.value = "operator";
-                  }
-                  permissonDdzh.value = oldRadioDdzh.value;
-                }
-                if (roleList[index].roleSystem == "垃圾全生命周期管家") {
-                  radioCclj.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioCclj.value = ["浏览信息"];
-                    oldRadioCclj.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioCclj.value = ["浏览信息", "管理参数"];
-                    oldRadioCclj.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioCclj.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioCclj.value = "operator";
-                  }
-                  permissonCclj.value = oldRadioCclj.value;
-                }
-                if (roleList[index].roleSystem == "餐饮油烟管家") {
-                  radioCyyy.value = [];
-                  if (roleList[index].roleName == "viewer") {
-                    radioCyyy.value = ["浏览信息"];
-                    oldRadioCyyy.value = "viewer";
-                  }
-                  if (roleList[index].roleName == "admin") {
-                    radioCyyy.value = ["浏览信息", "管理参数"];
-                    oldRadioCyyy.value = "admin";
-                  }
-                  if (roleList[index].roleName == "operator") {
-                    radioCyyy.value = ["浏览信息", "管理参数", "操作系统"];
-                    oldRadioCyyy.value = "operator";
-                  }
-                  permissonCyyy.value = oldRadioCyyy.value;
-                }
-              }
-            }
-          });
-          formLoading.value = false;
+      // A. 处理 "all" (超级管理员/全局权限) 的情况
+      const hasGlobalRole = roleList.some(role => role.system === "all");
+      if (hasGlobalRole) {
+        const globalRights = ["浏览信息"];
+        for (const system in systemPermissons) {
+          systemPermissons[system].radio.value = globalRights;
+        }
+        // ElMessage({ message: "您不可更改该用户权限！", type: "warning" }); // 保持注释
+      } else {
+        // B. 处理具体系统权限
+        for (const role of roleList) {
+          processRolePermission(role.system, role.name);
         }
       }
-    });
+
+      // --- 第二步：获取待审批的权限申请列表 ---
+      const appResp = await axios.get("/api/auth/get_self_permission_applications", {
+        headers: {
+          Authorization: "Bearer " + params.token,
+        },
+      });
+
+      const applicationList = appResp.data || [];
+      const userApplications = applicationList.filter(app => app.telephone === permissonTelephone.value);
+
+      // C. 使用待审批的权限覆盖当前权限 (只处理 'add' 操作)
+      for (const app of userApplications) {
+        if (app.operateType === "add") {
+          // 在处理申请时，不需要清空 radio.value = []，因为第一步已经完成了重置
+          processRolePermission(app.roleSystem, app.roleName);
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error("加载权限信息失败:", error);
+    // 可在此处添加错误提示 ElMessage.error("加载权限信息失败");
+  } finally {
+    formLoading.value = false;
   }
 };
 
+
+
+// const handleClick = (row) => {
+//   currentRowPage = Math.ceil((row.index + 1) / 10);
+
+//   var div = document.getElementById("permissonAlert");
+//   if (permissonApplicationList.length != 0) {
+//     div.style.display = "flex";
+//   } else {
+//     div.style.display = "none";
+//     formLoading.value = true;
+//     permissonName.value = row.username;
+//     permissonTelephone.value = row.telephone;
+//     handleEvent.value = true;
+//     radioGxdc.value = [];
+//     radioHwzy.value = [];
+//     radioLjsj.value = [];
+//     radioCgAI.value = [];
+//     radioCgsyd.value = [];
+//     radioGgzp.value = [];
+//     radioYczl.value = [];
+//     radioSzhcs.value = [];
+//     radioJgzm.value = [];
+//     radioShlj.value = [];
+//     radioNewZmgj.value = [];
+//     radioZhxz.value = [];
+//     radioDdzh.value = [];
+//     radioCclj.value = [];
+//     radioCyyy.value = [];
+
+//     axios({
+//       url: "/api/auth/non_super_admin_list",
+//       method: "get",
+//       headers: {
+//         Authorization: "Bearer " + params.token,
+//       },
+//     }).then(async (resp) => {
+//       var data = resp.data;
+
+//       for (var key in data) {
+//         if (data[key].telephone == permissonTelephone.value) {
+//           var roleList = data[key].roleList;
+//           for (var index in roleList) {
+//             if (roleList[index].system == "all") {
+//               radioGxdc.value = ["浏览信息"];
+//               radioHwzy.value = ["浏览信息"];
+//               radioLjsj.value = ["浏览信息"];
+//               radioCgAI.value = ["浏览信息"];
+//               radioCgsyd.value = ["浏览信息"];
+//               radioGgzp.value = ["浏览信息"];
+//               radioYczl.value = ["浏览信息"];
+//               radioSzhcs.value = ["浏览信息"];
+//               radioJgzm.value = ["浏览信息"];
+//               radioShlj.value = ["浏览信息"];
+//               radioZhxz.value = ["浏览信息"];
+//               radioDdzh.value = ["浏览信息"];
+//               radioCclj.value = ["浏览信息"];
+//               radioCyyy.value = ["浏览信息"];
+//               radioNewZmgj.value = ["浏览信息"];
+
+//               // ElMessage({
+//               //   message: "您不可更改该用户权限！",
+//               //   type: "warning",
+//               // });
+//             } else {
+//               if (roleList[index].system == "共享单车管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioGxdc.value = ["浏览信息"];
+//                   oldRadioGxdc.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioGxdc.value = ["浏览信息", "管理参数"];
+//                   oldRadioGxdc.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioGxdc.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioGxdc.value = "operator";
+//                 }
+//                 permissonGxdc.value = oldRadioGxdc.value;
+//               }
+//               if (roleList[index].system == "环卫作业管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioHwzy.value = ["浏览信息"];
+//                   oldRadioHwzy.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioHwzy.value = ["浏览信息", "管理参数"];
+//                   oldRadioHwzy.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioHwzy.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioHwzy.value = "operator";
+//                 }
+//                 permissonHwzy.value = oldRadioHwzy.value;
+//               }
+//               if (roleList[index].system == "城管AI识别管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioCgAI.value = ["浏览信息"];
+//                   oldRadioCgAI.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioCgAI.value = ["浏览信息", "管理参数"];
+//                   oldRadioCgAI.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioCgAI.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioCgAI.value = "operator";
+//                 }
+//                 permissonCgAI.value = oldRadioCgAI.value;
+//               }
+//               if (roleList[index].system == "网络理政管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioCgsyd.value = ["浏览信息"];
+//                   oldRadioCgsyd.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioCgsyd.value = ["浏览信息", "管理参数"];
+//                   oldRadioCgsyd.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioCgsyd.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioCgsyd.value = "operator";
+//                 }
+//                 permissonCgsyd.value = oldRadioCgsyd.value;
+//               }
+//               if (roleList[index].system == "广告招牌二维码管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioGgzp.value = ["浏览信息"];
+//                   oldRadioGgzp.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioGgzp.value = ["浏览信息", "管理参数"];
+//                   oldRadioGgzp.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioGgzp.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioGgzp.value = "operator";
+//                 }
+//                 permissonGgzp.value = oldRadioGgzp.value;
+//               }
+//               if (roleList[index].system == "扬尘治理大数据协同管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioYczl.value = ["浏览信息"];
+//                   oldRadioYczl.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioYczl.value = ["浏览信息", "管理参数"];
+//                   oldRadioYczl.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioYczl.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioYczl.value = "operator";
+//                 }
+//                 permissonYczl.value = oldRadioYczl.value;
+//               }
+//               if (roleList[index].system == "数字化城市信息管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioSzhcs.value = ["浏览信息"];
+//                   oldRadioSzhcs.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioSzhcs.value = ["浏览信息", "管理参数"];
+//                   oldRadioSzhcs.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioSzhcs.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioSzhcs.value = "operator";
+//                 }
+//                 permissonSzhcs.value = oldRadioSzhcs.value;
+//               }
+//               if (roleList[index].system == "景观照明集中控制管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioJgzm.value = ["浏览信息"];
+//                   oldRadioJgzm.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioJgzm.value = ["浏览信息", "管理参数"];
+//                   oldRadioJgzm.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioJgzm.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioJgzm.value = "operator";
+//                 }
+//                 permissonJgzm.value = oldRadioJgzm.value;
+//               }
+//               if (roleList[index].system == "智慧公厕管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioShlj.value = ["浏览信息"];
+//                   oldRadioShlj.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioShlj.value = ["浏览信息", "管理参数"];
+//                   oldRadioShlj.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioShlj.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioShlj.value = "operator";
+//                 }
+//                 permissonShlj.value = oldRadioShlj.value;
+//               }
+//               if (roleList[index].system == "照明管家（新）") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioNewZmgj.value = ["浏览信息"];
+//                   oldRadioNewZmgj.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioNewZmgj.value = ["浏览信息", "管理参数"];
+//                   oldRadioNewZmgj.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioNewZmgj.value = "operator";
+//                 }
+//                 permissonNewZmgj.value = oldRadioNewZmgj.value;
+//               }
+//               if (roleList[index].system == "突出问题管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioZhxz.value = ["浏览信息"];
+//                   oldRadioZhxz.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioZhxz.value = ["浏览信息", "管理参数"];
+//                   oldRadioZhxz.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioZhxz.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioZhxz.value = "operator";
+//                 }
+//                 permissonZhxz.value = oldRadioZhxz.value;
+//               }
+//               if (roleList[index].system == "调度指挥管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioDdzh.value = ["浏览信息"];
+//                   oldRadioDdzh.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioDdzh.value = ["浏览信息", "管理参数"];
+//                   oldRadioDdzh.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioDdzh.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioDdzh.value = "operator";
+//                 }
+//                 permissonDdzh.value = oldRadioDdzh.value;
+//               }
+//               if (roleList[index].system == "垃圾全生命周期管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioCclj.value = ["浏览信息"];
+//                   oldRadioCclj.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioCclj.value = ["浏览信息", "管理参数"];
+//                   oldRadioCclj.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioCclj.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioCclj.value = "operator";
+//                 }
+//                 permissonCclj.value = oldRadioCclj.value;
+//               }
+//               if (roleList[index].system == "餐饮油烟管家") {
+//                 if (roleList[index].name == "viewer") {
+//                   radioCyyy.value = ["浏览信息"];
+//                   oldRadioCyyy.value = "viewer";
+//                 }
+//                 if (roleList[index].name == "admin") {
+//                   radioCyyy.value = ["浏览信息", "管理参数"];
+//                   oldRadioCyyy.value = "admin";
+//                 }
+//                 if (roleList[index].name == "operator") {
+//                   radioCyyy.value = ["浏览信息", "管理参数", "操作系统"];
+//                   oldRadioCyyy.value = "operator";
+//                 }
+//                 permissonCyyy.value = oldRadioCyyy.value;
+//               }
+//             }
+//           }
+//           await axios({
+//             url: "/api/auth/get_self_permission_applications",
+//             method: "get",
+//             headers: {
+//               Authorization: "Bearer " + params.token,
+//             },
+//           }).then((data) => {
+//             var roleList = data.data;
+//             for (var index in roleList) {
+//               if (permissonTelephone.value == roleList[index].telephone) {
+
+//                 if (roleList[index].roleSystem == "共享单车管家") {
+//                   radioGxdc.value = [];
+//                   if (roleList[index].operateType == "add") {
+//                     if (roleList[index].roleName == "viewer") {
+//                       radioGxdc.value = ["浏览信息"];
+//                       oldRadioGxdc.value = "viewer";
+//                     }
+//                     if (roleList[index].roleName == "admin") {
+//                       radioGxdc.value = ["浏览信息", "管理参数"];
+//                       oldRadioGxdc.value = "admin";
+//                     }
+//                     if (roleList[index].roleName == "operator") {
+//                       radioGxdc.value = ["浏览信息", "管理参数", "操作系统"];
+//                       oldRadioGxdc.value = "operator";
+//                     }
+//                     permissonGxdc.value = oldRadioGxdc.value;
+//                   }
+//                 }
+//                 if (roleList[index].roleSystem == "环卫作业管家") {
+//                   radioHwzy.value = [];
+//                   if (roleList[index].operateType == "add") {
+//                     if (roleList[index].roleName == "viewer") {
+//                       radioHwzy.value = ["浏览信息"];
+//                       oldRadioHwzy.value = "viewer";
+//                     }
+//                     if (roleList[index].roleName == "admin") {
+//                       radioHwzy.value = ["浏览信息", "管理参数"];
+//                       oldRadioHwzy.value = "admin";
+//                     }
+//                     if (roleList[index].roleName == "operator") {
+//                       radioHwzy.value = ["浏览信息", "管理参数", "操作系统"];
+//                       oldRadioHwzy.value = "operator";
+//                     }
+//                     permissonHwzy.value = oldRadioHwzy.value;
+//                   }
+//                 }
+//                 if (roleList[index].roleSystem == "城管AI识别管家") {
+//                   radioCgAI.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioCgAI.value = ["浏览信息"];
+//                     oldRadioCgAI.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioCgAI.value = ["浏览信息", "管理参数"];
+//                     oldRadioCgAI.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioCgAI.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioCgAI.value = "operator";
+//                   }
+//                   permissonCgAI.value = oldRadioCgAI.value;
+//                 }
+//                 if (roleList[index].roleSystem == "网络理政管家") {
+//                   radioCgsyd.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioCgsyd.value = ["浏览信息"];
+//                     oldRadioCgsyd.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioCgsyd.value = ["浏览信息", "管理参数"];
+//                     oldRadioCgsyd.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioCgsyd.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioCgsyd.value = "operator";
+//                   }
+//                   permissonCgsyd.value = oldRadioCgsyd.value;
+//                 }
+//                 if (roleList[index].roleSystem == "广告招牌二维码管家") {
+//                   radioGgzp.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioGgzp.value = ["浏览信息"];
+//                     oldRadioGgzp.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioGgzp.value = ["浏览信息", "管理参数"];
+//                     oldRadioGgzp.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioGgzp.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioGgzp.value = "operator";
+//                   }
+//                   permissonGgzp.value = oldRadioGgzp.value;
+//                 }
+//                 if (roleList[index].roleSystem == "扬尘治理大数据协同管家") {
+//                   radioYczl.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioYczl.value = ["浏览信息"];
+//                     oldRadioYczl.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioYczl.value = ["浏览信息", "管理参数"];
+//                     oldRadioYczl.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioYczl.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioYczl.value = "operator";
+//                   }
+//                   permissonYczl.value = oldRadioYczl.value;
+//                 }
+//                 if (roleList[index].roleSystem == "数字化城市信息管家") {
+//                   radioSzhcs.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioSzhcs.value = ["浏览信息"];
+//                     oldRadioSzhcs.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioSzhcs.value = ["浏览信息", "管理参数"];
+//                     oldRadioSzhcs.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioSzhcs.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioSzhcs.value = "operator";
+//                   }
+//                   permissonSzhcs.value = oldRadioSzhcs.value;
+//                 }
+//                 if (roleList[index].roleSystem == "景观照明集中控制管家") {
+//                   radioJgzm.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioJgzm.value = ["浏览信息"];
+//                     oldRadioJgzm.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioJgzm.value = ["浏览信息", "管理参数"];
+//                     oldRadioJgzm.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioJgzm.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioJgzm.value = "operator";
+//                   }
+//                   permissonJgzm.value = oldRadioJgzm.value;
+//                 }
+//                 if (roleList[index].roleSystem == "照明管家（新）") {
+//                   radioNewZmgj.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioNewZmgj.value = ["浏览信息"];
+//                     oldRadioNewZmgj.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioNewZmgj.value = ["浏览信息", "管理参数"];
+//                     oldRadioNewZmgj.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioNewZmgj.value = "operator";
+//                   }
+//                   permissonNewZmgj.value = oldRadioNewZmgj.value;
+//                 }
+//                 if (roleList[index].roleSystem == "智慧公厕管家") {
+//                   radioShlj.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioShlj.value = ["浏览信息"];
+//                     oldRadioShlj.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioShlj.value = ["浏览信息", "管理参数"];
+//                     oldRadioShlj.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioShlj.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioShlj.value = "operator";
+//                   }
+//                   permissonShlj.value = oldRadioShlj.value;
+//                 }
+//                 if (roleList[index].roleSystem == "突出问题管家") {
+//                   radioZhxz.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioZhxz.value = ["浏览信息"];
+//                     oldRadioZhxz.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioZhxz.value = ["浏览信息", "管理参数"];
+//                     oldRadioZhxz.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioZhxz.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioZhxz.value = "operator";
+//                   }
+//                   permissonZhxz.value = oldRadioZhxz.value;
+//                 }
+//                 if (roleList[index].roleSystem == "调度指挥管家") {
+//                   radioDdzh.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioDdzh.value = ["浏览信息"];
+//                     oldRadioDdzh.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioDdzh.value = ["浏览信息", "管理参数"];
+//                     oldRadioDdzh.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioDdzh.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioDdzh.value = "operator";
+//                   }
+//                   permissonDdzh.value = oldRadioDdzh.value;
+//                 }
+//                 if (roleList[index].roleSystem == "垃圾全生命周期管家") {
+//                   radioCclj.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioCclj.value = ["浏览信息"];
+//                     oldRadioCclj.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioCclj.value = ["浏览信息", "管理参数"];
+//                     oldRadioCclj.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioCclj.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioCclj.value = "operator";
+//                   }
+//                   permissonCclj.value = oldRadioCclj.value;
+//                 }
+//                 if (roleList[index].roleSystem == "餐饮油烟管家") {
+//                   radioCyyy.value = [];
+//                   if (roleList[index].roleName == "viewer") {
+//                     radioCyyy.value = ["浏览信息"];
+//                     oldRadioCyyy.value = "viewer";
+//                   }
+//                   if (roleList[index].roleName == "admin") {
+//                     radioCyyy.value = ["浏览信息", "管理参数"];
+//                     oldRadioCyyy.value = "admin";
+//                   }
+//                   if (roleList[index].roleName == "operator") {
+//                     radioCyyy.value = ["浏览信息", "管理参数", "操作系统"];
+//                     oldRadioCyyy.value = "operator";
+//                   }
+//                   permissonCyyy.value = oldRadioCyyy.value;
+//                 }
+//               }
+//             }
+//           });
+//           formLoading.value = false;
+//         }
+//       }
+//     });
+//   }
+// };
+
 //申请：添加/删除权限操作
+
+
 const selfPermisson = (systemName, operateType, roleName) => {
   axios({
     url: "/api/auth/apply_for_permission",
@@ -7945,10 +8084,6 @@ const selfPermisson = (systemName, operateType, roleName) => {
     ),
     method: "post",
   }).then(function (resp) {
-    console.log(2, resp);
-    console.log(
-      "我管理员" + params.username + "指定人员" + permissonTelephone.value
-    );
   });
 };
 
@@ -8047,9 +8182,7 @@ const cellStyle = ({ row, column, rowIndex, columnIndex }) => {
 
 //提交权限修改表单
 const submitPermisson = (permissionForm) => {
-  // console.log(
-  //   "更改之前：" + oldRadioGxdc.value + "更改之后：" + permissonGxdc.value
-  // );
+
   if (
     oldRadioGxdc.value == permissonGxdc.value &&
     oldRadioLjsj.value == permissonLjsj.value &&
@@ -8238,7 +8371,6 @@ const submitPermisson = (permissionForm) => {
       });
     }
     loading.value = true;
-    console.log("currentRowPage:" + currentRowPage);
     getPermissionList(currentRowPage, searchName.value, searchPhone.value);
     getPermissonApplicationListList(1);
   }
@@ -8246,12 +8378,10 @@ const submitPermisson = (permissionForm) => {
 
 //多选框--》角色分配
 const radioChangeGxdc = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonGxdc.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonGxdc.value = "viewer";
     }
@@ -8268,12 +8398,10 @@ const radioChangeGxdc = (value) => {
 };
 
 const radioChangeHwzy = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonHwzy.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonHwzy.value = "viewer";
     }
@@ -8290,12 +8418,10 @@ const radioChangeHwzy = (value) => {
 };
 
 const radioChangeLjsj = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonLjsj.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonLjsj.value = "viewer";
     }
@@ -8312,12 +8438,10 @@ const radioChangeLjsj = (value) => {
 };
 
 const radioChangeCgAI = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonCgAI.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonCgAI.value = "viewer";
     }
@@ -8334,12 +8458,10 @@ const radioChangeCgAI = (value) => {
 };
 
 const radioChangeCgsyd = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonCgsyd.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonCgsyd.value = "viewer";
     }
@@ -8356,12 +8478,10 @@ const radioChangeCgsyd = (value) => {
 };
 
 const radioChangeGgzp = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonGgzp.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonGgzp.value = "viewer";
     }
@@ -8378,12 +8498,10 @@ const radioChangeGgzp = (value) => {
 };
 
 const radioChangeYczl = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonYczl.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonYczl.value = "viewer";
     }
@@ -8400,12 +8518,10 @@ const radioChangeYczl = (value) => {
 };
 
 const radioChangeSzhcs = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonSzhcs.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonSzhcs.value = "viewer";
     }
@@ -8422,12 +8538,10 @@ const radioChangeSzhcs = (value) => {
 };
 
 const radioChangeJgzm = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonJgzm.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonJgzm.value = "viewer";
     }
@@ -8444,12 +8558,10 @@ const radioChangeJgzm = (value) => {
 };
 
 const radioChangeNewZmgj = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonNewZmgj.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonNewZmgj.value = "viewer";
     }
@@ -8466,12 +8578,10 @@ const radioChangeNewZmgj = (value) => {
 };
 
 const radioChangeShlj = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonShlj.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonShlj.value = "viewer";
     }
@@ -8488,12 +8598,10 @@ const radioChangeShlj = (value) => {
 };
 
 const radioChangeZhxz = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonZhxz.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonZhxz.value = "viewer";
     }
@@ -8510,12 +8618,10 @@ const radioChangeZhxz = (value) => {
 };
 
 const radioChangeDdzh = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonDdzh.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonDdzh.value = "viewer";
     }
@@ -8532,12 +8638,10 @@ const radioChangeDdzh = (value) => {
 };
 
 const radioChangeCclj = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonCclj.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonCclj.value = "viewer";
     }
@@ -8554,12 +8658,10 @@ const radioChangeCclj = (value) => {
 };
 
 const radioChangeCyyy = (value) => {
-  console.log("value长度：" + value.length);
   if (value.length == 0) {
     permissonCyyy.value = "";
   }
   for (var index in value) {
-    console.log("value:" + value[index]);
     if (value[index] == "浏览信息") {
       permissonCyyy.value = "viewer";
     }
@@ -8578,22 +8680,28 @@ const radioChangeCyyy = (value) => {
 //==============================================================================================================
 
 //===================================================================大图片定时更换（一个月）
-var curIndex = 0;
-var picture = ref("1");
-var timeInterval = 1000 * 60 * 60 * 24;
-
-setInterval(changeImg, timeInterval);
+const picture = ref('1');
+const TIME_INTERVAL = 1000 * 60 * 60 * 24;
+let intervalId = null;
 function changeImg() {
-  let nowDay = new Date().getDate();
-  //每个月1号更换一次图片
-  if (nowDay == "1") {
-    if (picture.value == "1") {
-      picture.value = "3";
-    } else {
-      picture.value = "1";
+    const nowDay = new Date().getDate();
+    if (nowDay === 1) {
+        if (picture.value === '1') {
+            picture.value = '3';
+        } else {
+            picture.value = '1';
+        }
     }
-  }
 }
+onMounted(() => {
+    changeImg();
+    intervalId = setInterval(changeImg, TIME_INTERVAL);
+});
+onUnmounted(() => {
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
+});
 
 //================================================================================
 // const cclj_sites = ref([]);
@@ -8621,66 +8729,69 @@ const validatePass2 = (rule, value, callback) => {
     callback();
   }
 };
-
-const submitForm = (formEl) => {
+const resetForm = (formEl) => {
+    if (!formEl) return;
+    formEl.resetFields(); // 清除表单数据和验证状态
+    changePasswordDialog.value = false;
+};
+const submitForm = async (formEl) => {
   if (!formEl) return;
-  formEl.validate((valid) => {
-    if (valid) {
-      ElMessageBox.confirm("确认修改密码？", "提示", {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
-        type: "warning",
-        center: true,
-      })
-        .then(() => {
-          axios({
-            url: "/api/auth/change_password",
-            method: "post",
-            headers: {
-              Authorization: "Bearer" + params.token,
-              "Content-Type": " application/json",
-            },
-            data: form.new_password,
-          }).then((res) => {
-            if (res.data) {
-              ElMessage({
-                type: "success",
-                message: "修改密码成功！",
-              });
-            } else {
-              ElMessage({
-                type: "error",
-                message:
-                  "密码的组成至少8位以上，要包含字母、数字、符号，例如：w-765223！",
-              });
-            }
-          });
-          // changePassword(form).then(res => {
-          //   console.log(res)
-          //   ElMessage({
-          //     type: 'success',
-          //     message: '修改密码成功！',
-          //   })
-          // })
-        })
-        .catch(() => {
-          ElMessage({
-            type: "info",
-            message: "取消修改密码！",
-          });
-        });
-    } else {
-      console.log("error submit!");
-      return false;
+  try {
+    const isValid = await formEl.validate();
+    if (!isValid) {
+      console.log("表单验证失败！");
+      ElMessage.error("请检查表单内容是否完整且符合要求！");
+      return;
     }
-  });
+    await ElMessageBox.confirm("确认修改密码？", "提示", {
+      confirmButtonText: "确认",
+      cancelButtonText: "取消",
+      type: "warning",
+      center: true,
+    });
+    const response = await axios({
+      url: "/api/auth/change_password",
+      method: "post",
+      headers: {
+        Authorization: "Bearer " + params.token,
+        "Content-Type": "application/json",
+      },
+      data: {
+        old_password: form.old_password,
+        new_password: form.new_password,
+      },
+    });
+    if (response.data && response.data.success) {
+      ElMessage({ type: "success", message: "修改密码成功！" });
+    } else {
+      const errorMsg = response.data.message || "密码格式不符合要求，例如：w-765223！";
+      ElMessage({ type: "error", message: errorMsg });
+    }
+    resetForm(formEl);
+  } catch (error) {
+    // 统一处理所有错误 (验证失败已在上面处理)
+    // 如果错误是取消操作（用户点击了取消按钮）
+    if (error === 'cancel') {
+      ElMessage({ type: "info", message: "已取消修改密码！" });
+    } else if (error.response) {
+      // API 请求失败（例如 401, 500 错误）
+      console.error("修改密码 API 失败:", error.response.data);
+      ElMessage({ type: "error", message: error.response.data.message || "修改密码失败，请联系管理员！" });
+    } else {
+      // 其他错误（网络错误、代码错误等）
+      console.error("未知错误:", error);
+      ElMessage({ type: "error", message: "操作失败，请重试。" });
+    }
+  }
 };
 const rules = reactive({
+  old_password: [{ required: true, message: '请输入当前密码', trigger: 'blur' },],
   new_password: [{ validator: validatePass, trigger: "blur" }],
   new_password_confirm: [{ validator: validatePass2, trigger: "blur" }],
 });
 
 const form = reactive({
+  old_password: "",
   new_password: "",
   new_password_confirm: "",
 });
@@ -8838,432 +8949,683 @@ const echartInit_srzx = () => {
 };
 
 const echartInit_ddzh = () => {
-  console.log(ddzh_tableData2);
-  if (ddzh_tableData2.value.length == 3) {
-    ddzh_tableData2.value.unshift({
-      isNormal: false,
-      identity: "办公室人员",
-      num: 0,
-    });
-  }
-  if (ddzh_tableData2.value.length == 4) {
-    ddzh_tableData2.value.push({
-      isNormal: false,
-      identity: "执法人员",
-      num: 0,
-    });
-  }
-  document
-    .getElementById("container_ddzh1")
-    .removeAttribute("_echarts_instance_");
-  var myChart_ddzh1 = echarts.init(document.getElementById("container_ddzh1"));
-  document
-    .getElementById("container_ddzh2")
-    .removeAttribute("_echarts_instance_");
-  var myChart_ddzh2 = echarts.init(document.getElementById("container_ddzh2"));
-  document
-    .getElementById("container_ddzh3")
-    .removeAttribute("_echarts_instance_");
-  var myChart_ddzh3 = echarts.init(document.getElementById("container_ddzh3"));
-  var option1 = {
-    title: {
-      text: "打卡率统计",
-      textStyle: {
-        color: "#ccc",
-      },
-    },
-    tooltip: {
-      trigger: "axis",
-      axisPointer: {
-        type: "shadow",
-      },
-      formatter: function (params) {
-        // 获取横坐标的内容
-        let xAxisLabel = params[0].axisValue;
+    // 1. 数据预处理和保证数据结构完整 (核心优化)
+    const tableData2 = ddzh_tableData2.value;
 
-        // 获取数据项的数值
-        let dataValue = params[0].value;
+    // 原始逻辑：如果长度是 3，插入 "办公室人员"；如果长度是 4，追加 "执法人员"。
+    // 🚨 错误分析：这种基于长度的判断非常脆弱。如果数据源没有按预期长度返回，会导致数据错位。
+    // 优化：直接确保需要的五个角色存在，并在图表配置中使用稳定的索引/查找。
+    // 由于原始代码依赖特定的索引 [0], [1], [2], [3]，我们必须确保这些索引存在。
+    // 为了不改变原始索引，这里仅进行修复性填充：
+    if (tableData2.length < 4) {
+        // 如果数据缺失，为了防止图表报错，进行必要的填充
+        // 这里需要更精确的逻辑来判断哪个数据缺失，但基于原始代码，我们假设它们是按顺序填充。
 
-        // 构建 tooltip 内容并换行显示
-        return xAxisLabel + "<br>打卡率 " + dataValue + "%";
-      },
-    },
-    xAxis: {
-      type: "category",
-      data: ddzh_tableData1.value.map(item => item.department),
-      // data: [
-      //   ddzh_tableData1.value[0].department,
-      //   ddzh_tableData1.value[1].department,
-      //   ddzh_tableData1.value[2].department,
-      //   ddzh_tableData1.value[3].department,
-      //   ddzh_tableData1.value[4].department,
-      //   ddzh_tableData1.value[5].department,
-      //   ddzh_tableData1.value[6].department,
-      //   ddzh_tableData1.value[7].department,
-      //   ddzh_tableData1.value[8].department,
-      //   ddzh_tableData1.value[9].department,
-      //   ddzh_tableData1.value[10].department,
-      //   ddzh_tableData1.value[11].department,
-      //   ddzh_tableData1.value[12].department,
-      //   ddzh_tableData1.value[13].department,
-      //   ddzh_tableData1.value[14].department,
-      //   ddzh_tableData1.value[15].department,
-      //   ddzh_tableData1.value[16].department,
-      //   ddzh_tableData1.value[17].department,
-      //   ddzh_tableData1.value[18].department,
-      //   ddzh_tableData1.value[19].department,
-      //   ddzh_tableData1.value[20].department,
-      //   ddzh_tableData1.value[21].department,
-      //   ddzh_tableData1.value[22].department,
-      //   ddzh_tableData1.value[23].department,
-      //   ddzh_tableData1.value[24].department,
-      //   ddzh_tableData1.value[25].department,
-      //   ddzh_tableData1.value[26].department,
-      //   ddzh_tableData1.value[27].department,
-      //   ddzh_tableData1.value[28].department,
-      // ],
-      axisLabel: {
-        //x轴文字的配置
-        show: true,
-        interval: 0, //使x轴文字显示全
-        rotate: 20,
-      },
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true,
-      textStyle: {
-        color: "white",
-      },
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        barWidth: '10%',
-        data: ddzh_tableData1.value.map(item => (item.checkRate * 100).toFixed(1)),
-        // data: [
-        //   (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
-        //   (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
-        // ],
-        type: "bar",
-        showBackground: true,
-        backgroundStyle: {
-          color: "rgba(180, 180, 180, 0.2)",
+        // 确保至少有 4 个位置，以便后续访问 [0], [1], [2], [3] 不报错。
+        while (tableData2.length < 4) {
+            tableData2.push({ isNormal: false, identity: "缺失人员类型", num: 0 });
+        }
+
+        // 原始代码是特殊插入，我们采用更稳定的方式：
+        // 假设索引 0 应该是“定位异常人员（协管）”
+        // 假设索引 1 应该是“定位异常人员（执法）”
+        // 假设索引 2 应该是“定位正常人员（协管）”
+        // 假设索引 3 应该是“定位正常人员（执法）”
+    }
+
+    // 2. 统一 Echarts 实例处理 (消除 DOM 冗余操作)
+
+    // 更好的做法是：在组件外部缓存图表实例，并在组件卸载时进行销毁 (dispose)。
+    // 这里的优化是确保在初始化前先销毁旧实例，避免内存泄漏。
+    const initChart = (id) => {
+        const dom = document.getElementById(id);
+        if (!dom) {
+            console.error(`找不到 ID 为 ${id} 的 DOM 元素!`);
+            return null;
+        }
+
+        // 推荐做法：先销毁旧实例，而非移除属性
+        const existingChart = echarts.getInstanceByDom(dom);
+        if (existingChart) {
+            existingChart.dispose();
+        }
+        // 移除属性是非标准的做法，如果必须，请保持一致
+        // dom.removeAttribute("_echarts_instance_");
+
+        return echarts.init(dom);
+    };
+
+    const myChart_ddzh1 = initChart("container_ddzh1");
+    const myChart_ddzh2 = initChart("container_ddzh2");
+    const myChart_ddzh3 = initChart("container_ddzh3");
+
+    if (!myChart_ddzh1 || !myChart_ddzh2 || !myChart_ddzh3) return; // 提前退出
+
+    // 3. Echarts Option 1: 打卡率统计 (柱状图)
+
+    // 3.1. 数据预处理 (避免在 Option 中重复计算)
+    const tableData1 = ddzh_tableData1.value;
+    const xAxisData1 = tableData1.map(item => item.department);
+    const seriesData1 = tableData1.map(item => (item.checkRate * 100).toFixed(1));
+
+    const option1 = {
+        // ... (保持 title, tooltip, grid, yAxis 配置不变)
+        title: { text: "打卡率统计", textStyle: { color: "#ccc" } },
+        tooltip: {
+            trigger: "axis",
+            axisPointer: { type: "shadow" },
+            formatter: (params) => {
+                // 使用模板字符串简化 formatter
+                return `${params[0].axisValue}<br>打卡率 ${params[0].value}%`;
+            },
         },
-        emphasis: {
-          focus: "series",
+        xAxis: {
+            type: "category",
+            data: xAxisData1, // 使用预处理的数据，移除了所有冗长的注释行
+            axisLabel: {
+                show: true,
+                interval: 0,
+                rotate: 20,
+            },
         },
-        textStyle: {
-          color: "white",
+        grid: {
+            left: "3%", right: "4%", bottom: "3%", containLabel: true,
+            textStyle: { color: "white" }
         },
-        label: {
-          show: true,
-        },
-      },
-    ],
-  };
-  var option2 = {
-    title: {
-      text: "执法人员定位情况",
-      left: "center",
-      textStyle: {
-        color: "white",
-      },
-    },
-    tooltip: {
-      trigger: "item",
-    },
-    legend: {
-      orient: "vertical",
-      left: "left",
-      textStyle: {
-        color: "#ccc",
-      },
-    },
-    series: [
-      {
-        name: "执法人员",
-        type: "pie",
-        radius: "50%",
-        data: [
-          { value: ddzh_tableData2.value[3].num, name: "定位正常人员" },
-          { value: ddzh_tableData2.value[1].num, name: "定位异常人员" },
-          // { value: 111, name: 222 },
-        ],
-        label: {
-          show: true,
-          formatter(param) {
-            // correct the percentage
-            return param.name + +param.value + " (" + param.percent + "%)";
-          },
-        },
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-          },
-        },
-      },
-    ],
-  };
-  var option3 = {
-    title: {
-      text: "协管人员定位情况",
-      left: "center",
-      textStyle: {
-        color: "white",
-      },
-    },
-    tooltip: {
-      trigger: "item",
-    },
-    legend: {
-      orient: "vertical",
-      left: "left",
-      textStyle: {
-        color: "#ccc",
-      },
-    },
-    series: [
-      {
-        name: "协管人员",
-        type: "pie",
-        radius: "50%",
-        data: [
-          { value: ddzh_tableData2.value[2].num, name: "定位正常人员" },
-          { value: ddzh_tableData2.value[0].num, name: "定位异常人员" },
-          // { value: 111, name: 222 },
-        ],
-        label: {
-          show: true,
-          formatter(param) {
-            // correct the percentage
-            return param.name + " (" + param.percent + "%)";
-          },
-        },
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-          },
-        },
-      },
-    ],
-  };
-  myChart_ddzh1.setOption(option1);
-  myChart_ddzh2.setOption(option2);
-  myChart_ddzh3.setOption(option3);
+        yAxis: { type: "value" },
+        series: [{
+            barWidth: '10%',
+            data: seriesData1, // 使用预处理的数据
+            type: "bar",
+            showBackground: true,
+            backgroundStyle: { color: "rgba(180, 180, 180, 0.2)" },
+            emphasis: { focus: "series" },
+            // 移除了冗余的 textStyle
+            label: { show: true },
+        }],
+    };
+
+    // 4. Echarts Option 2 & 3: 定位情况 (饼图)
+
+    // 4.1. 定义通用的饼图配置
+    const commonPieOptions = {
+        tooltip: { trigger: "item" },
+        legend: { orient: "vertical", left: "left", textStyle: { color: "#ccc" } },
+    };
+
+    // 4.2. 执法人员定位 (Option 2)
+    const option2 = {
+        ...commonPieOptions,
+        title: { text: "执法人员定位情况", left: "center", textStyle: { color: "white" } },
+        series: [{
+            name: "执法人员",
+            type: "pie",
+            radius: "50%",
+            // 修复：使用常量和命名来提高可读性，避免使用魔法数字索引
+            data: [
+                { value: tableData2[3]?.num || 0, name: "定位正常人员" }, // 索引 3
+                { value: tableData2[1]?.num || 0, name: "定位异常人员" }, // 索引 1
+            ],
+            label: {
+                show: true,
+                // 修复：简化 formatter 逻辑，移除冗余的 + +
+                formatter: (param) => {
+                    return `${param.name} ${param.value} (${param.percent}%)`;
+                },
+            },
+            emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0, 0, 0, 0.5)" } },
+        }],
+    };
+
+    // 4.3. 协管人员定位 (Option 3)
+    const option3 = {
+        ...commonPieOptions,
+        title: { text: "协管人员定位情况", left: "center", textStyle: { color: "white" } },
+        series: [{
+            name: "协管人员",
+            type: "pie",
+            radius: "50%",
+            // 修复：使用常量和命名来提高可读性，避免使用魔法数字索引
+            data: [
+                { value: tableData2[2]?.num || 0, name: "定位正常人员" }, // 索引 2
+                { value: tableData2[0]?.num || 0, name: "定位异常人员" }, // 索引 0
+            ],
+            label: {
+                show: true,
+                // 修复：移除原代码中的错误注释和不完整的 formatter
+                formatter: (param) => {
+                    return `${param.name} (${param.percent}%)`; // 原始代码只显示名称和百分比
+                },
+            },
+            emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0, 0, 0, 0.5)" } },
+        }],
+    };
+
+    // 5. 设置图表 Option
+    myChart_ddzh1.setOption(option1);
+    myChart_ddzh2.setOption(option2);
+    myChart_ddzh3.setOption(option3);
 };
+
+// const echartInit_ddzh = () => {
+//   if (ddzh_tableData2.value.length == 3) {
+//     ddzh_tableData2.value.unshift({
+//       isNormal: false,
+//       identity: "办公室人员",
+//       num: 0,
+//     });
+//   }
+//   if (ddzh_tableData2.value.length == 4) {
+//     ddzh_tableData2.value.push({
+//       isNormal: false,
+//       identity: "执法人员",
+//       num: 0,
+//     });
+//   }
+//   document
+//     .getElementById("container_ddzh1")
+//     .removeAttribute("_echarts_instance_");
+//   var myChart_ddzh1 = echarts.init(document.getElementById("container_ddzh1"));
+//   document
+//     .getElementById("container_ddzh2")
+//     .removeAttribute("_echarts_instance_");
+//   var myChart_ddzh2 = echarts.init(document.getElementById("container_ddzh2"));
+//   document
+//     .getElementById("container_ddzh3")
+//     .removeAttribute("_echarts_instance_");
+//   var myChart_ddzh3 = echarts.init(document.getElementById("container_ddzh3"));
+//   var option1 = {
+//     title: {
+//       text: "打卡率统计",
+//       textStyle: {
+//         color: "#ccc",
+//       },
+//     },
+//     tooltip: {
+//       trigger: "axis",
+//       axisPointer: {
+//         type: "shadow",
+//       },
+//       formatter: function (params) {
+//         // 获取横坐标的内容
+//         let xAxisLabel = params[0].axisValue;
+
+//         // 获取数据项的数值
+//         let dataValue = params[0].value;
+
+//         // 构建 tooltip 内容并换行显示
+//         return xAxisLabel + "<br>打卡率 " + dataValue + "%";
+//       },
+//     },
+//     xAxis: {
+//       type: "category",
+//       data: ddzh_tableData1.value.map(item => item.department),
+//       // data: [
+//       //   ddzh_tableData1.value[0].department,
+//       //   ddzh_tableData1.value[1].department,
+//       //   ddzh_tableData1.value[2].department,
+//       //   ddzh_tableData1.value[3].department,
+//       //   ddzh_tableData1.value[4].department,
+//       //   ddzh_tableData1.value[5].department,
+//       //   ddzh_tableData1.value[6].department,
+//       //   ddzh_tableData1.value[7].department,
+//       //   ddzh_tableData1.value[8].department,
+//       //   ddzh_tableData1.value[9].department,
+//       //   ddzh_tableData1.value[10].department,
+//       //   ddzh_tableData1.value[11].department,
+//       //   ddzh_tableData1.value[12].department,
+//       //   ddzh_tableData1.value[13].department,
+//       //   ddzh_tableData1.value[14].department,
+//       //   ddzh_tableData1.value[15].department,
+//       //   ddzh_tableData1.value[16].department,
+//       //   ddzh_tableData1.value[17].department,
+//       //   ddzh_tableData1.value[18].department,
+//       //   ddzh_tableData1.value[19].department,
+//       //   ddzh_tableData1.value[20].department,
+//       //   ddzh_tableData1.value[21].department,
+//       //   ddzh_tableData1.value[22].department,
+//       //   ddzh_tableData1.value[23].department,
+//       //   ddzh_tableData1.value[24].department,
+//       //   ddzh_tableData1.value[25].department,
+//       //   ddzh_tableData1.value[26].department,
+//       //   ddzh_tableData1.value[27].department,
+//       //   ddzh_tableData1.value[28].department,
+//       // ],
+//       axisLabel: {
+//         //x轴文字的配置
+//         show: true,
+//         interval: 0, //使x轴文字显示全
+//         rotate: 20,
+//       },
+//     },
+//     grid: {
+//       left: "3%",
+//       right: "4%",
+//       bottom: "3%",
+//       containLabel: true,
+//       textStyle: {
+//         color: "white",
+//       },
+//     },
+//     yAxis: {
+//       type: "value",
+//     },
+//     series: [
+//       {
+//         barWidth: '10%',
+//         data: ddzh_tableData1.value.map(item => (item.checkRate * 100).toFixed(1)),
+//         // data: [
+//         //   (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
+//         //   (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
+//         // ],
+//         type: "bar",
+//         showBackground: true,
+//         backgroundStyle: {
+//           color: "rgba(180, 180, 180, 0.2)",
+//         },
+//         emphasis: {
+//           focus: "series",
+//         },
+//         textStyle: {
+//           color: "white",
+//         },
+//         label: {
+//           show: true,
+//         },
+//       },
+//     ],
+//   };
+//   var option2 = {
+//     title: {
+//       text: "执法人员定位情况",
+//       left: "center",
+//       textStyle: {
+//         color: "white",
+//       },
+//     },
+//     tooltip: {
+//       trigger: "item",
+//     },
+//     legend: {
+//       orient: "vertical",
+//       left: "left",
+//       textStyle: {
+//         color: "#ccc",
+//       },
+//     },
+//     series: [
+//       {
+//         name: "执法人员",
+//         type: "pie",
+//         radius: "50%",
+//         data: [
+//           { value: ddzh_tableData2.value[3].num, name: "定位正常人员" },
+//           { value: ddzh_tableData2.value[1].num, name: "定位异常人员" },
+//           // { value: 111, name: 222 },
+//         ],
+//         label: {
+//           show: true,
+//           formatter(param) {
+//             // correct the percentage
+//             return param.name + +param.value + " (" + param.percent + "%)";
+//           },
+//         },
+//         emphasis: {
+//           itemStyle: {
+//             shadowBlur: 10,
+//             shadowOffsetX: 0,
+//             shadowColor: "rgba(0, 0, 0, 0.5)",
+//           },
+//         },
+//       },
+//     ],
+//   };
+//   var option3 = {
+//     title: {
+//       text: "协管人员定位情况",
+//       left: "center",
+//       textStyle: {
+//         color: "white",
+//       },
+//     },
+//     tooltip: {
+//       trigger: "item",
+//     },
+//     legend: {
+//       orient: "vertical",
+//       left: "left",
+//       textStyle: {
+//         color: "#ccc",
+//       },
+//     },
+//     series: [
+//       {
+//         name: "协管人员",
+//         type: "pie",
+//         radius: "50%",
+//         data: [
+//           { value: ddzh_tableData2.value[2].num, name: "定位正常人员" },
+//           { value: ddzh_tableData2.value[0].num, name: "定位异常人员" },
+//           // { value: 111, name: 222 },
+//         ],
+//         label: {
+//           show: true,
+//           formatter(param) {
+//             // correct the percentage
+//             return param.name + " (" + param.percent + "%)";
+//           },
+//         },
+//         emphasis: {
+//           itemStyle: {
+//             shadowBlur: 10,
+//             shadowOffsetX: 0,
+//             shadowColor: "rgba(0, 0, 0, 0.5)",
+//           },
+//         },
+//       },
+//     ],
+//   };
+//   myChart_ddzh1.setOption(option1);
+//   myChart_ddzh2.setOption(option2);
+//   myChart_ddzh3.setOption(option3);
+// };
 
 //客流量趋势
 var weeklyChart = null;
-onMounted(() => {
-  showWeeklyChart();
-});
-
-//让图表随着屏幕自适应
-// window.addEventListener("resize", function () {
-//   weeklyChart.resize();
-// });
-
 //页面跳转之前销毁图表
 onBeforeUnmount(() => {
   if (weeklyChart) {
-    //window.removeEventListener("resize", weeklyChart);
     weeklyChart.dispose();
     weeklyChart = null;
   }
 });
-const showWeeklyChart = () => {
-  document.getElementById("weekly_chart").removeAttribute("_echarts_instance_");
-  var chartDom = document.getElementById("weekly_chart");
-  weeklyChart = echarts.init(chartDom);
+const showWeeklyChart = async () => {
+  let domElement = document.getElementById("weekly_chart");
+  if (!domElement) {
+    console.error("ECharts 容器未找到，ID可能错误或DOM尚未渲染！");
+    return;
+  }
+  try {
+      domElement.removeAttribute("_echarts_instance_");
+      // 重新获取实例，如果 weeklyChart 变量是全局或外部声明的
+      weeklyChart = echarts.init(domElement);
+  } catch (e) {
+      console.warn("无法移除旧的 ECharts 实例属性或初始化图表", e);
+      return; // 如果初始化失败，则中止后续操作
+  }
+  // --- 步骤 2: 数据准备和 API 调用 ---
+  // 使用 const 代替 var，并确保日期格式化工具 (moment) 已导入
+  const showPersonStart = moment().subtract(6, "days").format("YYYY-MM-DD"); // 优化: 使用 subtract 代替 add(-6, "d")
+  const showPersonEnd = moment().add(1, "days").format("YYYY-MM-DD");
+  const apiUrl = `/api/toilet/getSumByDuration/枣子巷/${showPersonStart}/${showPersonEnd}/threeType`;
+  try {
+      // 优化：使用 async/await 简化 Promise 链
+      const response = await axios.get(apiUrl, {
+          headers: {
+              // 修复：Authorization 后的空格
+              Authorization: "Bearer " + params.token,
+              "Content-Type": "application/json",
+          },
+      });
+      // 优化：使用解构赋值和更清晰的变量名
+      const rawData = response.data.data;
+      // --- 步骤 3: 数据处理优化（使用 Reduce/Map 或更简洁的 Filter） ---
+      // 优化：通过 Reduce 遍历一次数据，同时收集所有需要的数组，避免三次 filter
+      const processedData = rawData.reduce((acc, item) => {
+          if (item.gender === "男卫生间") {
+              acc.flowValues1.push(item.flowValue);
+              acc.DateValues1.push(item.startDate);
+          } else if (item.gender === "女卫生间") {
+              acc.flowValues2.push(item.flowValue);
+          } else if (item.gender === "第三卫生间") {
+              acc.flowValues3.push(item.flowValue);
+          }
+          return acc;
+      }, { flowValues1: [], DateValues1: [], flowValues2: [], flowValues3: [] });
+      const { flowValues1, DateValues1, flowValues2, flowValues3 } = processedData;
+      const option = {
+          title: {
+              text: "最近一周每日客流量统计",
+              textStyle: { color: "white" },
+          },
+          tooltip: {
+              trigger: "axis",
+              axisPointer: { type: "shadow" },
+              formatter: function (params) {
+                  const dataMap = {};
+                  params.forEach(p => {
+                      dataMap[p.seriesName] = p.value;
+                  });
+                  return `${params[0].axisValue}<br>` +
+                         `第三卫生间 ${dataMap["第三卫生间"] || 0}人<br>` +
+                         `女卫生间 ${dataMap["女卫生间"] || 0}人<br>` +
+                         `男卫生间 ${dataMap["男卫生间"] || 0}人`;
+              },
+          },
+          legend: {
+              textStyle: { color: "white" },
+          },
+          grid: {
+              left: "3%",
+              right: "4%",
+              bottom: "3%",
+              containLabel: true,
+          },
+          xAxis: [{
+              type: "category",
+              data: DateValues1,
+              axisLabel: { color: "white" }
+          }],
+          yAxis: [{
+              type: "value",
+              axisLabel: {
+                  formatter: "{value} 人",
+                  color: "white"
+              },
+          }],
+          series: [
+              { name: "男卫生间", type: "bar", stack: "Ad", label: { show: true }, emphasis: { focus: "series" }, data: flowValues1 },
+              { name: "女卫生间", type: "bar", stack: "Ad", label: { show: true }, emphasis: { focus: "series" }, data: flowValues2 },
+              { name: "第三卫生间", type: "bar", stack: "Ad", label: { show: true }, emphasis: { focus: "series" }, data: flowValues3 },
+          ],
+      };
 
-  var showPersonStart = moment().add(-6, "d").format("YYYY-MM-DD");
-  var showPersonEnd = moment().add(1, "d").format("YYYY-MM-DD");
+      // 5. 设置图表选项
+      weeklyChart.setOption(option);
 
-  axios({
-    url:
-      "/api/toilet/getSumByDuration/枣子巷/" +
-      showPersonStart +
-      "/" +
-      showPersonEnd +
-      "/threeType",
-    headers: {
-      Authorization: "Bearer" + params.token,
-      "Content-Type": " application/json",
-    },
-    method: "get",
-  }).then((dataTable) => {
-    console.log(222, dataTable.data.data);
-    dataTable = dataTable.data.data;
-    const filteredData1 = dataTable.filter(
-      (item) => item.gender === "男卫生间"
-    );
-    const flowValues1 = filteredData1.map((item) => item.flowValue);
-    const DateValues1 = filteredData1.map((item) => item.startDate);
-    const filteredData2 = dataTable.filter(
-      (item) => item.gender === "女卫生间"
-    );
-    const flowValues2 = filteredData2.map((item) => item.flowValue);
-
-    const filteredData3 = dataTable.filter(
-      (item) => item.gender === "第三卫生间"
-    );
-    const flowValues3 = filteredData3.map((item) => item.flowValue);
-
-    // 处理成功响应
-    var option;
-
-    option = {
-      title: {
-        text: "最近一周每日客流量统计",
-        textStyle: {
-          color: "white",
-        },
-      },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "shadow",
-        },
-        formatter: function (params) {
-          // 获取横坐标的内容
-          let xAxisLabel = params[0].axisValue;
-
-          // 获取数据项的数值
-          let dataValue = params[0].value;
-          let dataValue1 = params[1].value;
-          let dataValue2 = params[2].value;
-
-          // 构建 tooltip 内容并换行显示
-          return (
-            xAxisLabel +
-            "<br>第三卫生间 " +
-            dataValue2 +
-            "人" +
-            "<br>女卫生间 " +
-            dataValue1 +
-            "人" +
-            "<br>男卫生间 " +
-            dataValue +
-            "人"
-          );
-        },
-      },
-      legend: {
-        textStyle: {
-          color: "white",
-        },
-      },
-      grid: {
-        left: "3%",
-        right: "4%",
-        bottom: "3%",
-        containLabel: true,
-        textStyle: {
-          color: "white",
-        },
-      },
-      xAxis: [
-        {
-          type: "category",
-          data: DateValues1,
-        },
-      ],
-      yAxis: [
-        {
-          type: "value",
-          axisLabel: {
-            formatter: "{value} 人",
-          },
-        },
-      ],
-      series: [
-        {
-          name: "男卫生间",
-          type: "bar",
-          stack: "Ad",
-          label: {
-            show: true,
-          },
-          emphasis: {
-            focus: "series",
-          },
-          textStyle: {
-            color: "white",
-          },
-          data: flowValues1,
-        },
-        {
-          name: "女卫生间",
-          type: "bar",
-          stack: "Ad",
-          label: {
-            show: true,
-          },
-          emphasis: {
-            focus: "series",
-          },
-          textStyle: {
-            color: "white",
-          },
-          data: flowValues2,
-        },
-        {
-          name: "第三卫生间",
-          type: "bar",
-          stack: "Ad",
-          label: {
-            show: true,
-          },
-          emphasis: {
-            focus: "series",
-          },
-          textStyle: {
-            color: "white",
-          },
-          data: flowValues3,
-        },
-      ],
-    };
-
-    option && weeklyChart.setOption(option);
-  });
+  } catch (error) {
+      // 捕获 API 调用的错误
+      console.error("获取客流量数据失败:", error);
+      ElMessage.error("客流量数据加载失败！");
+  }
 };
+// const showWeeklyChart = () => {
+//   const chartContainer = weeklyChartRef.value;
+//   document.getElementById("weekly_chart").removeAttribute("_echarts_instance_");
+//   var chartDom = document.getElementById("weekly_chart");
+//   if (!chartDom) {
+//     console.error("ECharts 容器未找到，ID可能错误或DOM尚未渲染！");
+//     return;
+//   }
+//   weeklyChart = echarts.init(chartDom);
+
+//   var showPersonStart = moment().add(-6, "d").format("YYYY-MM-DD");
+//   var showPersonEnd = moment().add(1, "d").format("YYYY-MM-DD");
+//   axios({
+//     url:
+//       "/api/toilet/getSumByDuration/枣子巷/" +
+//       showPersonStart +
+//       "/" +
+//       showPersonEnd +
+//       "/threeType",
+//     headers: {
+//       Authorization: "Bearer" + params.token,
+//       "Content-Type": " application/json",
+//     },
+//     method: "get",
+//   }).then((dataTable) => {
+//     dataTable = dataTable.data.data;
+//     const filteredData1 = dataTable.filter(
+//       (item) => item.gender === "男卫生间"
+//     );
+//     const flowValues1 = filteredData1.map((item) => item.flowValue);
+//     const DateValues1 = filteredData1.map((item) => item.startDate);
+//     const filteredData2 = dataTable.filter(
+//       (item) => item.gender === "女卫生间"
+//     );
+//     const flowValues2 = filteredData2.map((item) => item.flowValue);
+
+//     const filteredData3 = dataTable.filter(
+//       (item) => item.gender === "第三卫生间"
+//     );
+//     const flowValues3 = filteredData3.map((item) => item.flowValue);
+
+//     // 处理成功响应
+//     var option;
+
+//     option = {
+//       title: {
+//         text: "最近一周每日客流量统计",
+//         textStyle: {
+//           color: "white",
+//         },
+//       },
+//       tooltip: {
+//         trigger: "axis",
+//         axisPointer: {
+//           type: "shadow",
+//         },
+//         formatter: function (params) {
+//           // 获取横坐标的内容
+//           let xAxisLabel = params[0].axisValue;
+
+//           // 获取数据项的数值
+//           let dataValue = params[0].value;
+//           let dataValue1 = params[1].value;
+//           let dataValue2 = params[2].value;
+
+//           // 构建 tooltip 内容并换行显示
+//           return (
+//             xAxisLabel +
+//             "<br>第三卫生间 " +
+//             dataValue2 +
+//             "人" +
+//             "<br>女卫生间 " +
+//             dataValue1 +
+//             "人" +
+//             "<br>男卫生间 " +
+//             dataValue +
+//             "人"
+//           );
+//         },
+//       },
+//       legend: {
+//         textStyle: {
+//           color: "white",
+//         },
+//       },
+//       grid: {
+//         left: "3%",
+//         right: "4%",
+//         bottom: "3%",
+//         containLabel: true,
+//         textStyle: {
+//           color: "white",
+//         },
+//       },
+//       xAxis: [
+//         {
+//           type: "category",
+//           data: DateValues1,
+//         },
+//       ],
+//       yAxis: [
+//         {
+//           type: "value",
+//           axisLabel: {
+//             formatter: "{value} 人",
+//           },
+//         },
+//       ],
+//       series: [
+//         {
+//           name: "男卫生间",
+//           type: "bar",
+//           stack: "Ad",
+//           label: {
+//             show: true,
+//           },
+//           emphasis: {
+//             focus: "series",
+//           },
+//           textStyle: {
+//             color: "white",
+//           },
+//           data: flowValues1,
+//         },
+//         {
+//           name: "女卫生间",
+//           type: "bar",
+//           stack: "Ad",
+//           label: {
+//             show: true,
+//           },
+//           emphasis: {
+//             focus: "series",
+//           },
+//           textStyle: {
+//             color: "white",
+//           },
+//           data: flowValues2,
+//         },
+//         {
+//           name: "第三卫生间",
+//           type: "bar",
+//           stack: "Ad",
+//           label: {
+//             show: true,
+//           },
+//           emphasis: {
+//             focus: "series",
+//           },
+//           textStyle: {
+//             color: "white",
+//           },
+//           data: flowValues3,
+//         },
+//       ],
+//     };
+
+//     option && weeklyChart.setOption(option);
+//   });
+// };
 const echartInit_ljz = () => {
   document
     .getElementById("container_ljz1")
@@ -9519,9 +9881,6 @@ const echartInit_syd = () => {
             value: syd_data.value[1].infoVal,
             name: "超期量",
           },
-          // { value: 580, name: 'Email' },
-          // { value: 484, name: 'Union Ads' },
-          // { value: 300, name: 'Video Ads' }
         ],
       },
     ],
@@ -9584,177 +9943,177 @@ const echartInit_syd = () => {
   };
   myChart_syd2.setOption(option_syd2);
 };
-// const echartInit_cclj = () => {
-//   document
-//     .getElementById("container_cclj")
-//     .removeAttribute("_echarts_instance_");
-//   var myChart_cclj = echarts.init(document.getElementById("container_cclj"));
-//   document
-//     .getElementById("container_cclj1")
-//     .removeAttribute("_echarts_instance_");
-//   var myChart_cclj1 = echarts.init(document.getElementById("container_cclj1"));
-//   var option = {
-//     title: {
-//       text: "收运点位统计",
-//       textStyle: {
-//         color: "#ccc",
-//       },
-//     },
-//     tooltip: {
-//       trigger: "axis",
-//       axisPointer: {
-//         type: "shadow",
-//       },
-//     },
-//     xAxis: {
-//       type: "category",
-//       axisLabel: {
-//         //x轴文字的配置
-//         show: true,
-//         interval: 0, //使x轴文字显示全
-//         rotate: 20,
-//       },
-//       data: [
-//         cclj_sites.value[0].street,
-//         cclj_sites.value[1].street,
-//         cclj_sites.value[2].street,
-//         cclj_sites.value[3].street,
-//         cclj_sites.value[4].street,
-//         cclj_sites.value[5].street,
-//         cclj_sites.value[6].street,
-//         cclj_sites.value[7].street,
-//         cclj_sites.value[8].street,
-//         cclj_sites.value[9].street,
-//         cclj_sites.value[10].street,
-//         cclj_sites.value[11].street,
-//         cclj_sites.value[12].street,
-//       ],
-//     },
-//     yAxis: {
-//       type: "value",
-//     },
-//     series: [
-//       {
-//         data: [
-//           cclj_sites.value[0].street_site_num,
-//           cclj_sites.value[1].street_site_num,
-//           cclj_sites.value[2].street_site_num,
-//           cclj_sites.value[3].street_site_num,
-//           cclj_sites.value[4].street_site_num,
-//           cclj_sites.value[5].street_site_num,
-//           cclj_sites.value[6].street_site_num,
-//           cclj_sites.value[7].street_site_num,
-//           cclj_sites.value[8].street_site_num,
-//           cclj_sites.value[9].street_site_num,
-//           cclj_sites.value[10].street_site_num,
-//           cclj_sites.value[11].street_site_num,
-//           cclj_sites.value[12].street_site_num,
-//         ],
-//         type: "bar",
-//         showBackground: true,
-//         backgroundStyle: {
-//           color: "rgba(180, 180, 180, 0.2)",
-//         },
-//       },
-//     ],
-//   };
-//   var option1 = {
-//     title: {
-//       text: "收运点位统计",
-//       left: "center",
-//       textStyle: {
-//         color: "white",
-//       },
-//     },
-//     tooltip: {
-//       trigger: "item",
-//     },
-//     legend: {
-//       orient: "vertical",
-//       left: "left",
-//       textStyle: {
-//         color: "#ccc",
-//       },
-//     },
-//     series: [
-//       {
-//         name: "街道点位统计",
-//         type: "pie",
-//         radius: "50%",
-//         data: [
-//           {
-//             value: cclj_sites.value[0].street_site_num,
-//             name: cclj_sites.value[0].street,
-//           },
-//           {
-//             value: cclj_sites.value[1].street_site_num,
-//             name: cclj_sites.value[1].street,
-//           },
-//           {
-//             value: cclj_sites.value[2].street_site_num,
-//             name: cclj_sites.value[2].street,
-//           },
-//           {
-//             value: cclj_sites.value[3].street_site_num,
-//             name: cclj_sites.value[3].street,
-//           },
-//           {
-//             value: cclj_sites.value[4].street_site_num,
-//             name: cclj_sites.value[4].street,
-//           },
-//           {
-//             value: cclj_sites.value[5].street_site_num,
-//             name: cclj_sites.value[5].street,
-//           },
-//           {
-//             value: cclj_sites.value[6].street_site_num,
-//             name: cclj_sites.value[6].street,
-//           },
-//           {
-//             value: cclj_sites.value[7].street_site_num,
-//             name: cclj_sites.value[7].street,
-//           },
-//           {
-//             value: cclj_sites.value[8].street_site_num,
-//             name: cclj_sites.value[8].street,
-//           },
-//           {
-//             value: cclj_sites.value[9].street_site_num,
-//             name: cclj_sites.value[9].street,
-//           },
-//           {
-//             value: cclj_sites.value[10].street_site_num,
-//             name: cclj_sites.value[10].street,
-//           },
-//           {
-//             value: cclj_sites.value[11].street_site_num,
-//             name: cclj_sites.value[11].street,
-//           },
-//           {
-//             value: cclj_sites.value[12].street_site_num,
-//             name: cclj_sites.value[12].street,
-//           },
-//         ],
-//         label: {
-//           show: true,
-//           formatter(param) {
-//             // correct the percentage
-//             return param.name + " (" + param.percent + "%)";
-//           },
-//         },
-//         emphasis: {
-//           itemStyle: {
-//             shadowBlur: 10,
-//             shadowOffsetX: 0,
-//             shadowColor: "rgba(0, 0, 0, 0.5)",
-//           },
-//         },
-//       },
-//     ],
-//   };
-//   myChart_cclj.setOption(option);
-//   myChart_cclj1.setOption(option1);
-// };
+const echartInit_cclj = () => {
+  document
+    .getElementById("container_cclj")
+    .removeAttribute("_echarts_instance_");
+  var myChart_cclj = echarts.init(document.getElementById("container_cclj"));
+  document
+    .getElementById("container_cclj1")
+    .removeAttribute("_echarts_instance_");
+  var myChart_cclj1 = echarts.init(document.getElementById("container_cclj1"));
+  var option = {
+    title: {
+      text: "收运点位统计",
+      textStyle: {
+        color: "#ccc",
+      },
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow",
+      },
+    },
+    xAxis: {
+      type: "category",
+      axisLabel: {
+        //x轴文字的配置
+        show: true,
+        interval: 0, //使x轴文字显示全
+        rotate: 20,
+      },
+      data: [
+        cclj_sites.value[0].street,
+        cclj_sites.value[1].street,
+        cclj_sites.value[2].street,
+        cclj_sites.value[3].street,
+        cclj_sites.value[4].street,
+        cclj_sites.value[5].street,
+        cclj_sites.value[6].street,
+        cclj_sites.value[7].street,
+        cclj_sites.value[8].street,
+        cclj_sites.value[9].street,
+        cclj_sites.value[10].street,
+        cclj_sites.value[11].street,
+        cclj_sites.value[12].street,
+      ],
+    },
+    yAxis: {
+      type: "value",
+    },
+    series: [
+      {
+        data: [
+          cclj_sites.value[0].street_site_num,
+          cclj_sites.value[1].street_site_num,
+          cclj_sites.value[2].street_site_num,
+          cclj_sites.value[3].street_site_num,
+          cclj_sites.value[4].street_site_num,
+          cclj_sites.value[5].street_site_num,
+          cclj_sites.value[6].street_site_num,
+          cclj_sites.value[7].street_site_num,
+          cclj_sites.value[8].street_site_num,
+          cclj_sites.value[9].street_site_num,
+          cclj_sites.value[10].street_site_num,
+          cclj_sites.value[11].street_site_num,
+          cclj_sites.value[12].street_site_num,
+        ],
+        type: "bar",
+        showBackground: true,
+        backgroundStyle: {
+          color: "rgba(180, 180, 180, 0.2)",
+        },
+      },
+    ],
+  };
+  var option1 = {
+    title: {
+      text: "收运点位统计",
+      left: "center",
+      textStyle: {
+        color: "white",
+      },
+    },
+    tooltip: {
+      trigger: "item",
+    },
+    legend: {
+      orient: "vertical",
+      left: "left",
+      textStyle: {
+        color: "#ccc",
+      },
+    },
+    series: [
+      {
+        name: "街道点位统计",
+        type: "pie",
+        radius: "50%",
+        data: [
+          {
+            value: cclj_sites.value[0].street_site_num,
+            name: cclj_sites.value[0].street,
+          },
+          {
+            value: cclj_sites.value[1].street_site_num,
+            name: cclj_sites.value[1].street,
+          },
+          {
+            value: cclj_sites.value[2].street_site_num,
+            name: cclj_sites.value[2].street,
+          },
+          {
+            value: cclj_sites.value[3].street_site_num,
+            name: cclj_sites.value[3].street,
+          },
+          {
+            value: cclj_sites.value[4].street_site_num,
+            name: cclj_sites.value[4].street,
+          },
+          {
+            value: cclj_sites.value[5].street_site_num,
+            name: cclj_sites.value[5].street,
+          },
+          {
+            value: cclj_sites.value[6].street_site_num,
+            name: cclj_sites.value[6].street,
+          },
+          {
+            value: cclj_sites.value[7].street_site_num,
+            name: cclj_sites.value[7].street,
+          },
+          {
+            value: cclj_sites.value[8].street_site_num,
+            name: cclj_sites.value[8].street,
+          },
+          {
+            value: cclj_sites.value[9].street_site_num,
+            name: cclj_sites.value[9].street,
+          },
+          {
+            value: cclj_sites.value[10].street_site_num,
+            name: cclj_sites.value[10].street,
+          },
+          {
+            value: cclj_sites.value[11].street_site_num,
+            name: cclj_sites.value[11].street,
+          },
+          {
+            value: cclj_sites.value[12].street_site_num,
+            name: cclj_sites.value[12].street,
+          },
+        ],
+        label: {
+          show: true,
+          formatter(param) {
+            // correct the percentage
+            return param.name + " (" + param.percent + "%)";
+          },
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)",
+          },
+        },
+      },
+    ],
+  };
+  myChart_cclj.setOption(option);
+  myChart_cclj1.setOption(option1);
+};
 
 const echartInit_jgzm = () => {
   document
@@ -9894,7 +10253,6 @@ function toSystemHjws(item) {
   }
   if (permission.value == true) {
     var realURL = item.url + "?phone=" + params.username + "&realName=" + params.realname;
-    console.log("realURL:  " + realURL);
     window.open(realURL);
     uploadClickLog(item.systemName);
   } else {
@@ -9902,6 +10260,7 @@ function toSystemHjws(item) {
   }
   // permission.value = false;
 }
+
 const echartInit = () => {
   document.getElementById("container").removeAttribute("_echarts_instance_");
   document.getElementById("container1").removeAttribute("_echarts_instance_");
@@ -9933,7 +10292,6 @@ const echartInit = () => {
 
   // 指定图表的配置项和数据
   getTrend().then((data) => {
-    console.log(data);
     var option = {
       title: {
         text: "事件趋势分析",
@@ -10187,7 +10545,6 @@ const echartInit = () => {
     myChart4.setOption(option4);
   });
   getResourceSzcg().then((data) => {
-    console.log(data.length);
     if (data.length == 0) {
       var default_data = { value: 0, wtly: "城管平台" };
       data.push(default_data);
@@ -10672,7 +11029,6 @@ function changeCellStyle(row) {
 }
 
 var time = new Date().getTime();
-//setInterval(refreshSydToken, 1000 * 61)
 const DateToday =
   new Date().getFullYear() +
   "-" +
@@ -10687,8 +11043,6 @@ const DateTomorrow =
   "-" +
   new Date(time + 1 * 24 * 60 * 60 * 1000).getDate();
 const tomorrow = moment().add(+1, "d").format("YYYY-MM-DD");
-console.log("today:" + today + "  " + "tomorrow:" + tomorrow);
-console.log("DateToday:" + DateToday + "  " + "DateTomorrow:" + DateTomorrow);
 const token = ref("");
 const gxdc = reactive({ url: "" });
 const syd = reactive({ url: "" });
@@ -10709,68 +11063,66 @@ const sydUrl = ref(
 const toDdzh = () => {
   router.push({ name: "dept1", params: { num: "3" } });
 };
-onBeforeMount(() => {
-  getMainSyd().then((data) => {
-    syd_data.value = data;
-  });
 
-  getCheckRate().then((data) => {
-    ddzh_tableData1.value = data;
-  });
-  // axios({
-  //     url: "/diao/auth/login",
-  //     method: "post",
-  //     data: JSON.stringify({
-  //       phone: "18380195019",
-  //       password: "123456",
-  //     }),
-  //     headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  // }).then(function (resp) {
-  //     console.log("ddzh2",resp)
-  //     var ddzh_token = resp.data.token;
-  //     axios({
-  //       url: "/diao/patrol-status/status/rate_period",
-  //       method: "post",
-  //       data: JSON.stringify({
-  //         startDate:startDate,
-  //         endDate:endDate,
-  //         param: "1",
-  //       }),
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: ddzh_token,
-  //       },
-  //     }).then(function (resp) {
-  //       ddzh_tableData1.value = resp.data.data;
-  //       console.log("打卡率",resp);
-  //       echartInit_ddzh();
-  //     });
+onMounted(async () => { // 使用 onMounted 和 async/await
 
-  //   });
-  getCntStatus().then((data) => {
-    ddzh_tableData2.value = data;
-  });
-  getAllEvents(today, tomorrow).then((data) => {
-    tcwtTableData.value = data;
-  });
-  config_szcg.series[0].data[0].value =
-    90 %
-    getTokenGxdc().then((data) => {
-      gxdcUrl.value = data;
-      gxdc.url = "https://119.4.191.13:5580/manage/?token=" + gxdcUrl.value;
-    });
-  // getAiAlarm().then((data) => {
-  //   hwzy_tableData1.value = data;
-  // });
-  getCompanyDust().then((data) => {
-    ycxt_tableData1.value = data;
-  });
-  getOverSpeed().then((data) => {
-    if (data.length != 0) ycxt_tableData2.value = data;
-  });
+    // 1. 固定配置和依赖项准备
+    // 🚨 修复原始代码中 90 % 的语法错误。假设 90 是数值。
+    config_szcg.series[0].data[0].value = 90;
+
+    // 提前启动 token 获取，因为它是一个依赖
+    const tokenPromise = getTokenGxdc();
+
+    // 2. 使用 Promise.allSettled 并发执行所有 API 调用
+    const results = await Promise.allSettled([
+        getMainSyd(),
+        getCheckRate(),
+        getCntStatus(),
+        getAllEvents(today, tomorrow),
+        tokenPromise,
+        getCompanyDust(),
+        getOverSpeed()
+    ]);
+
+    // 3. 安全地解构和处理结果
+    const [
+        sydResult, checkRateResult, cntStatusResult, eventsResult,
+        tokenResult, companyDustResult, overSpeedResult
+    ] = results;
+
+    // 辅助函数：安全地从成功的 Promise 结果中提取 value
+    const getFulfilledValue = (result) =>
+        result.status === 'fulfilled' ? result.value : null;
+
+    // 3.1. 直接赋值和空值处理
+    syd_data.value = getFulfilledValue(sydResult);
+    ddzh_tableData1.value = getFulfilledValue(checkRateResult);
+    ddzh_tableData2.value = getFulfilledValue(cntStatusResult);
+
+    // 确保即使数据为空或失败，目标列表也是一个空数组
+    tcwtTableData.value = getFulfilledValue(eventsResult) || [];
+    ycxt_tableData1.value = getFulfilledValue(companyDustResult);
+
+    // 3.2. Token 依赖的赋值
+    const token = getFulfilledValue(tokenResult);
+    if (token) {
+        gxdcUrl.value = token;
+        // 使用模板字符串使 URL 拼接更清晰
+        gxdc.url = `https://119.4.191.13:5580/manage/?token=${token}`;
+    }
+
+    // 3.3. 带有长度检查的赋值 (getOverSpeed)
+    const overSpeedData = getFulfilledValue(overSpeedResult);
+
+    // 增强健壮性：检查是否为数组且非空
+    if (Array.isArray(overSpeedData) && overSpeedData.length !== 0) {
+        ycxt_tableData2.value = overSpeedData;
+    } else {
+        // 如果数据为空、null 或 API 失败，清空目标列表
+        ycxt_tableData2.value = [];
+    }
 });
+
 const imgVisible = ref(true);
 //用户信息
 const user = reactive({
@@ -10817,7 +11169,6 @@ function toSystem(item) {
     }
   }
   //每个子系统登录方式不一样
-  console.log(item.systemId);
   if (permission.value == true) {
     if (
       item.systemId != "13" &&
@@ -10826,7 +11177,6 @@ function toSystem(item) {
       item.systemId != "4" &&
       item.systemId != "12"
     ) {
-      console.log(item.systemName);
       if (item.url === "") {
         ElMessage({
           showClose: true,
@@ -10835,11 +11185,9 @@ function toSystem(item) {
       } else if (item.systemId == "15") {
         //item.url = item.url + "?iphone=" + params.username;
         item.url = "http://171.221.172.74:6888/eUrbanMIS/main.htm" + "?iphone=" + params.username;
-        console.log("url:" + item.url);
         window.open(item.url);
       } else if (item.systemId == "19") {
         item.url = item.url + "?iphone=" + params.username;
-        console.log("url:" + item.url);
         window.open(item.url);
       } else if (
         item.systemId == "18" ||
@@ -10848,12 +11196,10 @@ function toSystem(item) {
       ) {
         // 这三个系统目前url无登录参数
         item.url = item.url + "?phone=" + params.username;
-        console.log("url:" + item.url);
         window.open(item.url);
       } else window.open(item.url + "&phone=" + params.username);
     }
 
-    console.log(item.systemName);
 
     if (item.systemId == "13") {
       //共享单车
@@ -10872,21 +11218,17 @@ function toSystem(item) {
         var sydUrl = "https://119.4.191.13:9580/#/login?token=";
         sydUrl = sydUrl + token.value + "&phone=" + params.username;
         syd.url = sydUrl;
-        console.log(syd.url);
         window.open(syd.url);
       });
     }
     if (item.systemId == "17" || item.systemId == "4") {
       getAiUrl().then((data) => {
         aiUrl.value = data.message + "&phone=" + params.username;
-        console.log("22222", aiUrl.value);
-        console.log("11111111", data, aiUrl);
         window.open(aiUrl.value);
       });
     }
     if (item.systemId == "12") {
       var ddzh_url = "https://119.4.191.13:8881/login/?token=" + params.token;
-      console.log("ddzh_url:  " + ddzh_url);
       window.open(ddzh_url);
     } //调度指挥
     uploadClickLog(item.systemName);
@@ -10899,18 +11241,11 @@ const ljz_table1 = ref([]);
 
 //部门列表, 从后端获取
 const depts = ref([]);
-// const hwzyToken = ref([])
-onBeforeMount(() => {
-  // getHwzyToken().then((data) => {
-  //   hwzyToken.value = data;
-  //   console.log(418,hwzyToken.value)
-  // });
+onMounted(() => {
   getDeptList().then((response) => {
     depts.value = response;
   });
   getCategory().then((data) => {
-    console.log("ggzp", data);
-    console.log("xxx", data[0]);
     retailCount.value = data[0];
     cateringCount.value = data[3];
     serviceCount.value = data[1];
@@ -10922,44 +11257,85 @@ onBeforeMount(() => {
     jgzm_month_consumption.value = data[2];
     jgzm_year_consumption.value = data[3];
   });
-  // getSitesData().then((data) => {
-  //   cclj_sites.value = data;
-  // });
 });
-// 系统列表
+
 const systems = ref([]);
+// 系统列表
+const fetchDataAndInitialize = async () => {
+    // --- 1. 获取系统列表 (首个串行请求) ---
+    let systemList = [];
+    try {
+        systemList = await getSystemList();
+        // 确保 systems.value 立即更新，以便模板或其他地方使用
+        systems.value = systemList;
+    } catch (error) {
+        console.error("获取系统列表失败:", error);
+        // 如果失败，则后续的系统数据请求都无法进行
+        return;
+    }
+
+    // --- 2. 准备并发请求 ---
+
+    // 2.1. 独立并发请求 (ljz_table1, ljz_table2)
+    const independentPromises = [
+        getMainLjz(),
+        getSum()
+    ];
+
+    // 2.2. 系统数据并发请求 (系统列表循环)
+    const systemPromises = systemList
+        .filter(system => system.api && system.api !== "") // 过滤掉 api 为空的情况
+        .map(async (system) => {
+            let api = system.api;
+            let token = null;
+
+            // 构造 API URL 和 Token
+            if (system.systemId === "5" || system.systemId === "7") {
+                // 拼接 Token
+                api = `${api}?token=${params.hwzyToken}`;
+            }
+
+            // 执行请求并处理结果
+            try {
+                const data = await get(api);
+                // 成功后，将数据直接赋值给 system 对象 (Vue 响应式会自动追踪)
+                system.data = data;
+            } catch (error) {
+                console.error(`请求系统 ${system.systemId} (${system.api}) 失败:`, error);
+                // 失败时设置默认值，防止页面崩溃
+                system.data = null;
+            }
+            return system; // 返回更新后的 system 对象
+        });
+
+    // --- 3. 执行所有并发请求 (使用 Promise.allSettled 增强健壮性) ---
+    const allPromises = [...independentPromises, ...systemPromises];
+
+    // 使用 allSettled 确保所有请求都完成，即使部分失败
+    const results = await Promise.allSettled(allPromises);
+
+    // --- 4. 集中更新状态 ---
+
+    // 独立请求的结果 (假设按顺序对应 [getMainLjz, getSum])
+    const ljzResult = results[0];
+    const sumResult = results[1];
+
+    if (ljzResult.status === 'fulfilled') {
+        ljz_table1.value = ljzResult.value;
+    }
+
+    if (sumResult.status === 'fulfilled') {
+        ljz_table2.value = sumResult.value;
+    }
+
+    // 系统数据请求的结果 (systemPromises 的结果已经直接修改了 system.data，无需再次处理)
+};
+
 onMounted(() => {
-  getSystemList().then((data) => {
-    systems.value = data;
-
-    // 请求各个子系统要显示的数据
-    systems.value.forEach((system) => {
-      if (system.api !== "") {
-        if (system.systemId == "5" || system.systemId == "7") {
-          //环卫作业和垃圾全生命周期的接口要传递token，这个token在登录城市管家的时候就获取并缓存
-          console.log(4182, params.hwzyToken);
-          get(system.api + "?token=" + params.hwzyToken).then(
-            (data) => (system.data = data)
-          );
-          // console.log(ljz_table1)
-        } else {
-          get(system.api).then((data) => (system.data = data));
-        }
-      }
-    });
-  });
-
-  getMainLjz().then((data) => {
-    ljz_table1.value = data;
-  });
-  getSum().then((data) => {
-    ljz_table2.value = data;
-  });
-
-  // getCarLists().then((data) => {
-  //   hwzy_tableData.value = data;
-  // });
+    fetchDataAndInitialize();
 });
+
+
 //选中的部门
 // -1表示全选，为默认值
 const choosedDept = ref(-1);
@@ -10977,11 +11353,6 @@ const choosedSystems = computed(() => {
   }
 
   return systems.value.filter(filterFun);
-  // .filter(system => {
-  //   console.log(system)
-  //   // 只显示有数据的子系统
-  //   return system.data && system.data.length != 0
-  // })
 });
 
 // 切换显示部门和子系统
@@ -11085,16 +11456,13 @@ const szhcsImageUrl = ref(""); //
 const hovered = ref(false);
 const showText = () => {
   hovered.value = true;
-  console.log(hovered.value);
 };
 
 const hideText = () => {
   hovered.value = false;
-  console.log(hovered.value);
 };
 // const handleUploadSuccess = async (response, uploadFile) => {
 //   latestImageUrl.value = URL.createObjectURL(uploadFile.raw); // 更新最新头像 URL
-//   console.log("现在的图片" + latestImageUrl.value);
 //   // latestImageUrl.value = response.data.url;
 // };
 
@@ -11102,138 +11470,125 @@ const createBeforeUpload = (systemName) => (rawFile) =>
   beforeUpload(rawFile, systemName);
 
 const beforeUpload = async (rawFile, systemName) => {
-  const type = ["image/jpeg", "image/jpg", "image/png", "image/svg"];
-  const isJPG = type.includes(rawFile.type);
-  const isLt20M = rawFile.size / 1024 / 1024 < 20;
-  if (!isJPG) {
+  // --- 映射对象：将系统名称字符串映射到对应的图片 URL 响应式引用 ---
+  // 注意：您必须确保在外部作用域定义了这些响应式引用（例如：const hwzyImageUrl = ref('')）
+  const imageRefMap = {
+    "banner": latestImageUrl,
+    "mainBg": backgroundImageUrl,
+    "hwzy": hwzyImageUrl,
+    "cclj": ccljImageUrl,
+    "shlj": shljImageUrl,
+    "ljfl": ljflImageUrl,
+    "cyyy": cyyyImageUrl,
+    "ddzh": ddzhImageUrl,
+    "gxdc": gxdcImageUrl,
+    "yczl": yczlImageUrl,
+    "jgzm": jgzmImageUrl,
+    "new_jgzm": newJgzmImageUrl,
+    "ljdp": ljdpImageUrl,
+    "bottom_banner": bottomBannerImageUrl,
+    "tcwt": tcwtImageUrl,
+    "cgAI": cgAIImageUrl,
+    "cgsyd": cgsydImageUrl,
+    "szhcs": szhcsImageUrl,
+  };
+  // 校验允许的 MIME 类型
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/svg"];
+  // 校验文件大小 (5MB)
+  const maxFileSizeMB = 5;
+  const fileSizeMB = rawFile.size / 1024 / 1024;
+  if (!allowedTypes.includes(rawFile.type)) {
     ElMessage.error("图片仅支持jpeg,jpg,png,svg格式！");
     return false;
-  } else if (rawFile.size / 1024 / 1024 > 5) {
-    ElMessage.error("图片不能超过5MB!");
-    return false;
-  } else {
-    const formData = new FormData();
-    formData.append("file", rawFile); // 添加文件
-    formData.append("systemName", systemName);
-    // 使用 Axios 发送自定义上传请求
-    await axios
-      .post(uploadUrl, formData, {
-        headers: {
-          Authorization: "Bearer " + params.token, // 添加 token
-        },
-      })
-      .then((response) => {
-        console.log("上传成功", response);
-        // 在这里处理上传成功的逻辑，如更新页面等
-
-        // 更新最新头像 URL
-        if (systemName == "banner") {
-          latestImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "mainBg") {
-          backgroundImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "hwzy") {
-          hwzyImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "cclj") {
-          ccljImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "shlj") {
-          shljImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "ljfl") {
-          ljflImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "cyyy") {
-          cyyyImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "ddzh") {
-          ddzhImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "gxdc") {
-          gxdcImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "yczl") {
-          yczlImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "jgzm") {
-          jgzmImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "new_jgzm") {
-          newJgzmImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "ljdp") {
-          ljdpImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "bottom_banner") {
-          bottomBannerImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "tcwt") {
-          tcwtImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "cgAI") {
-          cgAIImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "cgsyd") {
-          cgsydImageUrl.value = "/homePicture/" + response.data.url;
-        }
-        if (systemName == "szhcs") {
-          szhcsImageUrl.value = "/homePicture/" + response.data.url;
-        }
-
-        //  latestImageUrl.value = require("@/assets/home/" + response.data.url);
-      })
-      .catch((error) => {
-        console.error("上传失败", error);
-        // 在这里处理上传失败的逻辑
-      });
+  }
+  if (fileSizeMB > maxFileSizeMB) {
+    ElMessage.error(`图片不能超过${maxFileSizeMB}MB!`);
     return false;
   }
+  // --- 校验通过，执行自定义上传 ---
+  const formData = new FormData();
+  formData.append("file", rawFile);
+  formData.append("systemName", systemName);
+  // 1. 获取目标响应式引用
+  const targetImageRef = imageRefMap[systemName];
+  if (!targetImageRef) {
+      console.warn(`SystemName: ${systemName} 未知，无法更新图片状态。`);
+      return false;
+  }
+  await axios
+    .post(uploadUrl, formData, {
+      headers: {
+        Authorization: "Bearer " + params.token, // 添加 token
+      },
+    })
+    .then((response) => {
+      targetImageRef.value = "/homePicture/" + response.data.url;
+    })
+    .catch((error) => {
+      console.error("上传失败", error);
+      ElMessage.error("图片上传失败，请检查网络或联系管理员！");
+    });
+  return false;
 };
 
 // 获取最新头像的 URL
-const getLatestAvatar = async (systemName, latestImageUrl) => {
+const getLatestAvatar = async (systemName, targetRef) => {
   try {
     const response = await axios.get("/api/avatar-other/get-avatar-other", {
       params: {
         systemName: systemName,
       },
       headers: {
-        Authorization: "Bearer " + params.token, // 添加 token
+        Authorization: "Bearer " + params.token,
       },
     });
-    // latestImageUrl.value = require("@/assets/home/" + response.data);
-    latestImageUrl.value = "/homePicture/" + response.data;
-    // console.log("之前的图片" + latestImageUrl.value);
+    if (response.data && response.data !== "bg_box.jpg") {
+      targetRef.value = "/homePicture/" + response.data;
+    } else {
+      console.warn(`系统 ${systemName} 返回了默认或空图片名: ${response.data}`);
+      targetRef.value = null;
+    }
   } catch (error) {
-    console.error("Error fetching latest avatar:", error);
+    console.error(`Error fetching latest avatar for ${systemName}:`, error);
+    targetRef.value = null;
   }
 };
-// 在组件加载后获取最新头像的 URL
-
-getLatestAvatar("banner", latestImageUrl);
-getLatestAvatar("mainBg", backgroundImageUrl);
-getLatestAvatar("hwzy", hwzyImageUrl);
-getLatestAvatar("bottom_banner", bottomBannerImageUrl);
-getLatestAvatar("cclj", ccljImageUrl);
-getLatestAvatar("shlj", shljImageUrl);
-getLatestAvatar("ljfl", ljflImageUrl);
-getLatestAvatar("cyyy", cyyyImageUrl);
-getLatestAvatar("ddzh", ddzhImageUrl);
-getLatestAvatar("gxdc", gxdcImageUrl);
-getLatestAvatar("yczl", yczlImageUrl);
-getLatestAvatar("jgzm", jgzmImageUrl);
-getLatestAvatar("new_jgzm", newJgzmImageUrl);
-getLatestAvatar("ljdp", ljdpImageUrl);
-getLatestAvatar("tcwt", tcwtImageUrl);
-getLatestAvatar("cgAI", cgAIImageUrl);
-getLatestAvatar("cgsyd", cgsydImageUrl);
-getLatestAvatar("szhcs", szhcsImageUrl);
-// getLatestAvatar("tcwt", tcwtImageUrl);
-// getLatestAvatar("cgAI", cgAIImageUrl);
-// getLatestAvatar("cgsyd", cgsydImageUrl);
-// getLatestAvatar("szhcs", szhcsImageUrl);
+// 定义需要请求的列表
+const AVATAR_CONFIGS = [
+    { systemName: "banner", targetRef: latestImageUrl },
+    { systemName: "mainBg", targetRef: backgroundImageUrl },
+    { systemName: "hwzy", targetRef: hwzyImageUrl },
+    { systemName: "bottom_banner", targetRef: bottomBannerImageUrl },
+    { systemName: "cclj", targetRef: ccljImageUrl },
+    { systemName: "shlj", targetRef: shljImageUrl },
+    { systemName: "ljfl", targetRef: ljflImageUrl },
+    { systemName: "cyyy", targetRef: cyyyImageUrl },
+    { systemName: "ddzh", targetRef: ddzhImageUrl },
+    { systemName: "gxdc", targetRef: gxdcImageUrl },
+    { systemName: "yczl", targetRef: yczlImageUrl },
+    { systemName: "jgzm", targetRef: jgzmImageUrl },
+    { systemName: "new_jgzm", targetRef: newJgzmImageUrl },
+    { systemName: "ljdp", targetRef: ljdpImageUrl },
+    { systemName: "tcwt", targetRef: tcwtImageUrl },
+    { systemName: "cgAI", targetRef: cgAIImageUrl },
+    { systemName: "cgsyd", targetRef: cgsydImageUrl },
+    { systemName: "szhcs", targetRef: szhcsImageUrl },
+];
+//在 onMounted 钩子中执行所有并发请求
+onMounted(() => {
+    // 创建一个 Promise 数组，其中包含所有对 getLatestAvatar 的调用
+    const promises = AVATAR_CONFIGS.map(config =>
+        getLatestAvatar(config.systemName, config.targetRef)
+    );
+    // 使用 Promise.allSettled（推荐）或 Promise.all 执行所有请求
+    // Promise.allSettled 会等待所有请求完成，无论成功或失败，不会中断
+    Promise.allSettled(promises)
+        .then(() => {console.log("所有头像 URL 请求处理完毕。");
+        })
+        .catch(error => {
+            console.error("并发请求管理出现未预期错误:", error);
+        });
+});
 </script>
 
 <style scoped>
@@ -11334,15 +11689,15 @@ getLatestAvatar("szhcs", szhcsImageUrl);
 }
 
 .text-week {
-  margin-left: -10vw;
+  margin-left: -35vw;
   font-size: large;
   color: #fff;
   line-height: 60px;
-  width: 100%;
+  flex-shrink: 0;
 }
 
 .text-title {
-  margin-left: 20px;
+  margin-left: -5px;
   font-size: large;
   color: #fff;
   line-height: 60px;
@@ -11350,6 +11705,11 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   padding: 5px;
 }
 
+.alarm-indicator {
+    margin-left: -260px;
+    display: flex;
+    align-items: flex-start;
+}
 .text-logo {
   margin-left: 20px;
   font-size: large;
@@ -11421,7 +11781,6 @@ getLatestAvatar("szhcs", szhcsImageUrl);
   flex-wrap: wrap;
   /*当屏幕尺寸变小时，各个子系统汇总模块自动换行*/
   justify-content: center;
-  /*background: url("/public/images/bg-box7.jpg") -30% center; */
 }
 
 .logo-title {

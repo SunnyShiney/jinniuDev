@@ -20,7 +20,6 @@ router.beforeEach(async (to, from, next) => {
     if (hash.includes("?")) {
       const paramsString = hash.split("?")[1]; // 获取问号后面的部分
       const urlParams = new URLSearchParams(paramsString);
-      console.log("urlParams:" + urlParams);
      
     } else {
       return next({ path: "/login" });

@@ -514,7 +514,7 @@ import ClassItem from "@/views/home/components/ClassItem.vue";
 import Header from "@/components/Header.vue";
 import { get, getDeptList, getSystemList, uploadClickLog } from "@/api/home.js";
 import { getMainGarbage } from "@/api/garbage";
-import { getMainCclj, getSitesData } from "@/api/cclj.js";
+import { getMainCclj} from "@/api/cclj.js";
 import { getMainHwzy } from "@/api/hwzy.js";
 import { params } from "@/store/store.js";
 // import { getCarLists, getAiAlarm } from "@/api/hwzy";
@@ -626,12 +626,10 @@ onBeforeMount(() => {
   getStations().then((data) => {
     stations_table.value = data;
     echartInit_ljz();
-    console.log(4171, stations_table.value);
   });
   getLifecycle().then((data) => {
     lifecycle_table.value = data;
     echartInit_ljz();
-    console.log(4172, lifecycle_table.value.total_lifecycle_truck);
   });
   getSum().then((data) => {
     ljz_table2.value = data;
@@ -641,9 +639,6 @@ onBeforeMount(() => {
     ccljData_month.value = data[1].infoVal;
     ccljData_day.value = data[2].infoVal;
     ccljData_sites.value = data[3].infoVal;
-  });
-  getSitesData().then((data) => {
-    cclj_sites.value = data;
   });
   getMainHwzy().then((data) => {
     hwzy_car_all.value = data[0].infoVal;

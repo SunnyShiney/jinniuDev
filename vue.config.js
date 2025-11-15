@@ -1,7 +1,14 @@
 const { defineConfig } = require("@vue/cli-service");
+const webpack = require('webpack');
 module.exports = defineConfig({
   transpileDependencies: true,
-
+  configureWebpack: {
+    plugins: [
+      new webpack.DefinePlugin({
+        '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(false)
+      })
+    ]
+  },
   devServer: {
     proxy: {
       "/api": {
@@ -10,11 +17,8 @@ module.exports = defineConfig({
         //政务云
         // target: "https://175.153.176.27:18801/api",
         //市政务云
-        target: "https://119.4.191.13:8891/api",
-        // target: 'http://101.37.246.72:8084',//服务器
-        //target: 'http://192.168.43.39:8084',
-        //target: 'http://192.168.50.7:8084',
-        //target: 'http://192.168.12.106:8084',
+        // target: "https://119.4.191.13:8891/api",
+        target: "http://localhost:8890/",
         changeOrigin: true,
         pathRewrite: {
           "^/api": "", //将url中起始的'/api'替换成''，比如将/api/getDeptList替换成/getDeptList
@@ -28,9 +32,6 @@ module.exports = defineConfig({
         //市政务云
         target: "https://119.4.191.13:8891/homePicture",
         // target: 'http://101.37.246.72:8084',//服务器
-        //target: 'http://192.168.43.39:8084',
-        //target: 'http://192.168.50.7:8084',
-        //target: 'http://192.168.12.106:8084',
         changeOrigin: true,
         pathRewrite: {
           "^/homePicture": "", //将url中起始的'/api'替换成''，比如将/api/getDeptList替换成/getDeptList
