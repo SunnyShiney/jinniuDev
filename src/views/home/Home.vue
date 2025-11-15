@@ -3574,13 +3574,13 @@
 <!--                    </li>-->
                     <!-- 显示固定的值 -->
                     <li style="font-size: 20px; padding: 5px">
-                      集中控制设备：284台
+                      集中控制设备：317台
                     </li>
                     <li style="font-size: 20px; padding: 5px">
                       视频监控设备：36台
                     </li>
                     <li style="font-size: 20px; padding: 5px">
-                      亮灯楼宇：286栋
+                      亮灯楼宇：302栋
                     </li>
                     <li style="font-size: 20px; padding: 5px">
                       亮灯桥梁及绿地：11处
@@ -5446,23 +5446,26 @@ const guoShuData = reactive([]);
 const hardWaresData = reactive([]);
 
 const tableData = [
-  { name: '一环路', controlDevices: 63, videoDevices: 9, lightingBuildings: 72, lightingBridges: 0 },
-  { name: '锦江公园', controlDevices: 75, videoDevices: 3, lightingBuildings: 77, lightingBridges: 1 },
+  { name: '一环路', controlDevices: 63, videoDevices: 11, lightingBuildings: 72, lightingBridges: 0 },
+  { name: '锦江公园', controlDevices: 78, videoDevices: 3, lightingBuildings: 77, lightingBridges: 1 },
   { name: '王家巷', controlDevices: 7, videoDevices: 1, lightingBuildings: 2, lightingBridges: 0 },
-  { name: '城北体育馆', controlDevices: 19, videoDevices: 3, lightingBuildings: 14, lightingBridges: 0 },
+  { name: '城北体育馆', controlDevices: 12, videoDevices: 3, lightingBuildings: 14, lightingBridges: 0 },
   { name: '音乐公园', controlDevices: 31, videoDevices: 3, lightingBuildings: 20, lightingBridges: 0 },
-  { name: '体育公园', controlDevices: 38, videoDevices: 3, lightingBuildings: 37, lightingBridges: 0 },
+  { name: '体育公园', controlDevices: 37, videoDevices: 3, lightingBuildings: 37, lightingBridges: 0 },
   { name: '群星路', controlDevices: 4, videoDevices: 0, lightingBuildings: 0, lightingBridges: 3 },
-  { name: '枣子巷', controlDevices: 19, videoDevices: 3, lightingBuildings: 41, lightingBridges: 0 },
+  { name: '枣子巷', controlDevices: 38, videoDevices: 3, lightingBuildings: 39, lightingBridges: 0 },
   { name: '茶店子', controlDevices: 18, videoDevices: 2, lightingBuildings: 23, lightingBridges: 0 },
-  { name: '丝路云锦', controlDevices: 6, videoDevices: 1, lightingBuildings: 0, lightingBridges: 3 },
+  { name: '丝路云锦', controlDevices: 6, videoDevices: 1, lightingBuildings: 1, lightingBridges: 3 },
   { name: 'CD地块', controlDevices: 1, videoDevices: 1, lightingBuildings: 0, lightingBridges: 1 },
-  { name: '蜀西路人行天桥', controlDevices: 3, videoDevices: 2, lightingBuildings: 0, lightingBridges: 3 }
+  { name: '蜀西路人行天桥', controlDevices: 3, videoDevices: 2, lightingBuildings: 0, lightingBridges: 3 },
+  { name: '营门口', controlDevices: 19, videoDevices: 1, lightingBuildings: 17, lightingBridges: 0 },
+  { name: '一品天下', controlDevices: 0, videoDevices: 2, lightingBuildings: 0, lightingBridges: 0 },
+  { name: '合计', controlDevices: 317, videoDevices: 36, lightingBuildings: 302, lightingBridges: 11 }
 ];
 //==============================================================================2024.04.12 告警指示灯
 const query = ref("");
 const value = ref("");
-const warningPersonList = ref([]);
+let warningPersonList = [];
 // const warningPersonList = [
 //   { name: "周攀", phone: "18008061031", company: "办公室" },
 //   { name: "李自勇", phone: "18008060397", company: "办公室" },
@@ -5515,10 +5518,28 @@ const warningPersonList = ref([]);
 // ];
 // 自定义结果格式
 // const selectedResult = ref(null);
-onMounted(() => {
-  getAllWarningPersonList();
-});
-const getAllWarningPersonList = () => {
+// onMounted(() => {
+//   getAllWarningPersonList();
+// });
+// const getAllWarningPersonList = () => {
+//   axios({
+//     url: "/api/auth/allWarningPersonList",
+//     method: "get",
+//     headers: {
+//       Authorization: "Bearer " + params.token,
+//     },
+//   }).then((resp) => {
+//         warningPersonList.value = resp.data.data;
+//         console.log("人员列表：", warningPersonList);
+//       })
+//       .catch((err) => {
+//         console.error("获取人员信息失败：", err);
+//       });
+// };
+const warningFormatResult = (result) => {
+  return `${result.name} - ${result.phone} - ${result.company}`;
+};
+const getwarningPersonList = (pageNum) => {
   axios({
     url: "/api/auth/allWarningPersonList",
     method: "get",
@@ -5526,17 +5547,12 @@ const getAllWarningPersonList = () => {
       Authorization: "Bearer " + params.token,
     },
   }).then((resp) => {
-        warningPersonList.value = resp.data;
-        console.log("人员列表：", warningPersonList);
-      })
+    warningPersonList.value = resp.data.data;
+    console.log("人员列表：", warningPersonList);
+  })
       .catch((err) => {
         console.error("获取人员信息失败：", err);
       });
-};
-const warningFormatResult = (result) => {
-  return `${result.name} - ${result.phone} - ${result.company}`;
-};
-const getwarningPersonList = (pageNum) => {
   axios({
     // url: "/api/lzj/getWarning",
     url: "/api/auth/all_permission",

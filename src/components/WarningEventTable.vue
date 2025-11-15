@@ -248,7 +248,7 @@
 
 <script setup>
 
-import {ref, watch, computed, reactive} from 'vue'
+import {ref, watch, computed, reactive, onMounted} from 'vue'
 import moment from "moment/moment";
 import axios from "axios";
 import {params} from "@/store/store";
@@ -661,56 +661,75 @@ const warningRules = reactive({
   content: [{ required: "true", message: "指令内容不能为空", trigger: "blur" }],
 });
 
-const warningPersonList = [
-  { name: "周攀", phone: "18008061031", company: "办公室" },
-  { name: "李自勇", phone: "18008060397", company: "办公室" },
-  { name: "蒲远胜", phone: "18008060520", company: "办公室" },
-  { name: "周思源", phone: "18008060503", company: "办公室" },
-  { name: "虞诚磊", phone: "18008060536", company: "办公室" },
-  { name: "尹叶峰", phone: "18008060657", company: "办公室" },
-  { name: "周晓蓉", phone: "19381969851", company: "办公室" },
-  { name: "叶建春", phone: "19381968202", company: "办公室" },
-  { name: "彭姣", phone: "19381969852", company: "办公室" },
-  { name: "谈方灿", phone: "18008061082", company: "城市环境综合治理科" },
-  { name: "刘敏", phone: "18008060760", company: "城市环境综合治理科" },
-  { name: "张蓉", phone: "18008060787", company: "城市环境综合治理科" },
-  { name: "王胜男", phone: "18008060872", company: "城市环境综合治理科" },
-  { name: "彭蕾", phone: "18008060898", company: "城市环境综合治理科" },
-  { name: "杜强", phone: "18008061026", company: "基建设备管理科" },
-  { name: "张红星", phone: "18008061015", company: "基建设备管理科" },
-  { name: "邓雨檬", phone: "18008061016", company: "基建设备管理科" },
-  { name: "胡浩", phone: "18008061036", company: "环境卫生监督管理科" },
-  { name: "张宗贵", phone: "18008061087", company: "环境卫生监督管理科" },
-  { name: "张静", phone: "18008061139", company: "环境卫生监督管理科" },
-  { name: "胡玉莲", phone: "19381969853", company: "环境卫生监督管理科" },
-  { name: "杨雨荷", phone: "19381969856", company: "环境卫生监督管理科" },
-  { name: "周勇刚", phone: "18008060092", company: "环境卫生监督管理科" },
-  { name: "肖轶", phone: "18008061056", company: "广告招牌和景观照明管理科" },
-  { name: "聂宁", phone: "18008061159", company: "广告招牌和景观照明管理科" },
-  { name: "刘文", phone: "19381969857", company: "广告招牌和景观照明管理科" },
-  { name: "叶华", phone: "18008061175", company: "计划财务处" },
-  { name: "罗争妍", phone: "18008061176", company: "计划财务处" },
-  { name: "邱惠", phone: "18008061181", company: "计划财务处" },
-  { name: "代然", phone: "18008061185", company: "计划财务处" },
-  { name: "王英", phone: "18008061191", company: "计划财务处" },
-  { name: "陈雪梅", phone: "18008061293", company: "计划财务处" },
-  { name: "周建春", phone: "18008061295", company: "计划财务处" },
-  { name: "钟杨", phone: "19381969858", company: "计划财务处" },
-  { name: "蒋波", phone: "18008061301", company: "人事劳资科" },
-  { name: "徐巧英", phone: "18008061303", company: "人事劳资科" },
-  { name: "张宽", phone: "18008061380", company: "人事劳资科" },
-  { name: "张成波", phone: "18008061369", company: "人事劳资科" },
-  { name: "段国钢", phone: "15388115360", company: "数字化指挥监督中心" },
-  { name: "高志昊", phone: "19381968262", company: "政策法规科" },
-  { name: "李新成", phone: "18008061170", company: "大队勤务科" },
-  { name: "邱志强", phone: "18008061023", company: "大队勤务科" },
-  { name: "李贵明", phone: "18008061381", company: "大队勤务科" },
-  { name: "冯娟", phone: "18008061037", company: "大队勤务科" },
-  { name: "汪敏", phone: "18190992825", company: "大队勤务科" },
-  { name: "赵杨", phone: "17723321969", company: "大队勤务科" },
-  { name: "文宇恒", phone: "18008060691", company: "大队勤务科" },
-  { name: "张宇杨", phone: "18008061257", company: "大队勤务科" },
-];
+const warningPersonList = ref([]);
+onMounted(() => {
+  getAllWarningPersonList();
+});
+const getAllWarningPersonList = () => {
+  axios({
+    url: "/api/auth/allWarningPersonList",
+    method: "get",
+    headers: {
+      Authorization: "Bearer " + params.token,
+    },
+  }).then((resp) => {
+    warningPersonList.value = resp.data;
+    console.log("人员列表：", warningPersonList);
+  })
+      .catch((err) => {
+        console.error("获取人员信息失败：", err);
+      });
+};
+// const warningPersonList = [
+//   { name: "周攀", phone: "18008061031", company: "办公室" },
+//   { name: "李自勇", phone: "18008060397", company: "办公室" },
+//   { name: "蒲远胜", phone: "18008060520", company: "办公室" },
+//   { name: "周思源", phone: "18008060503", company: "办公室" },
+//   { name: "虞诚磊", phone: "18008060536", company: "办公室" },
+//   { name: "尹叶峰", phone: "18008060657", company: "办公室" },
+//   { name: "周晓蓉", phone: "19381969851", company: "办公室" },
+//   { name: "叶建春", phone: "19381968202", company: "办公室" },
+//   { name: "彭姣", phone: "19381969852", company: "办公室" },
+//   { name: "谈方灿", phone: "18008061082", company: "城市环境综合治理科" },
+//   { name: "刘敏", phone: "18008060760", company: "城市环境综合治理科" },
+//   { name: "张蓉", phone: "18008060787", company: "城市环境综合治理科" },
+//   { name: "王胜男", phone: "18008060872", company: "城市环境综合治理科" },
+//   { name: "彭蕾", phone: "18008060898", company: "城市环境综合治理科" },
+//   { name: "杜强", phone: "18008061026", company: "基建设备管理科" },
+//   { name: "张红星", phone: "18008061015", company: "基建设备管理科" },
+//   { name: "邓雨檬", phone: "18008061016", company: "基建设备管理科" },
+//   { name: "胡浩", phone: "18008061036", company: "环境卫生监督管理科" },
+//   { name: "张宗贵", phone: "18008061087", company: "环境卫生监督管理科" },
+//   { name: "张静", phone: "18008061139", company: "环境卫生监督管理科" },
+//   { name: "胡玉莲", phone: "19381969853", company: "环境卫生监督管理科" },
+//   { name: "杨雨荷", phone: "19381969856", company: "环境卫生监督管理科" },
+//   { name: "周勇刚", phone: "18008060092", company: "环境卫生监督管理科" },
+//   { name: "肖轶", phone: "18008061056", company: "广告招牌和景观照明管理科" },
+//   { name: "聂宁", phone: "18008061159", company: "广告招牌和景观照明管理科" },
+//   { name: "刘文", phone: "19381969857", company: "广告招牌和景观照明管理科" },
+//   { name: "叶华", phone: "18008061175", company: "计划财务处" },
+//   { name: "罗争妍", phone: "18008061176", company: "计划财务处" },
+//   { name: "邱惠", phone: "18008061181", company: "计划财务处" },
+//   { name: "代然", phone: "18008061185", company: "计划财务处" },
+//   { name: "王英", phone: "18008061191", company: "计划财务处" },
+//   { name: "陈雪梅", phone: "18008061293", company: "计划财务处" },
+//   { name: "周建春", phone: "18008061295", company: "计划财务处" },
+//   { name: "钟杨", phone: "19381969858", company: "计划财务处" },
+//   { name: "蒋波", phone: "18008061301", company: "人事劳资科" },
+//   { name: "徐巧英", phone: "18008061303", company: "人事劳资科" },
+//   { name: "张宽", phone: "18008061380", company: "人事劳资科" },
+//   { name: "张成波", phone: "18008061369", company: "人事劳资科" },
+//   { name: "段国钢", phone: "15388115360", company: "数字化指挥监督中心" },
+//   { name: "高志昊", phone: "19381968262", company: "政策法规科" },
+//   { name: "李新成", phone: "18008061170", company: "大队勤务科" },
+//   { name: "邱志强", phone: "18008061023", company: "大队勤务科" },
+//   { name: "李贵明", phone: "18008061381", company: "大队勤务科" },
+//   { name: "冯娟", phone: "18008061037", company: "大队勤务科" },
+//   { name: "汪敏", phone: "18190992825", company: "大队勤务科" },
+//   { name: "赵杨", phone: "17723321969", company: "大队勤务科" },
+//   { name: "文宇恒", phone: "18008060691", company: "大队勤务科" },
+//   { name: "张宇杨", phone: "18008061257", company: "大队勤务科" },
+// ];
 
 const warningFormatResult = (result) => {
   return `${result.name} - ${result.phone} - ${result.company}`;
