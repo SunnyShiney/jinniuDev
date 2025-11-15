@@ -147,27 +147,20 @@ const login = (formEl) => {
             ElMessage.warning("请完整填写登录信息！");
             return;
         }
-
-        // 1. 前端验证码校验
         if (!captchaRef.value || !captchaRef.value.validate(loginForm.captchaCode)) {
              ElMessage.error("验证码输入错误或已过期，请点击图片刷新！");
              captchaRef.value.refreshCaptcha(); // 验证失败，刷新验证码
              loginForm.captchaCode = ""; // 清空输入
              return; 
         }
-
-        // 2. 准备登录数据 (不包含验证码字段，因为已在前端验证)
         var user = {
-            name: loginForm.username,
+            username: loginForm.username,
             password: loginForm.password,
         };
 
         try {
             const data = await getLogin(user);
-
             if (data.error_message === "success") {
-                
-                // 3. 记住密码逻辑
                 if (rememberUser.value) {
                     localStorage.setItem("username", loginForm.username);
                     localStorage.setItem("password", loginForm.password);
@@ -175,7 +168,6 @@ const login = (formEl) => {
                     localStorage.removeItem("username");
                     localStorage.removeItem("password");
                 }
-
                 // 4. 初始密码强制重设/正常登录逻辑
                 if (data.isValidPassword === "false") {
                     ElMessage.error({ message: "您的密码为初始密码，为保证登录安全请重设密码！" });
