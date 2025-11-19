@@ -89,7 +89,7 @@
           <el-button
               class="buttonToMap"
               link
-              color="fff"
+              color="white"
               @click="updateCompanyDialog = true"
               size="large"
               v-show="isAdmin"
@@ -100,7 +100,7 @@
           <el-button
               class="buttonToMap"
               link
-              color="fff"
+              color="white"
               @click="showClickLog"
               size="large"
               v-show="canViewLog"
@@ -108,18 +108,18 @@
               点击日志
           </el-button>
 
-          <el-button class="buttonToMap" link color="fff" @click="changePermissonDialog = true" size="large" v-show="isAdmin">
+          <el-button class="buttonToMap" link color="white" @click="changePermissonDialog = true" size="large" v-show="isAdmin">
               权限管理
           </el-button>
-          <el-button class="buttonToMap" link color="fff" @click="resetPasswordDialog = true" size="large" v-show="isAdmin">
+          <el-button class="buttonToMap" link color="white" @click="resetPasswordDialog = true" size="large" v-show="isAdmin">
               用户密码重置管理
           </el-button>
 
-          <el-button class="buttonToMap" link color="fff" @click="changePasswordDialog = true" size="large">
+          <el-button class="buttonToMap" link color="white" @click="changePasswordDialog = true" size="large">
               修改个人密码
           </el-button>
 
-          <el-button class="buttonToMap" link color="fff" @click="toMap" size="large">
+          <el-button class="buttonToMap" link color="white" @click="toMap" size="large">
               前往地图主页
           </el-button>
       </div>
@@ -630,7 +630,7 @@
         </div>
         <el-divider v-if="(choosedDept == -1) | (choosedDept == 0)" />
 
-        <template v-for="(item, idx) in choosedSystems">
+        <template v-for="(item, idx) in choosedSystems" :key="item.id || idx">
           <el-card
             v-if="item.systemName == '环卫作业运行管家'"
             class="card"
@@ -961,11 +961,14 @@
             >
               <div>
                 <ul class="infoList">
-                  <li v-for="item in item.data" style="font-size: 20px">
-                    {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+                  <li
+                    v-for="(itemData, index) in item.data"
+                    :key="itemData.id || index"
+                    style="font-size: 20px"
+                  >
+                    {{ itemData.infoKey + ": " }}<span>{{ itemData.infoVal }}</span>
                   </li>
                 </ul>
-
                 <el-popover
                   :width="1000"
                   placement="right"
@@ -2216,21 +2219,7 @@
       <h3 text="2xl" justify="center">{{ item }}</h3>
     </el-carousel-item>
   </el-carousel> -->
-        <template v-for="(item, idx) in choosedSystems">
-          <!-- <div class="srzxInfo" v-if="item.deptId == 1 && item.systemName != '餐饮油烟管家'" :key="idx"
-              :systemName="item.systemName" :url="item.url" :logo="item.systemLogo" :infoList="item.data"
-              :image="item.image" :to="item.to" :deptId="item.deptId">
-              <div style="margin-bottom:15%;margin-top: 10%;font-size: 25px;">
-
-                <el-button v-if="item.url" class="el-button-succeed" type="text" @click="toSystem(item)"
-                  style="margin-top:10px;color:#e6e6e6">{{ item.systemName }}</el-button>
-                <el-button v-else="item.url" class="el-button-null" type="text" @click="toSystem(item)"
-                  style="margin-top:10px">{{ item.systemName }}</el-button>
-
-              </div>
-              <li v-for="item in item.data" style="padding:10px;font-size: 25px;">{{ item.infoKey + ": " + item.infoVal
-              }}</li>
-            </div> -->
+        <template v-for="(item, idx) in choosedSystems" :key="item.id || idx">
           <el-card
             v-if="item.systemName == '餐饮油烟管家'"
             class="card"
@@ -2295,8 +2284,12 @@
               <div>
                 <!-- <el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large" ></el-avatar> -->
                 <ul class="infoList">
-                  <li v-for="item in item.data" style="font-size: 20px">
-                    {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+                  <li 
+                    v-for="(info, index) in item.data" 
+                    :key="info.infoKey || index" 
+                    style="font-size: 20px"
+                  >
+                    {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
                   </li>
                 </ul>
 
@@ -2449,8 +2442,12 @@
               <div>
                 <!-- <el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large" ></el-avatar> -->
                 <ul class="infoList">
-                  <li v-for="item in item.data" style="font-size: 20px">
-                    {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+                  <li 
+                    v-for="(info, index) in item.data" 
+                    :key="info.infoKey || index" 
+                    style="font-size: 20px"
+                  >
+                    {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
                   </li>
                 </ul>
 
@@ -2601,8 +2598,12 @@
               <!-- 汇总数据列表 -->
               <div>
                 <ul class="infoList">
-                  <li v-for="item in item.data" style="font-size: 20px">
-                    {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+                  <li 
+                    v-for="(info, index) in item.data" 
+                    :key="info.infoKey || index" 
+                    style="font-size: 20px"
+                  >
+                    {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
                   </li>
                 </ul>
 
@@ -2657,7 +2658,8 @@
 
                         <div style="display: flex; clear: left">
                           <dv-border-box6
-                            v-for="item in item.data"
+                            v-for="(item, index) in item.data"
+                            :key="item.infoKey || index"
                             style="
                               font-size: 20px;
                               padding: 10px;
@@ -2736,8 +2738,12 @@
             >
               <div>
                 <ul class="infoList">
-                  <li v-for="item in item.data" style="font-size: 20px">
-                    {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+                  <li 
+                    v-for="(info, index) in item.data" 
+                    :key="info.infoKey || index" 
+                    style="font-size: 20px"
+                  >
+                    {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
                   </li>
                 </ul>
 
@@ -11260,84 +11266,58 @@ onMounted(() => {
 });
 
 const systems = ref([]);
-// 系统列表
-const fetchDataAndInitialize = async () => {
-    // --- 1. 获取系统列表 (首个串行请求) ---
-    let systemList = [];
-    try {
-        systemList = await getSystemList();
-        // 确保 systems.value 立即更新，以便模板或其他地方使用
-        systems.value = systemList;
-    } catch (error) {
-        console.error("获取系统列表失败:", error);
-        // 如果失败，则后续的系统数据请求都无法进行
-        return;
-    }
-
-    // --- 2. 准备并发请求 ---
-
-    // 2.1. 独立并发请求 (ljz_table1, ljz_table2)
-    const independentPromises = [
-        getMainLjz(),
-        getSum()
-    ];
-
-    // 2.2. 系统数据并发请求 (系统列表循环)
-    const systemPromises = systemList
-        .filter(system => system.api && system.api !== "") // 过滤掉 api 为空的情况
-        .map(async (system) => {
-            let api = system.api;
-            let token = null;
-
-            // 构造 API URL 和 Token
-            if (system.systemId === "5" || system.systemId === "7") {
-                // 拼接 Token
-                api = `${api}?token=${params.hwzyToken}`;
-            }
-
-            // 执行请求并处理结果
-            try {
-                const data = await get(api);
-                // 成功后，将数据直接赋值给 system 对象 (Vue 响应式会自动追踪)
-                system.data = data;
-            } catch (error) {
-                console.error(`请求系统 ${system.systemId} (${system.api}) 失败:`, error);
-                // 失败时设置默认值，防止页面崩溃
-                system.data = null;
-            }
-            return system; // 返回更新后的 system 对象
-        });
-
-    // --- 3. 执行所有并发请求 (使用 Promise.allSettled 增强健壮性) ---
-    const allPromises = [...independentPromises, ...systemPromises];
-
-    // 使用 allSettled 确保所有请求都完成，即使部分失败
-    const results = await Promise.allSettled(allPromises);
-
-    // --- 4. 集中更新状态 ---
-
-    // 独立请求的结果 (假设按顺序对应 [getMainLjz, getSum])
-    const ljzResult = results[0];
-    const sumResult = results[1];
-
-    if (ljzResult.status === 'fulfilled') {
-        ljz_table1.value = ljzResult.value;
-    }
-
-    if (sumResult.status === 'fulfilled') {
-        ljz_table2.value = sumResult.value;
-    }
-
-    // 系统数据请求的结果 (systemPromises 的结果已经直接修改了 system.data，无需再次处理)
-};
-
+// 定义需要传递Token的特定系统ID
+const TOKEN_REQUIRED_IDS = ["5", "7"];
 onMounted(() => {
-    fetchDataAndInitialize();
+  getSystemList()
+    .then((data) => {
+      // 接口成功，先渲染列表壳子
+      systems.value = data || [];
+      // 然后异步加载各个子系统的数据
+      systems.value.forEach(async (system) => {
+        if (!system.api) return;
+        try {
+          let url = system.api;
+          // 判断是否是需要 token 的特定系统
+          if (TOKEN_REQUIRED_IDS.includes(String(system.systemId))) {
+             // 智能拼接参数
+            const separator = url.includes("?") ? "&" : "?";
+            url = `${url}${separator}token=${params.hwzyToken}`;
+          }
+          // 单独请求子数据，不阻塞其他操作
+          const subData = await get(url);
+          system.data = subData; // 数据回来后自动更新UI
+        } catch (err) {
+          // 这里捕获子系统的错误，不影响主列表显示
+          console.error(`子系统数据获取失败 (ID:${system.systemId})`, err);
+        }
+      });
+    })
+    .catch((err) => {
+      console.error("【严重】获取系统列表主接口失败:", err);
+    });
+  // 2. 独立请求：MainLjz
+  getMainLjz()
+    .then((data) => {
+      ljz_table1.value = data;
+    })
+    .catch((err) => {
+      console.error("获取MainLjz数据失败:", err);
+      // 可以在这里处理错误UI，比如 ljz_table1.value = []
+    });
+  // 3. 独立请求：Sum
+  getSum()
+    .then((data) => {
+      ljz_table2.value = data;
+    })
+    .catch((err) => {
+      console.error("获取Sum数据失败:", err);
+    });
 });
 
 
-//选中的部门
-// -1表示全选，为默认值
+
+
 const choosedDept = ref(-1);
 const choosedDeptName = ref();
 //选中部门对应的子系统
