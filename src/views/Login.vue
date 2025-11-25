@@ -154,7 +154,7 @@ const login = (formEl) => {
              return; 
         }
         var user = {
-            username: loginForm.username,
+            name: loginForm.username,
             password: loginForm.password,
         };
 
