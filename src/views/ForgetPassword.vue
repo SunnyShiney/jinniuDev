@@ -329,7 +329,6 @@ const resetPassword = (params) => {
     })
     .catch((error) => {
       console.error("重置密码失败", error);
-      ElMessage.error("网络请求失败，请稍后重试。");
     });
 };
 </script>

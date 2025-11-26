@@ -73,12 +73,12 @@ service.interceptors.response.use(
             } else if (status >= 500) {
                 // 5xx Server Error: 服务器内部错误
                 message = `服务器内部错误 (${status})，请稍后重试。`;
-                ElMessage.error(message);
+                console.error(message);
                 
             } else if (status >= 400) {
                 // 其他 4xx 错误 (如 404 Not Found, 400 Bad Request)
                 message = `请求错误 (${status})：${serverMsg}`;
-                ElMessage.error(message);
+                console.error(message);
             }
         } else {
             // 网络错误或请求被取消

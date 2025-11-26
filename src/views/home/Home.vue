@@ -454,9 +454,6 @@
             <div :id="`fourTopic-${index}`" :class="`fourTopic-${index}`"></div>
           </div>
         </div>
-        <!-- <div class="subsys" v-if="!showDepts">
-          <div class="subdepts">{{choosedDeptName}}</div>
-        </div> -->
         <div class="subsys" v-if="!showDepts">
           <class-item
             v-for="system in choosedSystems"
@@ -495,35 +492,6 @@
           </div>
         </div>
       </el-header>
-      <!-- <div class="background" v-if="showDepts">
-        <img
-          id="obj"
-          :src="require('@/assets/home/banner-new' + picture + '.jpg')"
-          width="10000"
-          style="overflow-y: auto; overflow-x: auto"
-        />
-      </div> -->
-      <!-- <el-upload
-    class="avatar-uploader"
-    action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-    :show-file-list="false"
-    :on-success="handleAvatarSuccess"
-    :before-upload="beforeAvatarUpload"
-  >
-    <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-  </el-upload> -->
-      <!-- <el-upload
-    class="avatar-uploader"
-    action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-    :show-file-list="false"
-    :on-success="handleAvatarSuccess"
-    :before-upload="beforeAvatarUpload"
-  >
-    <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-  </el-upload> -->
-
       <div class="upload">
         <template v-if="params.role == '管理员'">
           <div class="image-title-container">
@@ -1488,8 +1456,12 @@
               <!-- 汇总数据列表 -->
               <div>
                 <ul class="infoList">
-                  <li v-for="item in item.data" style="font-size: 20px">
-                    {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+                  <li 
+                    v-for="(info, index) in item.data" 
+                    :key="info.infoKey || index" 
+                    style="font-size: 20px"
+                  >
+                    {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
                   </li>
                 </ul>
 
@@ -1798,11 +1770,6 @@
             shadow="hover"
             :body-style="{ padding: '0px' }"
           >
-            <!-- <el-image
-              class="image"
-              :src="require('@/assets/home/img-ljz2.jpg')"
-            >
-            </el-image> -->
             <ul v-if="item.url">
               <div class="header-card">
                 <el-button
@@ -2127,14 +2094,13 @@
             >
               <div>
                 <ul class="infoList">
-                    <li
-                        v-for="(dataItem, index) in item.data"
-                        :key="dataItem.id || index"
-                        class="info-item"
-                    >
-                        <span class="info-key">{{ dataItem.infoKey }}: </span>
-                        <span class="info-value">{{ dataItem.infoVal }}</span>
-                    </li>
+                  <li 
+                    v-for="(info, index) in item.data" 
+                    :key="info.infoKey || index" 
+                    style="font-size: 20px"
+                  >
+                    {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
+                  </li>
                 </ul>
 
                 <el-popover
@@ -2213,12 +2179,6 @@
           利用智慧化、科技化信息手段，开展市容秩序、餐饮油烟、共享单车、扬尘污染的智能监管，执法人员精细管理和执法案件线上办理。
         </div>
         <el-divider v-if="(choosedDept == -1) | (choosedDept == 1)" />
-        <!-- <div class="img-wrapper" v-if="imgVisible"> -->
-        <!-- <el-carousel :interval="4000" type="card" height="200px">
-    <el-carousel-item v-for="item in 6" :key="item">
-      <h3 text="2xl" justify="center">{{ item }}</h3>
-    </el-carousel-item>
-  </el-carousel> -->
         <template v-for="(item, idx) in choosedSystems" :key="item.id || idx">
           <el-card
             v-if="item.systemName == '餐饮油烟管家'"
@@ -2276,13 +2236,7 @@
               class="infoContainer"
               style="background-color: #2775b6; color: white"
             >
-              <!-- logo -->
-              <!-- <div>
-<el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large"></el-avatar>
-</div> -->
-              <!-- 汇总数据列表 -->
               <div>
-                <!-- <el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large" ></el-avatar> -->
                 <ul class="infoList">
                   <li 
                     v-for="(info, index) in item.data" 
@@ -2967,14 +2921,15 @@
                 <div>
                   <!-- <div style="padding: 5px; margin-top: 5%; padding-left: 8%"> -->
 
-                  <ul class="infoList">
-                    <li
-                      v-for="item in item.data"
-                      style="font-size: 20px; padding: 5px"
-                    >
-                      {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
-                    </li>
-                  </ul>
+                    <ul class="infoList">
+                      <li 
+                        v-for="(info, index) in item.data" 
+                        :key="info.infoKey || index" 
+                        style="font-size: 20px"
+                      >
+                        {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
+                      </li>
+                    </ul>
                   <el-popover
                     :width="500"
                     placement="right"
@@ -3129,11 +3084,12 @@
                   <!-- <div style="padding: 5px; margin-top: 5%; padding-left: 8%"> -->
 
                   <ul class="infoList">
-                    <li
-                      v-for="item in item.data"
-                      style="font-size: 20px; padding: 5px"
+                    <li 
+                      v-for="(info, index) in item.data" 
+                      :key="info.infoKey || index" 
+                      style="font-size: 20px"
                     >
-                      {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+                      {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
                     </li>
                   </ul>
                   <el-popover
@@ -3740,14 +3696,15 @@
                 <div>
                   <!-- <div style="padding: 5px; margin-top: 5%; padding-left: 8%"> -->
 
-                  <ul class="infoList">
-                    <li
-                      v-for="item in item.data"
-                      style="font-size: 20px; padding: 5px"
-                    >
-                      {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
-                    </li>
-                  </ul>
+                <ul class="infoList">
+                  <li 
+                    v-for="(info, index) in item.data" 
+                    :key="info.infoKey || index" 
+                    style="font-size: 20px"
+                  >
+                    {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
+                  </li>
+                </ul>
                   <el-popover
                     :width="1200"
                     placement="right"
@@ -3879,14 +3836,13 @@
               >
                 <div>
                   <ul class="infoList">
-                      <li
-                          v-for="(dataItem, index) in item.data"
-                          :key="dataItem.id || index"
-                          class="info-item"
-                      >
-                          <span class="info-key">{{ dataItem.infoKey }}: </span>
-                          <span class="info-value">{{ dataItem.infoVal }}</span>
-                      </li>
+                    <li 
+                      v-for="(info, index) in item.data" 
+                      :key="info.infoKey || index" 
+                      style="font-size: 20px"
+                    >
+                      {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
+                    </li>
                   </ul>
                   <el-popover
                     :width="1200"
@@ -4063,14 +4019,13 @@
               >
                 <div>
                   <ul class="infoList">
-                      <li
-                          v-for="(dataItem, index) in item.data"
-                          :key="dataItem.id || index"
-                          class="info-item"
-                      >
-                          <span class="info-key">{{ dataItem.infoKey }}: </span>
-                          <span class="info-value">{{ dataItem.infoVal }}</span>
-                      </li>
+                    <li 
+                      v-for="(info, index) in item.data" 
+                      :key="info.infoKey || index" 
+                      style="font-size: 20px"
+                    >
+                      {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
+                    </li>
                   </ul>
 
                   <el-popover
@@ -4210,11 +4165,12 @@
                   <!-- <div style="padding: 5px; margin-top: 5%; margin-left: 8%"> -->
 
                   <ul class="infoList">
-                    <li
-                      v-for="item in item.data"
-                      style="font-size: 20px; padding: 5px; margin-top: 0px"
+                    <li 
+                      v-for="(info, index) in item.data" 
+                      :key="info.infoKey || index" 
+                      style="font-size: 20px"
                     >
-                      {{ item.infoKey + ": " }}<span>{{ item.infoVal }}</span>
+                      {{ info.infoKey }}: <span>{{ info.infoVal }}</span>
                     </li>
                   </ul>
                   <el-popover
