@@ -90,7 +90,7 @@
               class="buttonToMap"
               link
               color="white"
-              @click="updateCompanyDialog = true"
+              @click="updateCompanyDialog = true; getEditCompanyList(1)"
               size="large"
               v-show="isAdmin"
           >
@@ -108,10 +108,10 @@
               点击日志
           </el-button>
 
-          <el-button class="buttonToMap" link color="white" @click="changePermissonDialog = true" size="large" v-show="isAdmin">
+          <el-button class="buttonToMap" link color="white" @click="changePermissonDialog = true;getPermissionList(1, searchName, searchPhone);getPermissonApplicationListList(1);" size="large" v-show="isAdmin">
               权限管理
           </el-button>
-          <el-button class="buttonToMap" link color="white" @click="resetPasswordDialog = true" size="large" v-show="isAdmin">
+          <el-button class="buttonToMap" link color="white" @click="resetPasswordDialog = true; handleSearchInReset()" size="large" v-show="isAdmin">
               用户密码重置管理
           </el-button>
 
@@ -1221,9 +1221,9 @@
                   />
                   <el-table
                       :data="
-                ljqsmHistoryList.slice(
-                  (warningCurrentPage - 1) * 5,
-                  warningCurrentPage * 5)"
+                        ljqsmHistoryList.slice(
+                        (warningCurrentPage - 1) * 5,
+                        warningCurrentPage * 5)"
                       style="width: 100%"
                       size="large"
                       class="data-table"
@@ -1864,9 +1864,9 @@
                   />
                   <el-table
                       :data="
-                toiletWarningHistoryList.slice(
-                  (warningCurrentPage - 1) * 5,
-                  warningCurrentPage * 5)"
+                        toiletWarningHistoryList.slice(
+                          (warningCurrentPage - 1) * 5,
+                          warningCurrentPage * 5)"
                       style="width: 100%"
                       size="large"
                       class="data-table"
@@ -4302,7 +4302,7 @@
               clearable
               style="width: 200px; margin-right: 10px;"
           />
-          <el-button type="primary" @click="handleSearchInCompany">
+          <el-button type="primary" @click="getEditCompanyList(1)">
             <el-icon><Search /></el-icon>搜索
           </el-button>
         </div>
@@ -4413,12 +4413,10 @@
           </el-button>
         </div>
         <el-table
-          :data="
-            resetPasswordList.slice(
+          :data="resetPasswordList?.slice(
               (current_Page_reset - 1) * 10,
               current_Page_reset * 10
-            )
-          "
+          ) || []"
           size="large"
           style="width: 100%"
           :header-cell-style="{
@@ -4431,8 +4429,6 @@
           :cell-style="cellStyle"
         >
           <!-- 序号（应该可选才对-目前没有） -->
-
-          \
           <el-table-column fixed="left" prop="realName" label="人员姓名" />
           <el-table-column fixed="left" prop="telephone" label="手机号" />
           <el-table-column fixed="right" prop="operate" label="操作">
@@ -4541,12 +4537,10 @@
       >
         <div style="font-size: 2rem">权限申请列表</div>
         <el-table
-          :data="
-            permissonApplicationList.value.slice(
+          :data="permissonApplicationList?.slice(
               (current_Page - 1) * 10,
               current_Page * 10
-            )
-          "
+          ) || []"
           v-loading="aplicationloading"
           size="large"
           style="width: 100%"
@@ -4661,13 +4655,13 @@
               fixed="left"
               prop="company"
               label="单位"
-              width="100"
+              width="90"
           />
           <el-table-column
             fixed="left"
             prop="telephone"
             label="手机号"
-            width="150"
+            width="160"
           />
           <el-table-column prop="zhxz" label="突出问题管家" />
           <el-table-column prop="cyyy" label="餐饮油烟管家" />
@@ -4794,201 +4788,33 @@
             permissonTelephone
           }}
         </div>
+
         <el-form
-          ref="permissionForm"
           :model="ruleForm"
           status-icon
-          :rules="rules"
           label-width="320px"
           class="demo-ruleForm"
           v-loading="formLoading"
           id="selectForm"
         >
           <el-form-item
-            label="共享单车管家"
-            prop="gxdc"
-            style="font-size: 2rem"
+            v-for="item in formConfig"
+            :key="item.prop"
+            :label="item.label"
+            :prop="item.prop"
+            :class="{ 'large-label': item.isLarge }"
           >
             <el-checkbox-group
-              v-model="radioGxdc"
+              v-model="ruleForm[item.prop]"
               class="radioPermisson"
-              @change="radioChangeGxdc"
             >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item
-            label="环卫作业运行管家"
-            prop="hwzy"
-            style="font-size: 2rem"
-          >
-            <el-checkbox-group
-              v-model="radioHwzy"
-              class="radioPermisson"
-              @change="radioChangeHwzy"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-          <!-- 
-          <el-form-item label="垃圾数据归集管家" prop="ljsj">
-            <el-checkbox-group
-              v-model="radioLjsj"
-              class="radioPermisson"
-              @change="radioChangeLjsj"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item> -->
-
-          <el-form-item label="城管AI识别管家" prop="cgAI">
-            <el-checkbox-group
-              v-model="radioCgAI"
-              class="radioPermisson"
-              @change="radioChangeCgAI"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="网络理政管家" prop="cgsyd">
-            <el-checkbox-group
-              v-model="radioCgsyd"
-              class="radioPermisson"
-              @change="radioChangeCgsyd"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="临街店铺管家" prop="ggzp">
-            <el-checkbox-group
-              v-model="radioGgzp"
-              class="radioPermisson"
-              @change="radioChangeGgzp"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="扬尘治理大数据协同管家" prop="yczl">
-            <el-checkbox-group
-              v-model="radioYczl"
-              class="radioPermisson"
-              @change="radioChangeYczl"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="数字化城市信息管家" prop="szhcs">
-            <el-checkbox-group
-              v-model="radioSzhcs"
-              class="radioPermisson"
-              @change="radioChangeSzhcs"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="景观照明管家" prop="jgzm">
-            <el-checkbox-group
-              v-model="radioJgzm"
-              class="radioPermisson"
-              @change="radioChangeJgzm"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="照明管家（新）" prop="newZmgj">
-            <el-checkbox-group
-              v-model="radioNewZmgj"
-              class="radioPermisson"
-              @change="radioChangeNewZmgj"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="智慧公厕管家" prop="shlj">
-            <el-checkbox-group
-              v-model="radioShlj"
-              class="radioPermisson"
-              @change="radioChangeShlj"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="突出问题管家" prop="zhxz">
-            <el-checkbox-group
-              v-model="radioZhxz"
-              class="radioPermisson"
-              @change="radioChangeZhxz"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="调度指挥管家" prop="ddzh">
-            <el-checkbox-group
-              v-model="radioDdzh"
-              class="radioPermisson"
-              @change="radioChangeDdzh"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="垃圾全生命周期管家" prop="cclj">
-            <el-checkbox-group
-              v-model="radioCclj"
-              class="radioPermisson"
-              @change="radioChangeCclj"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
-            </el-checkbox-group>
-          </el-form-item>
-
-          <el-form-item label="餐饮油烟管家" prop="cyyy">
-            <el-checkbox-group
-              v-model="radioCyyy"
-              class="radioPermisson"
-              @change="radioChangeCyyy"
-            >
-              <el-checkbox v-for="city in cities" :key="city" :label="city">{{
-                city
-              }}</el-checkbox>
+              <el-checkbox
+                v-for="right in ['浏览信息', '管理参数', '操作系统']"
+                :key="right"
+                :label="right"
+              >
+                {{ right }}
+              </el-checkbox>
             </el-checkbox-group>
           </el-form-item>
         </el-form>
@@ -6005,7 +5831,6 @@ changeColor();
 setInterval(() => {
     changeColor();
     queryAllWarning(warningStart, warningEnd, 1);
-    getPermissionList(1, searchName.value, searchPhone.value);
 }, 360000);
 
 //========================================================================================
@@ -6263,13 +6088,12 @@ const searchPhone = ref("");
 const searchPhoneInReset = ref("");
 const showSuperAdmin = reactive([]);
 const permissonApplicationList = ref([]);
-const resetPasswordList = reactive([]);
+const resetPasswordList = ref([]);
 const clickLogList = reactive([]);
 const logListView = reactive([]);
 
 const loading = ref(true);
 const aplicationloading = ref(true);
-const formLoading = ref(true);
 const totalRecords = ref(1000);
 let currentPage = ref(1);
 let pageCount = 0;
@@ -6284,12 +6108,8 @@ const total_Records_clickLog = ref(1000);
 const current_Page_clickLog = ref(1);
 let page_Count_clickLog = 0;
 const permissionForm = ref(null);
-const handleEvent = ref(false);
 const peopleAdd = ref(false);
-const permissonName = ref("");
 const applicationId = ref("");
-const permissonTelephone = ref("");
-let currentRowPage = ref(0);
 const radioGxdc = ref([]);
 const radioHwzy = ref([]);
 const radioLjsj = ref([]);
@@ -6351,23 +6171,6 @@ const permissonCyyy = ref("");
 const oldRadioCyyy = ref([]);
 const checkCyyy = ref(false);
 //
-const ruleForm = reactive({
-  gxdc: false,
-  ljsj: false,
-  cgAI: false,
-  cgsyd: false,
-  ggzp: false,
-  yczl: false,
-  szhcs: false,
-  jgzm: false,
-  shlj: false,
-  zhxz: false,
-  ddzh: false,
-  cclj: false,
-  cyyy: false,
-  newZmgj: false,
-});
-const permissonAlert = ref(false);
 
 const clickLogDialog = ref(false);
 const selectedSys = ref("城市管家");
@@ -6436,120 +6239,295 @@ const exportExcelOfClickLog = () => {
     console.error("下载失败：", error);
   });
 };
-const getClickLogList = (sys, start, end, pageNum) => {
-  var realUrl = "";
-  if (sys == "城市管家") {
-    realUrl = "/api/click-log/get?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
-  } else if (sys == "餐饮油烟管家") {
-    realUrl = "/youyan/external/GetAuditLog?token=jinniuqu&page=" + pageNum + "&limit=10&start=" + start + "&end=" + end;
-  } else if (sys == "临街店铺管家") {
-    realUrl = "/linjie/sign/GetAuditLog?token=jinniuqu&page=" + pageNum + "&limit=10&start=" + start + "&end=" + end;
-  } else if (sys == "智慧公厕管家") {
-    realUrl = "/toilet/api/log-view/getLogHistory?start=" + start + "&end=" + end + "&pageNum=" + pageNum + "&pageSize=10";
-  } else if (sys == "共享单车管家") {
-    realUrl = "/bicycle/external/GetAuditLog?token=jinniuqu&page=" + pageNum + "&pageSize=10&start=" + start + "&end=" + end;
-  } else if (sys == "网络理政管家") {
-    realUrl = "/syd/prod-api/sys/logs?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
-  } else if (sys == "照明管家（新）") {
-    realUrl = "/jgzm/light/click-log/get/?start=" + start + "&end=" + end + "&page=" + pageNum + "&page_size=10";
-  } else if (sys == "环卫作业运行管家") {
-    realUrl = "/hw/api/logs/huanwei";
-  } else if (sys == "垃圾全生命周期管家") {
-    realUrl = "/qsm/api/logs/quansm";
-  } else if (sys == "餐厨收运管家") {
-    realUrl = "/cc/api/logs/cancu";
-  } else if (sys == "调度指挥管家") {
-    realUrl = "/ddzh/admin-log/page?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
+
+// 1. 定义各系统的配置策略 (建议放在文件顶部或单独的配置文件中)
+const SYSTEM_CONFIG = {
+  // --- POST 请求组 ---
+  "环卫作业运行管家": {
+    url: "/hw/api/logs/huanwei",
+    type: "post",
+    listKey: "lists",      // 列表数据字段名
+    totalKey: "total"      // 总数字段名
+  },
+  "垃圾全生命周期管家": {
+    url: "/qsm/api/logs/quansm",
+    type: "post",
+    listKey: "lists",
+    totalKey: "total"
+  },
+  "餐厨收运管家": {
+    url: "/cc/api/logs/cancu",
+    type: "post",
+    listKey: "lists",
+    totalKey: "total"
+  },
+  
+  // --- GET 请求组 ---
+  "城市管家": {
+    // 使用函数动态生成 URL
+    urlFn: (s, e, p) => `/api/click-log/get?start=${s}&end=${e}&page=${p}&pageSize=10`,
+    type: "get",
+    auth: true,            // 需要 Authorization 头
+    listKey: "list",
+    totalKey: "total",
+    dataPath: ["data", "data"] // 数据所在的层级 resp.data.data
+  },
+  "网络理政管家": {
+    urlFn: (s, e, p) => `/syd/prod-api/sys/logs?start=${s}&end=${e}&page=${p}&pageSize=10`,
+    type: "get",
+    listKey: "contentData",
+    totalKey: "totalSize",
+    dataPath: ["data", "data"]
+  },
+  "智慧公厕管家": {
+    urlFn: (s, e, p) => `/toilet/log-view/getLogHistory?start=${s}&end=${e}&pageNum=${p}&pageSize=10`,
+    type: "get",
+    listKey: "records",
+    totalKey: "total",
+    dataPath: ["data", "data"]
+  },
+  "调度指挥管家": {
+    urlFn: (s, e, p) => `/ddzh/admin-log/page?start=${s}&end=${e}&page=${p}&pageSize=10`,
+    type: "get",
+    listKey: "records",
+    totalKey: "total",
+    dataPath: ["data", "data"]
+  },
+  "餐饮油烟管家": {
+    urlFn: (s, e, p) => `/youyan/external/GetAuditLog?token=jinniuqu&page=${p}&limit=10&start=${s}&end=${e}`,
+    type: "get",
+    listKey: "data",      
+    totalKey: "total",
+    dataPath: ["data"]
+  },
+  "临街店铺管家": {
+    urlFn: (s, e, p) => `/linjie/sign/GetAuditLog?token=jinniuqu&page=${p}&limit=10&start=${s}&end=${e}`,
+    type: "get",
+    listKey: "data",
+    totalKey: "total",
+    dataPath: ["data"]
+  },
+  "共享单车管家": {
+    urlFn: (s, e, p) => `/bicycle/external/GetAuditLog?token=jinniuqu&page=${p}&pageSize=10&start=${s}&end=${e}`,
+    type: "get",
+    listKey: "data",
+    totalKey: "total",
+    dataPath: ["data"]
+  },
+  "照明管家（新）": {
+    urlFn: (s, e, p) => `/jgzm/light/click-log/get/?start=${s}&end=${e}&page=${p}&page_size=10`,
+    type: "get",
+    listKey: "data",
+    totalKey: "total",
+    dataPath: ["data"]
   }
-  var request;
-  if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
-    request = axios({
-      // url: "/api/lzj/getWarning",
-      url: realUrl,
-      method: "post",
-      data: JSON.parse(
-        JSON.stringify({
+};
+// 2. 主函数
+const getClickLogList = async (sys, start, end, pageNum) => {
+  // 获取当前系统的配置
+  const config = SYSTEM_CONFIG[sys];
+  if (!config) {
+    console.error(`未找到系统 [${sys}] 的日志配置`);
+    return;
+  }
+
+  try {
+    let requestConfig = {};
+    // --- 构建请求参数 ---
+    if (config.type === "post") {
+      requestConfig = {
+        url: config.url,
+        method: "post",
+        data: {
           start: start,
           end: end,
           access_token: params.hwzyToken,
           page: pageNum,
           pageSize: 10,
-        })
-      ),
-    });
-  } else {
-    let headers = {};
-    if (sys == "城市管家") {
-      headers.Authorization = "Bearer " + params.token;
-    }
-    request = axios({
-      // url: "/api/lzj/getWarning",
-      url: realUrl,
-      method: "get",
-      headers: headers,
-    });
-  }
-
-  request.then((resp) => {
-    //列表数据
-    var data = resp.data.data.list;
-    
-    if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
-      data = resp.data.data.lists;
-    } else if (sys == "网络理政管家") {
-      data = resp.data.data.contentData;
-    } else if (sys == "智慧公厕管家" || sys == "调度指挥管家") {
-      data = resp.data.data.records;
-    } else if (sys == "城市管家") {
-      data = resp.data.data.list;
-    }
-    clickLogList.splice(0, clickLogList.length);
-    for (var key in data) {
-      var operation = "点击";
-      if (sys != "城市管家") {
-        operation = data[key].operation;
-      }
-      var clickLog = {
-        realName: data[key].realName,
-        phone: data[key].phone,
-        subsystem: data[key].subsystem,
-        clickTime: data[key].clickTime,
-        operation: operation,
+        }
       };
-      clickLogList.push(clickLog);
-    }
-    total_Records_clickLog.value = clickLogList.length;
-    page_Count_clickLog = parseInt(clickLogList.length) % 10;
-    if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
-      total_Records_clickLog.value = resp.data.data.total;
-      page_Count_clickLog = parseInt(resp.data.data.total) % 10;
-    }  else if (sys == "网络理政管家") {
-      total_Records_clickLog.value = resp.data.data.totalSize;
-      page_Count_clickLog = parseInt(resp.data.data.totalSize) % 10;
-    } else if (sys == "照明管家（新）") {
-      total_Records_clickLog.value = resp.data.total;
-      page_Count_clickLog = parseInt(resp.data.total) % 10;
-    } else if (sys == "智慧公厕管家" || sys == "调度指挥管家") {
-      total_Records_clickLog.value = resp.data.data.total;
-      page_Count_clickLog = parseInt(resp.data.data.total) % 10;
-    } else if (sys == "城市管家") {
-      total_Records_clickLog.value = resp.data.data.total;
-      page_Count_clickLog = parseInt(resp.data.data.total) % 10;
-    } else if (sys == "临街店铺管家" || sys == "餐饮油烟管家" || sys == "共享单车管家") {
-      total_Records_clickLog.value = resp.data.total;
-      page_Count_clickLog = parseInt(resp.data.total) % 10;
-    }
-    if (clickLogList.length > (pageNum - 1) * 10) {
-      logListView.splice(0, logListView.length, ...clickLogList.slice(
-              (pageNum - 1) * 10,
-              pageNum * 10
-            ));
     } else {
-      logListView.splice(0, logListView.length, ...clickLogList);
+      // GET 请求
+      requestConfig = {
+        url: config.urlFn(start, end, pageNum),
+        method: "get",
+        headers: config.auth ? { Authorization: "Bearer " + params.token } : {}
+      };
     }
+
+    // --- 发起请求 ---
+    const resp = await axios(requestConfig);
+    // --- 统一数据解析逻辑 ---
+    // 1. 确定数据源根节点 (兼容 resp.data.data 和 resp.data)
+    // 默认为 ["data", "data"]，如果配置了 dataPath 则使用配置的
+    const path = config.dataPath || ["data", "data"];
+    let rootData = resp.data;
+    if (path.length === 2 && path[1] === 'data') {
+        rootData = resp.data?.data;
+    }
+    // 2. 安全获取列表 (使用可选链 ?. 避免报错)
+    // 等价于 rootData.list 或 rootData.records 等
+    const rawList = rootData?.[config.listKey] || []; 
+    // 3. 安全获取总数
+    const totalCount = rootData?.[config.totalKey] || 0;
+
+    // --- 数据转换与赋值 ---
+    
+    // 清空现有数组
+    clickLogList.splice(0, clickLogList.length);
+
+    // 转换数据格式
+    const formattedList = rawList.map(item => ({
+      realName: item.realName || '',
+      phone: item.phone || '',
+      subsystem: item.subsystem || '',
+      clickTime: item.clickTime || '',
+      // 城市管家特殊处理：operation 固定为 "点击"，其他系统读取字段
+      operation: sys === "城市管家" ? "点击" : (item.operation || "点击")
+    }));
+
+    clickLogList.push(...formattedList);
+
+    // 更新分页统计
+    total_Records_clickLog.value = totalCount;
+    // 注意：page_Count_clickLog 的计算方式建议统一，原代码为 % 10，通常应为 total / 10
+    // 这里保持原逻辑:
+    page_Count_clickLog = parseInt(totalCount) % 10; 
+
+    // 更新当前页码
     current_Page_clickLog.value = pageNum;
-  });
+
+    // --- 更新视图列表 (修复分页 Bug) ---
+    // 原逻辑中 clickLogList 每次都清空并重新填入当前页的10条数据
+    // 所以不需要 slice((page-1)*10, page*10)，直接赋值即可
+    // 如果再切片，翻到第2页时会导致数组越界变为空
+    logListView.splice(0, logListView.length, ...clickLogList);
+
+
+  } catch (error) {
+    console.error("获取日志列表失败:", error);
+    // 可选: 这里的 clickLogList 可能需要清空以防止显示脏数据
+    clickLogList.splice(0, clickLogList.length);
+    logListView.splice(0, logListView.length);
+  }
 };
+
+// const getClickLogList = (sys, start, end, pageNum) => {
+//   var realUrl = "";
+//   if (sys == "城市管家") {
+//     realUrl = "/api/click-log/get?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
+//   } else if (sys == "餐饮油烟管家") {
+//     realUrl = "/youyan/external/GetAuditLog?token=jinniuqu&page=" + pageNum + "&limit=10&start=" + start + "&end=" + end;
+//   } else if (sys == "临街店铺管家") {
+//     realUrl = "/linjie/sign/GetAuditLog?token=jinniuqu&page=" + pageNum + "&limit=10&start=" + start + "&end=" + end;
+//   } else if (sys == "智慧公厕管家") {
+//     realUrl = "/toilet/api/log-view/getLogHistory?start=" + start + "&end=" + end + "&pageNum=" + pageNum + "&pageSize=10";
+//   } else if (sys == "共享单车管家") {
+//     realUrl = "/bicycle/external/GetAuditLog?token=jinniuqu&page=" + pageNum + "&pageSize=10&start=" + start + "&end=" + end;
+//   } else if (sys == "网络理政管家") {
+//     realUrl = "/syd/prod-api/sys/logs?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
+//   } else if (sys == "照明管家（新）") {
+//     realUrl = "/jgzm/light/click-log/get/?start=" + start + "&end=" + end + "&page=" + pageNum + "&page_size=10";
+//   } else if (sys == "环卫作业运行管家") {
+//     realUrl = "/hw/api/logs/huanwei";
+//   } else if (sys == "垃圾全生命周期管家") {
+//     realUrl = "/qsm/api/logs/quansm";
+//   } else if (sys == "餐厨收运管家") {
+//     realUrl = "/cc/api/logs/cancu";
+//   } else if (sys == "调度指挥管家") {
+//     realUrl = "/ddzh/admin-log/page?start=" + start + "&end=" + end + "&page=" + pageNum + "&pageSize=10";
+//   }
+//   var request;
+//   if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
+//     request = axios({
+//       // url: "/api/lzj/getWarning",
+//       url: realUrl,
+//       method: "post",
+//       data: JSON.parse(
+//         JSON.stringify({
+//           start: start,
+//           end: end,
+//           access_token: params.hwzyToken,
+//           page: pageNum,
+//           pageSize: 10,
+//         })
+//       ),
+//     });
+//   } else {
+//     let headers = {};
+//     if (sys == "城市管家") {
+//       headers.Authorization = "Bearer " + params.token;
+//     }
+//     request = axios({
+//       // url: "/api/lzj/getWarning",
+//       url: realUrl,
+//       method: "get",
+//       headers: headers,
+//     });
+//   }
+
+//   request.then((resp) => {
+//     //列表数据
+//     var data = resp.data.data.list;
+    
+//     if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
+//       data = resp.data.data.lists;
+//     } else if (sys == "网络理政管家") {
+//       data = resp.data.data.contentData;
+//     } else if (sys == "智慧公厕管家" || sys == "调度指挥管家") {
+//       data = resp.data.data.records;
+//     } else if (sys == "城市管家") {
+//       data = resp.data.data.list;
+//     }
+//     clickLogList.splice(0, clickLogList.length);
+//     for (var key in data) {
+//       var operation = "点击";
+//       if (sys != "城市管家") {
+//         operation = data[key].operation;
+//       }
+//       var clickLog = {
+//         realName: data[key].realName,
+//         phone: data[key].phone,
+//         subsystem: data[key].subsystem,
+//         clickTime: data[key].clickTime,
+//         operation: operation,
+//       };
+//       clickLogList.push(clickLog);
+//     }
+//     total_Records_clickLog.value = clickLogList.length;
+//     page_Count_clickLog = parseInt(clickLogList.length) % 10;
+//     if (sys == "环卫作业运行管家" || sys == "垃圾全生命周期管家" || sys == "餐厨收运管家") {
+//       total_Records_clickLog.value = resp.data.data.total;
+//       page_Count_clickLog = parseInt(resp.data.data.total) % 10;
+//     }  else if (sys == "网络理政管家") {
+//       total_Records_clickLog.value = resp.data.data.totalSize;
+//       page_Count_clickLog = parseInt(resp.data.data.totalSize) % 10;
+//     } else if (sys == "照明管家（新）") {
+//       total_Records_clickLog.value = resp.data.total;
+//       page_Count_clickLog = parseInt(resp.data.total) % 10;
+//     } else if (sys == "智慧公厕管家" || sys == "调度指挥管家") {
+//       total_Records_clickLog.value = resp.data.data.total;
+//       page_Count_clickLog = parseInt(resp.data.data.total) % 10;
+//     } else if (sys == "城市管家") {
+//       total_Records_clickLog.value = resp.data.data.total;
+//       page_Count_clickLog = parseInt(resp.data.data.total) % 10;
+//     } else if (sys == "临街店铺管家" || sys == "餐饮油烟管家" || sys == "共享单车管家") {
+//       total_Records_clickLog.value = resp.data.total;
+//       page_Count_clickLog = parseInt(resp.data.total) % 10;
+//     }
+//     if (clickLogList.length > (pageNum - 1) * 10) {
+//       logListView.splice(0, logListView.length, ...clickLogList.slice(
+//               (pageNum - 1) * 10,
+//               pageNum * 10
+//             ));
+//     } else {
+//       logListView.splice(0, logListView.length, ...clickLogList);
+//     }
+//     current_Page_clickLog.value = pageNum;
+//   });
+// };
+
+
 
 //换页操作
 const getClickLogApplication = (pageNum) => {
@@ -6578,13 +6556,9 @@ const getClickLogApplication = (pageNum) => {
 const updateCompanyDialog = ref(false);
 const searchNameInCompany = ref("");
 const searchPhoneInCompany = ref("");
-const updateCompanyList = reactive([]);
+const updateCompanyList = ref([]);
 const total_Records_company = ref(0);
 const current_Page_company = ref(1);
-
-const handleSearchInCompany = () => {
-  getEditCompanyList(1);
-};
 
 const getEditCompanyList = (pageNum) =>{
   axios({
@@ -6595,21 +6569,20 @@ const getEditCompanyList = (pageNum) =>{
     },
   }).then(async (resp) => {
     var data = resp.data;
-    updateCompanyList.splice(0, updateCompanyList.length);
+    updateCompanyList.value.splice(0, updateCompanyList.value.length);
     for (var key in data) {
       var updateCompany = {
         realName: data[key].realName,
         telephone: data[key].telephone,
         company: data[key].department,
       };
-      updateCompanyList.push(updateCompany);
+      updateCompanyList.value.push(updateCompany);
       if (!updateCompany.realName.includes(searchNameInCompany.value)
           || !updateCompany.telephone.includes(searchPhoneInCompany.value)) {
-        updateCompanyList.pop();
+        updateCompanyList.value.pop();
       }
     }
-    total_Records_company.value = updateCompanyList.length;
-    //page_Count_company = parseInt(updateCompanyList.length) % 10;
+    total_Records_company.value = updateCompanyList.value.length;
     current_Page_company.value = pageNum;
   })
 };
@@ -6701,7 +6674,7 @@ const getResetPasswordList = async (pageNum) => {
         const phoneMatch = user.telephone.includes(searchPhone);
         return nameMatch && phoneMatch;
       });
-    resetPasswordList.values = processedList;
+    resetPasswordList.value = processedList;
     const listLength = processedList.length;
     total_Records_reset.value = listLength;
     // 使用 Math.ceil 计算总页数 (假设每页 10 条)
@@ -6715,38 +6688,10 @@ const getResetPasswordList = async (pageNum) => {
 
   } catch (error) {
     console.error("获取重置密码列表失败:", error);
-    resetPasswordList.values = [];
+    resetPasswordList.value = [];
     total_Records_reset.value = 0;
   }
 };
-
-// const getResetPasswordList = (pageNum) => {
-//   axios({
-//     url: "/api/auth/all_permission",
-//     method: "get",
-//     headers: {
-//       Authorization: "Bearer " + params.token,
-//     },
-//   }).then(async (resp) => {
-//     var data = resp.data;
-//     resetPasswordList.splice(0, resetPasswordList.length);
-
-//     for (var key in data) {
-//       var resetPassword = {
-//         realName: data[key].realName,
-//         telephone: data[key].telephone,
-//       };
-//       resetPasswordList.push(resetPassword);
-//       if (!resetPassword.realName.includes(searchNameInReset.value)
-//         || !resetPassword.telephone.includes(searchPhoneInReset.value)) {
-//         resetPasswordList.pop();
-//       }
-//     }
-//     total_Records_reset.value = resetPasswordList.length;
-//     page_Count_reset = parseInt(resetPasswordList.length) % 10;
-//     current_Page_reset.value = pageNum;
-//   });
-// };
 
 setInterval(() => {
     getResetPasswordList(1);
@@ -6813,7 +6758,6 @@ const getPermissonApplicationListList = async (pageNum) => {
         });
 
         const rawData = resp.data || {};
-
         // 3. 数据处理：使用 filter 和 map 提高效率和可读性
         const processedList = Object.values(rawData)
             // 过滤未审核的记录 (reviewed == false)
@@ -6865,58 +6809,6 @@ const getPermissonApplicationListList = async (pageNum) => {
     }
 };
 
-// const getPermissonApplicationListList = (pageNum) => {
-//   axios({
-//     url: "/api/auth/get_permission_applications",
-//     method: "get",
-//     headers: {
-//       Authorization: "Bearer " + params.token,
-//     },
-//   }).then(function (resp) {
-//     permissonApplicationList.splice(0, permissonApplicationList.length);
-//     var data = resp.data;
-
-//     for (var key in data) {
-//       if (data[key].reviewed == false) {
-//         var permission_list = {
-//           indexid: data[key].id,
-//           username: data[key].realName,
-//           telephone: data[key].telephone,
-//           roleName: data[key].roleName,
-//           roleSystem: data[key].roleSystem,
-//           operator: data[key].operator,
-//           operateType: data[key].operateType,
-//         };
-//         if (data[key].operateType == "add") {
-//           permission_list.operateType = "添加";
-//         } else if (data[key].operateType == "delete") {
-//           permission_list.operateType = "删除";
-//         }
-//         if (data[key].roleName == "viewer") {
-//           permission_list.roleName = "浏览信息";
-//         } else if (data[key].roleName == "operator") {
-//           permission_list.roleName = "操作系统";
-//         } else if (data[key].roleName == "admin") {
-//           permission_list.roleName = "管理参数";
-//         }
-//         permissonApplicationList.push(permission_list);
-//       }
-//     }
-//     total_Records.value = permissonApplicationList.length;
-//     page_Count = parseInt(permissonApplicationList.length) % 10;
-//     current_Page.value = pageNum;
-//     aplicationloading.value = false;
-//     var div = document.getElementById("permissonAlert");
-//     if (permissonApplicationList.length == 0) {
-//       div.style.display = "none";
-//     }
-//   });
-// };
-
-
-setInterval(() => {
-    getPermissonApplicationListList(1)
-}, 360000);
 const getPermissionApplication = (pageNum) => {
   // 当前页
   current_Page.value = pageNum;
@@ -7005,6 +6897,8 @@ const createBasePermissionItem = (user, keyIndex) => ({
   }, {}),
   hwzy: '×', // 确保 'hwzy' 的默认值统一
 });
+
+
 const getPermissionList = async (pageNum, filteredName, filteredPhone) => {
   loading.value = true;
   currentPage.value = pageNum;
@@ -7090,246 +6984,6 @@ const getPermissionList = async (pageNum, filteredName, filteredPhone) => {
   }
 };
 
-// const getPermissionList = (pageNum, filteredName, filteredPhone) => {
-//   let url = "/api/auth/non_super_admin_list";
-//   const queryParams = [];
-
-//   if (filteredName && filteredName.trim() !== "") {
-//     queryParams.push(`filteredName=${encodeURIComponent(filteredName.trim())}`);
-//   }
-
-//   if (filteredPhone && filteredPhone.trim() !== "") {
-//     queryParams.push(`filteredPhone=${encodeURIComponent(filteredPhone.trim())}`);
-//   }
-
-//   // Add query parameters to URL if any exist
-//   if (queryParams.length > 0) {
-//     url += `?${queryParams.join("&")}`;
-//   }
-//   axios({
-//     url: url,
-//     method: "get",
-//     headers: {
-//       Authorization: "Bearer " + params.token,
-//     },
-//   }).then(async (resp) => {
-//     permissionList.splice(0, permissionList.length);
-//     var data = resp.data;
-
-//     var realName = ref("");
-//     var telephone = ref("");
-//     var company = ref("");
-//     for (var key in data) {
-//       realName.value = data[key].realName;
-//       telephone.value = data[key].telephone;
-//       company.value = data[key].department;
-//       var permission_list = {
-//         index: Number(key) + 1,
-//         username: data[key].realName,
-//         telephone: data[key].telephone,
-//         gxdc: "×",
-//         ljsj: "×",
-//         cgAI: "×",
-//         cgsyd: "×",
-//         ggzp: "×",
-//         yczl: "×",
-//         szhcs: "×",
-//         jgzm: "×",
-//         shlj: "×",
-//         zhxz: "×",
-//         ddzh: "×",
-//         cclj: "×",
-//         cyyy: "×",
-//         hwzy: "x",
-//         newZmgj: "×",
-//       };
-//       var roleList = data[key].roleList;
-//       for (var index in roleList) {
-//         var finishied = false;
-//         if (roleList[index].system == "all") {
-//           permission_list.cyyy = "√";
-//           permission_list.gxdc = "√";
-//           permission_list.ljsj = "√";
-//           permission_list.cgAI = "√";
-//           permission_list.cgsyd = "√";
-//           permission_list.ggzp = "√";
-//           permission_list.yczl = "√";
-//           permission_list.szhcs = "√";
-//           permission_list.jgzm = "√";
-//           permission_list.shlj = "√";
-//           permission_list.zhxz = "√";
-//           permission_list.cclj = "√";
-//           permission_list.ddzh = "√";
-//           permission_list.hwzy = "√";
-//           permission_list.newZmgj = "√";
-//         }
-//         if (roleList[index].system == "共享单车管家") {
-//           permission_list.gxdc = "√";
-//         }
-//         if (roleList[index].system == "环卫作业管家") {
-//           permission_list.hwzy = "√";
-//         }
-//         // if (roleList[index].system == "垃圾数据归集管家") {
-//         //   permission_list.ljsj = "√";
-//         // }
-//         if (roleList[index].system == "城管AI识别管家") {
-//           permission_list.cgAI = "√";
-//         }
-//         if (roleList[index].system == "网络理政管家") {
-//           permission_list.cgsyd = "√";
-//         }
-//         if (roleList[index].system == "广告招牌二维码管家") {
-//           permission_list.ggzp = "√";
-//         }
-//         if (roleList[index].system == "扬尘治理大数据协同管家") {
-//           permission_list.yczl = "√";
-//         }
-//         if (roleList[index].system == "数字化城市信息管家") {
-//           permission_list.szhcs = "√";
-//         }
-//         if (roleList[index].system == "景观照明集中控制管家") {
-//           permission_list.jgzm = "√";
-//         }
-//         if (roleList[index].system == "智慧公厕管家") {
-//           permission_list.shlj = "√";
-//         }
-//         if (roleList[index].system == "突出问题管家") {
-//           permission_list.zhxz = "√";
-//         }
-//         if (roleList[index].system == "调度指挥管家") {
-//           permission_list.ddzh = "√";
-//         }
-//         if (roleList[index].system == "垃圾全生命周期管家") {
-//           permission_list.cclj = "√";
-//         }
-//         if (roleList[index].system == "餐饮油烟管家") {
-//           permission_list.cyyy = "√";
-//         }
-//         if (roleList[index].system == "照明管家（新）") {
-//           permission_list.newZmgj = "√";
-//         }
-//       }
-//       await axios({
-//         url: "/api/auth/get_self_permission_applications",
-//         method: "get",
-//         headers: {
-//           Authorization: "Bearer " + params.token,
-//         },
-//       }).then((data) => {
-//         var resp = data.data;
-//         for (var i in resp) {
-//           if (realName.value == resp[i].realName) {
-//             if (resp[i].operateType == "delete") {
-//               if (resp[i].roleSystem == "共享单车管家") {
-//                 permission_list.gxdc = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "环卫作业管家") {
-//                 permission_list.hwzy = "×(待定)";
-//               }
-//               // if (resp[i].roleSystem == "垃圾数据归集管家") {
-//               //   permission_list.ljsj = "×(待定)";
-//               // }
-//               if (resp[i].roleSystem == "城管AI识别管家") {
-//                 permission_list.cgAI = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "网络理政管家") {
-//                 permission_list.cgsyd = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "广告招牌二维码管家") {
-//                 permission_list.ggzp = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "扬尘治理大数据协同管家") {
-//                 permission_list.yczl = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "数字化城市信息管家") {
-//                 permission_list.szhcs = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "景观照明集中控制管家") {
-//                 permission_list.jgzm = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "智慧公厕管家") {
-//                 permission_list.shlj = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "突出问题管家") {
-//                 permission_list.zhxz = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "调度指挥管家") {
-//                 permission_list.ddzh = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "垃圾全生命周期管家") {
-//                 permission_list.cclj = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "餐饮油烟管家") {
-//                 permission_list.cyyy = "×(待定)";
-//               }
-//               if (resp[i].roleSystem == "照明管家（新）") {
-//                 permission_list.newZmgj = "×(待定)";
-//               }
-//             } else if (resp[i].operateType == "add") {
-//               if (resp[i].roleSystem == "共享单车管家") {
-//                 permission_list.gxdc = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "环卫作业管家") {
-//                 permission_list.hwzy = "√(待定)";
-//               }
-//               // if (resp[i].roleSystem == "垃圾数据归集管家") {
-//               //   permission_list.ljsj = "√(待定)";
-//               // }
-//               if (resp[i].roleSystem == "城管AI识别管家") {
-//                 permission_list.cgAI = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "网络理政管家") {
-//                 permission_list.cgsyd = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "广告招牌二维码管家") {
-//                 permission_list.ggzp = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "扬尘治理大数据协同管家") {
-//                 permission_list.yczl = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "数字化城市信息管家") {
-//                 permission_list.szhcs = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "景观照明集中控制管家") {
-//                 permission_list.jgzm = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "智慧公厕管家") {
-//                 permission_list.shlj = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "突出问题管家") {
-//                 permission_list.zhxz = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "调度指挥管家") {
-//                 permission_list.ddzh = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "垃圾全生命周期管家") {
-//                 permission_list.cclj = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "餐饮油烟管家") {
-//                 permission_list.cyyy = "√(待定)";
-//               }
-//               if (resp[i].roleSystem == "照明管家（新）") {
-//                 permission_list.newZmgj = "√(待定)";
-//               }
-//             }
-//           }
-//         }
-//       });
-//       permissionList.push(permission_list);
-
-//       // if (!permission_list.username.includes(searchName.value)
-//       //     || !permission_list.telephone.includes(searchPhone.value)) {
-//       //   permissionList.pop();
-//       // }
-//     }
-//     totalRecords.value = permissionList.length;
-//     pageCount = parseInt(permissionList.length) % 10;
-//     // 计算最后一页的页码
-//     lastPage = Math.ceil(totalRecords.value / 10);
-//     currentPage.value = pageNum;
-//     loading.value = false;
-//   });
-// };
 
 const getPermission = (pageNum) => {
   currentPage.value = pageNum;
@@ -7372,1272 +7026,297 @@ const handleDelete = (row) => {
   }
 };
 
-const handleAdd = () => {
-  peopleAdd.value = true;
-};
-// 用于控制权限申请提示框的显示状态 (取代直接操作DOM)
+
+
+// --- 1. 基础数据定义 ---
+const formLoading = ref(false);
+const permissionFormRef = ref(null);
 const showPermissonAlert = ref(false);
-const PERMISSION_MAP = {
-  viewer: {
-    rights: ['浏览信息'],
-    role: 'viewer'
-  },
-  admin: {
-    rights: ['浏览信息', '管理参数'],
-    role: 'admin'
-  },
-  operator: {
-    rights: ['浏览信息', '管理参数', '操作系统'],
-    role: 'operator'
-  }
-};
-const systemPermissons = reactive({
-  '共享单车管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '环卫作业管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '城管AI识别管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '网络理政管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '广告招牌二维码管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '扬尘治理大数据协同管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '数字化城市信息管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '景观照明集中控制管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '智慧公厕管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '照明管家（新）': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '突出问题管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '调度指挥管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '垃圾全生命周期管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
-  '餐饮油烟管家': { radio: ref([]), oldRadio: ref(''), permission: ref('') },
+const handleEvent = ref(false); // 标记当前是否处于编辑状态
+const permissonName = ref('');
+const permissonTelephone = ref('');
+const currentRowPage = ref(1);
+
+// --- 2. 表单配置 (核心配置) ---
+const formConfig = [
+  { label: '共享单车管家', prop: 'gxdc', isLarge: true },
+  { label: '环卫作业运行管家', prop: 'hwzy', isLarge: true },
+  { label: '城管AI识别管家', prop: 'cgAI' },
+  { label: '网络理政管家', prop: 'cgsyd' },
+  { label: '临街店铺管家', prop: 'ggzp' },
+  { label: '扬尘治理大数据协同管家', prop: 'yczl' },
+  { label: '数字化城市信息管家', prop: 'szhcs' },
+  { label: '景观照明管家', prop: 'jgzm' },
+  { label: '照明管家（新）', prop: 'newZmgj' },
+  { label: '智慧公厕管家', prop: 'shlj' },
+  { label: '突出问题管家', prop: 'zhxz' },
+  { label: '调度指挥管家', prop: 'ddzh' },
+  { label: '垃圾全生命周期管家', prop: 'cclj' },
+  { label: '餐饮油烟管家', prop: 'cyyy' }
+];
+
+// --- 3. 响应式数据 ---
+const ruleForm = reactive({});
+// 用于存储修改前的角色状态 (key: gxdc, value: 'admin')，用于提交时对比
+const originalPermissions = reactive({});
+
+// 初始化数据
+formConfig.forEach(item => {
+  ruleForm[item.prop] = [];
+  originalPermissions[item.prop] = "";
 });
-const resetAllRadios = () => {
-  for (const system in systemPermissons) {
-    systemPermissons[system].radio.value = [];
-    systemPermissons[system].oldRadio.value = '';
-    systemPermissons[system].permission.value = '';
-  }
-};
-const processRolePermission = (systemName, roleName) => {
-  const permData = systemPermissons[systemName];
-  if (!permData) return; // 如果系统不存在，则跳过
 
-  const perm = PERMISSION_MAP[roleName];
-  if (!perm) return; // 如果角色名称不存在，则跳过
+// --- 4. 关键映射表 ---
 
-  permData.radio.value = perm.rights;
-  permData.oldRadio.value = perm.role;
-  permData.permission.value = perm.role; // 使用 permission 字段存储当前权限
+// 【核心修复】数据库系统名 -> 前端属性名 映射
+// 这里解决了数据库叫 "城管诉易达管家" 而前端叫 "网络理政管家" 导致回显失败的问题
+const DB_SYSTEM_MAP = {
+  '共享单车管家': 'gxdc',
+  '环卫作业运行管家': 'hwzy',
+  '环卫作业管家': 'hwzy', // 兼容旧名称
+  '城管AI识别管家': 'cgAI',
+  '网络理政管家': 'cgsyd',
+  '城管诉易达管家': 'cgsyd', // 兼容数据库实际名称
+  '临街店铺管家': 'ggzp',
+  '广告招牌二维码管家': 'ggzp', // 兼容旧名称
+  '扬尘治理大数据协同管家': 'yczl',
+  '数字化城市信息管家': 'szhcs',
+  '景观照明管家': 'jgzm',
+  '景观照明集中控制管家': 'jgzm', // 兼容数据库实际名称
+  '照明管家（新）': 'newZmgj',
+  '智慧公厕管家': 'shlj',
+  '突出问题管家': 'zhxz',
+  '调度指挥管家': 'ddzh',
+  '垃圾全生命周期管家': 'cclj',
+  '餐饮油烟管家': 'cyyy'
 };
+
+// 权限字典映射
+const PERMISSION_MAP = {
+  viewer:   ['浏览信息'],
+  admin:    ['浏览信息', '管理参数'],
+  operator: ['浏览信息', '管理参数', '操作系统']
+};
+
+// --- 5. 辅助工具函数 ---
+
+// 根据权限数组计算角色编码 (前端数组 -> 后端字符串)
+const getRoleCodeFromRights = (rightsArray) => {
+  if (!rightsArray || rightsArray.length === 0) return "";
+  if (rightsArray.includes("操作系统")) return "operator";
+  if (rightsArray.includes("管理参数")) return "admin";
+  if (rightsArray.includes("浏览信息")) return "viewer";
+  return "";
+};
+
+// --- 6. 核心业务逻辑：点击修改 (handleClick) ---
 const handleClick = async (row) => {
-  // 1. 计算当前行所在页码
   currentRowPage.value = Math.ceil((row.index + 1) / 10);
+  
+  // 1. 重置
+  Object.keys(ruleForm).forEach(key => ruleForm[key] = []);
+  Object.keys(originalPermissions).forEach(key => originalPermissions[key] = "");
 
-  // 2. 检查权限申请列表，使用响应式数据控制显示
-  if (permissonApplicationList.value.length !== 0) {
-    showPermissonAlert.value = true;
-    return; // 提前退出
-  }
-
-  // 3. 权限申请列表为空时，执行加载和初始化
-  showPermissonAlert.value = false;
   formLoading.value = true;
-  permissonName.value = row.username;
+  permissonName.value = row.username || row.realName;
   permissonTelephone.value = row.telephone;
   handleEvent.value = true;
-  // 重置所有权限数据
-  resetAllRadios();
-  try {
-    // --- 第一步：获取用户当前权限列表 ---
-    const resp = await axios.get("/api/auth/non_super_admin_list", {
-      headers: {
-        Authorization: "Bearer " + params.token,
-      },
-    });
+  showPermissonAlert.value = false;
 
+  try {
+    // --- 第一步：获取真实已有的权限 ---
+    const resp = await axios.get("/api/auth/non_super_admin_list", {
+      headers: { Authorization: "Bearer " + params.token },
+    });
+    
     const userDataList = resp.data;
     const targetUser = userDataList.find(user => user.telephone === permissonTelephone.value);
 
-    if (targetUser) {
-      const roleList = targetUser.roleList || [];
+    if (targetUser && targetUser.roleList) {
+      for (const role of targetUser.roleList) {
+        const propName = DB_SYSTEM_MAP[role.system]; 
+        const rights = PERMISSION_MAP[role.name];
 
-      // A. 处理 "all" (超级管理员/全局权限) 的情况
-      const hasGlobalRole = roleList.some(role => role.system === "all");
-      if (hasGlobalRole) {
-        const globalRights = ["浏览信息"];
-        for (const system in systemPermissons) {
-          systemPermissons[system].radio.value = globalRights;
+        if (propName) {
+          if (rights) ruleForm[propName] = rights;
+          // 记录数据库里真实的原始权限
+          originalPermissions[propName] = role.name; 
         }
-        // ElMessage({ message: "您不可更改该用户权限！", type: "warning" }); // 保持注释
-      } else {
-        // B. 处理具体系统权限
-        for (const role of roleList) {
-          processRolePermission(role.system, role.name);
+        
+        // 全局权限处理
+        if (role.system === 'all' || role.name === 'superAdmin') {
+           formConfig.forEach(item => {
+             ruleForm[item.prop] = ['浏览信息', '管理参数', '操作系统'];
+             originalPermissions[item.prop] = 'operator';
+           });
         }
       }
-
-      // --- 第二步：获取待审批的权限申请列表 ---
+      
+      // --- 第二步：处理待审批的申请 (覆盖显示) ---
       const appResp = await axios.get("/api/auth/get_self_permission_applications", {
-        headers: {
-          Authorization: "Bearer " + params.token,
-        },
+        headers: { Authorization: "Bearer " + params.token },
       });
-
       const applicationList = appResp.data || [];
       const userApplications = applicationList.filter(app => app.telephone === permissonTelephone.value);
 
-      // C. 使用待审批的权限覆盖当前权限 (只处理 'add' 操作)
       for (const app of userApplications) {
+        // 如果是正在申请添加权限 (OperateType == 'add')
         if (app.operateType === "add") {
-          // 在处理申请时，不需要清空 radio.value = []，因为第一步已经完成了重置
-          processRolePermission(app.roleSystem, app.roleName);
+           const prop = DB_SYSTEM_MAP[app.roleSystem];
+           const rights = PERMISSION_MAP[app.roleName];
+           
+           if(prop && rights) {
+             // 1. 界面上显示为勾选 (保持不变)
+             ruleForm[prop] = rights;
+             
+             // 【⭐⭐⭐ 核心修复代码 ⭐⭐⭐】
+             // 必须把这个“待审批”的状态也视为“原始状态”，
+             // 这样当你取消勾选时，系统才能检测到 (有 -> 无) 的变化！
+             originalPermissions[prop] = app.roleName; 
+           }
+        }
+        
+        // 补充逻辑：如果是正在申请删除权限 (OperateType == 'delete')
+        // 界面上应该显示为不勾选，且原始状态也应该视为无，防止逻辑冲突
+        if (app.operateType === "delete") {
+           const prop = DB_SYSTEM_MAP[app.roleSystem];
+           if (prop) {
+             ruleForm[prop] = []; // 界面清空
+             originalPermissions[prop] = ""; // 视为已删除
+           }
         }
       }
     }
-
   } catch (error) {
-    console.error("加载权限信息失败:", error);
-    // 可在此处添加错误提示 ElMessage.error("加载权限信息失败");
+    console.error("加载权限失败:", error);
+    ElMessage.error("加载权限信息失败");
   } finally {
     formLoading.value = false;
   }
 };
 
-
-
-// const handleClick = (row) => {
-//   currentRowPage = Math.ceil((row.index + 1) / 10);
-
-//   var div = document.getElementById("permissonAlert");
-//   if (permissonApplicationList.length != 0) {
-//     div.style.display = "flex";
-//   } else {
-//     div.style.display = "none";
-//     formLoading.value = true;
-//     permissonName.value = row.username;
-//     permissonTelephone.value = row.telephone;
-//     handleEvent.value = true;
-//     radioGxdc.value = [];
-//     radioHwzy.value = [];
-//     radioLjsj.value = [];
-//     radioCgAI.value = [];
-//     radioCgsyd.value = [];
-//     radioGgzp.value = [];
-//     radioYczl.value = [];
-//     radioSzhcs.value = [];
-//     radioJgzm.value = [];
-//     radioShlj.value = [];
-//     radioNewZmgj.value = [];
-//     radioZhxz.value = [];
-//     radioDdzh.value = [];
-//     radioCclj.value = [];
-//     radioCyyy.value = [];
-
-//     axios({
-//       url: "/api/auth/non_super_admin_list",
-//       method: "get",
-//       headers: {
-//         Authorization: "Bearer " + params.token,
-//       },
-//     }).then(async (resp) => {
-//       var data = resp.data;
-
-//       for (var key in data) {
-//         if (data[key].telephone == permissonTelephone.value) {
-//           var roleList = data[key].roleList;
-//           for (var index in roleList) {
-//             if (roleList[index].system == "all") {
-//               radioGxdc.value = ["浏览信息"];
-//               radioHwzy.value = ["浏览信息"];
-//               radioLjsj.value = ["浏览信息"];
-//               radioCgAI.value = ["浏览信息"];
-//               radioCgsyd.value = ["浏览信息"];
-//               radioGgzp.value = ["浏览信息"];
-//               radioYczl.value = ["浏览信息"];
-//               radioSzhcs.value = ["浏览信息"];
-//               radioJgzm.value = ["浏览信息"];
-//               radioShlj.value = ["浏览信息"];
-//               radioZhxz.value = ["浏览信息"];
-//               radioDdzh.value = ["浏览信息"];
-//               radioCclj.value = ["浏览信息"];
-//               radioCyyy.value = ["浏览信息"];
-//               radioNewZmgj.value = ["浏览信息"];
-
-//               // ElMessage({
-//               //   message: "您不可更改该用户权限！",
-//               //   type: "warning",
-//               // });
-//             } else {
-//               if (roleList[index].system == "共享单车管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioGxdc.value = ["浏览信息"];
-//                   oldRadioGxdc.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioGxdc.value = ["浏览信息", "管理参数"];
-//                   oldRadioGxdc.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioGxdc.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioGxdc.value = "operator";
-//                 }
-//                 permissonGxdc.value = oldRadioGxdc.value;
-//               }
-//               if (roleList[index].system == "环卫作业管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioHwzy.value = ["浏览信息"];
-//                   oldRadioHwzy.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioHwzy.value = ["浏览信息", "管理参数"];
-//                   oldRadioHwzy.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioHwzy.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioHwzy.value = "operator";
-//                 }
-//                 permissonHwzy.value = oldRadioHwzy.value;
-//               }
-//               if (roleList[index].system == "城管AI识别管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioCgAI.value = ["浏览信息"];
-//                   oldRadioCgAI.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioCgAI.value = ["浏览信息", "管理参数"];
-//                   oldRadioCgAI.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioCgAI.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioCgAI.value = "operator";
-//                 }
-//                 permissonCgAI.value = oldRadioCgAI.value;
-//               }
-//               if (roleList[index].system == "网络理政管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioCgsyd.value = ["浏览信息"];
-//                   oldRadioCgsyd.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioCgsyd.value = ["浏览信息", "管理参数"];
-//                   oldRadioCgsyd.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioCgsyd.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioCgsyd.value = "operator";
-//                 }
-//                 permissonCgsyd.value = oldRadioCgsyd.value;
-//               }
-//               if (roleList[index].system == "广告招牌二维码管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioGgzp.value = ["浏览信息"];
-//                   oldRadioGgzp.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioGgzp.value = ["浏览信息", "管理参数"];
-//                   oldRadioGgzp.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioGgzp.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioGgzp.value = "operator";
-//                 }
-//                 permissonGgzp.value = oldRadioGgzp.value;
-//               }
-//               if (roleList[index].system == "扬尘治理大数据协同管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioYczl.value = ["浏览信息"];
-//                   oldRadioYczl.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioYczl.value = ["浏览信息", "管理参数"];
-//                   oldRadioYczl.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioYczl.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioYczl.value = "operator";
-//                 }
-//                 permissonYczl.value = oldRadioYczl.value;
-//               }
-//               if (roleList[index].system == "数字化城市信息管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioSzhcs.value = ["浏览信息"];
-//                   oldRadioSzhcs.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioSzhcs.value = ["浏览信息", "管理参数"];
-//                   oldRadioSzhcs.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioSzhcs.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioSzhcs.value = "operator";
-//                 }
-//                 permissonSzhcs.value = oldRadioSzhcs.value;
-//               }
-//               if (roleList[index].system == "景观照明集中控制管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioJgzm.value = ["浏览信息"];
-//                   oldRadioJgzm.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioJgzm.value = ["浏览信息", "管理参数"];
-//                   oldRadioJgzm.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioJgzm.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioJgzm.value = "operator";
-//                 }
-//                 permissonJgzm.value = oldRadioJgzm.value;
-//               }
-//               if (roleList[index].system == "智慧公厕管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioShlj.value = ["浏览信息"];
-//                   oldRadioShlj.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioShlj.value = ["浏览信息", "管理参数"];
-//                   oldRadioShlj.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioShlj.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioShlj.value = "operator";
-//                 }
-//                 permissonShlj.value = oldRadioShlj.value;
-//               }
-//               if (roleList[index].system == "照明管家（新）") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioNewZmgj.value = ["浏览信息"];
-//                   oldRadioNewZmgj.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioNewZmgj.value = ["浏览信息", "管理参数"];
-//                   oldRadioNewZmgj.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioNewZmgj.value = "operator";
-//                 }
-//                 permissonNewZmgj.value = oldRadioNewZmgj.value;
-//               }
-//               if (roleList[index].system == "突出问题管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioZhxz.value = ["浏览信息"];
-//                   oldRadioZhxz.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioZhxz.value = ["浏览信息", "管理参数"];
-//                   oldRadioZhxz.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioZhxz.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioZhxz.value = "operator";
-//                 }
-//                 permissonZhxz.value = oldRadioZhxz.value;
-//               }
-//               if (roleList[index].system == "调度指挥管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioDdzh.value = ["浏览信息"];
-//                   oldRadioDdzh.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioDdzh.value = ["浏览信息", "管理参数"];
-//                   oldRadioDdzh.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioDdzh.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioDdzh.value = "operator";
-//                 }
-//                 permissonDdzh.value = oldRadioDdzh.value;
-//               }
-//               if (roleList[index].system == "垃圾全生命周期管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioCclj.value = ["浏览信息"];
-//                   oldRadioCclj.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioCclj.value = ["浏览信息", "管理参数"];
-//                   oldRadioCclj.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioCclj.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioCclj.value = "operator";
-//                 }
-//                 permissonCclj.value = oldRadioCclj.value;
-//               }
-//               if (roleList[index].system == "餐饮油烟管家") {
-//                 if (roleList[index].name == "viewer") {
-//                   radioCyyy.value = ["浏览信息"];
-//                   oldRadioCyyy.value = "viewer";
-//                 }
-//                 if (roleList[index].name == "admin") {
-//                   radioCyyy.value = ["浏览信息", "管理参数"];
-//                   oldRadioCyyy.value = "admin";
-//                 }
-//                 if (roleList[index].name == "operator") {
-//                   radioCyyy.value = ["浏览信息", "管理参数", "操作系统"];
-//                   oldRadioCyyy.value = "operator";
-//                 }
-//                 permissonCyyy.value = oldRadioCyyy.value;
-//               }
-//             }
-//           }
-//           await axios({
-//             url: "/api/auth/get_self_permission_applications",
-//             method: "get",
-//             headers: {
-//               Authorization: "Bearer " + params.token,
-//             },
-//           }).then((data) => {
-//             var roleList = data.data;
-//             for (var index in roleList) {
-//               if (permissonTelephone.value == roleList[index].telephone) {
-
-//                 if (roleList[index].roleSystem == "共享单车管家") {
-//                   radioGxdc.value = [];
-//                   if (roleList[index].operateType == "add") {
-//                     if (roleList[index].roleName == "viewer") {
-//                       radioGxdc.value = ["浏览信息"];
-//                       oldRadioGxdc.value = "viewer";
-//                     }
-//                     if (roleList[index].roleName == "admin") {
-//                       radioGxdc.value = ["浏览信息", "管理参数"];
-//                       oldRadioGxdc.value = "admin";
-//                     }
-//                     if (roleList[index].roleName == "operator") {
-//                       radioGxdc.value = ["浏览信息", "管理参数", "操作系统"];
-//                       oldRadioGxdc.value = "operator";
-//                     }
-//                     permissonGxdc.value = oldRadioGxdc.value;
-//                   }
-//                 }
-//                 if (roleList[index].roleSystem == "环卫作业管家") {
-//                   radioHwzy.value = [];
-//                   if (roleList[index].operateType == "add") {
-//                     if (roleList[index].roleName == "viewer") {
-//                       radioHwzy.value = ["浏览信息"];
-//                       oldRadioHwzy.value = "viewer";
-//                     }
-//                     if (roleList[index].roleName == "admin") {
-//                       radioHwzy.value = ["浏览信息", "管理参数"];
-//                       oldRadioHwzy.value = "admin";
-//                     }
-//                     if (roleList[index].roleName == "operator") {
-//                       radioHwzy.value = ["浏览信息", "管理参数", "操作系统"];
-//                       oldRadioHwzy.value = "operator";
-//                     }
-//                     permissonHwzy.value = oldRadioHwzy.value;
-//                   }
-//                 }
-//                 if (roleList[index].roleSystem == "城管AI识别管家") {
-//                   radioCgAI.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioCgAI.value = ["浏览信息"];
-//                     oldRadioCgAI.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioCgAI.value = ["浏览信息", "管理参数"];
-//                     oldRadioCgAI.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioCgAI.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioCgAI.value = "operator";
-//                   }
-//                   permissonCgAI.value = oldRadioCgAI.value;
-//                 }
-//                 if (roleList[index].roleSystem == "网络理政管家") {
-//                   radioCgsyd.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioCgsyd.value = ["浏览信息"];
-//                     oldRadioCgsyd.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioCgsyd.value = ["浏览信息", "管理参数"];
-//                     oldRadioCgsyd.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioCgsyd.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioCgsyd.value = "operator";
-//                   }
-//                   permissonCgsyd.value = oldRadioCgsyd.value;
-//                 }
-//                 if (roleList[index].roleSystem == "广告招牌二维码管家") {
-//                   radioGgzp.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioGgzp.value = ["浏览信息"];
-//                     oldRadioGgzp.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioGgzp.value = ["浏览信息", "管理参数"];
-//                     oldRadioGgzp.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioGgzp.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioGgzp.value = "operator";
-//                   }
-//                   permissonGgzp.value = oldRadioGgzp.value;
-//                 }
-//                 if (roleList[index].roleSystem == "扬尘治理大数据协同管家") {
-//                   radioYczl.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioYczl.value = ["浏览信息"];
-//                     oldRadioYczl.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioYczl.value = ["浏览信息", "管理参数"];
-//                     oldRadioYczl.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioYczl.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioYczl.value = "operator";
-//                   }
-//                   permissonYczl.value = oldRadioYczl.value;
-//                 }
-//                 if (roleList[index].roleSystem == "数字化城市信息管家") {
-//                   radioSzhcs.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioSzhcs.value = ["浏览信息"];
-//                     oldRadioSzhcs.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioSzhcs.value = ["浏览信息", "管理参数"];
-//                     oldRadioSzhcs.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioSzhcs.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioSzhcs.value = "operator";
-//                   }
-//                   permissonSzhcs.value = oldRadioSzhcs.value;
-//                 }
-//                 if (roleList[index].roleSystem == "景观照明集中控制管家") {
-//                   radioJgzm.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioJgzm.value = ["浏览信息"];
-//                     oldRadioJgzm.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioJgzm.value = ["浏览信息", "管理参数"];
-//                     oldRadioJgzm.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioJgzm.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioJgzm.value = "operator";
-//                   }
-//                   permissonJgzm.value = oldRadioJgzm.value;
-//                 }
-//                 if (roleList[index].roleSystem == "照明管家（新）") {
-//                   radioNewZmgj.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioNewZmgj.value = ["浏览信息"];
-//                     oldRadioNewZmgj.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioNewZmgj.value = ["浏览信息", "管理参数"];
-//                     oldRadioNewZmgj.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioNewZmgj.value = "operator";
-//                   }
-//                   permissonNewZmgj.value = oldRadioNewZmgj.value;
-//                 }
-//                 if (roleList[index].roleSystem == "智慧公厕管家") {
-//                   radioShlj.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioShlj.value = ["浏览信息"];
-//                     oldRadioShlj.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioShlj.value = ["浏览信息", "管理参数"];
-//                     oldRadioShlj.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioShlj.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioShlj.value = "operator";
-//                   }
-//                   permissonShlj.value = oldRadioShlj.value;
-//                 }
-//                 if (roleList[index].roleSystem == "突出问题管家") {
-//                   radioZhxz.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioZhxz.value = ["浏览信息"];
-//                     oldRadioZhxz.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioZhxz.value = ["浏览信息", "管理参数"];
-//                     oldRadioZhxz.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioZhxz.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioZhxz.value = "operator";
-//                   }
-//                   permissonZhxz.value = oldRadioZhxz.value;
-//                 }
-//                 if (roleList[index].roleSystem == "调度指挥管家") {
-//                   radioDdzh.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioDdzh.value = ["浏览信息"];
-//                     oldRadioDdzh.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioDdzh.value = ["浏览信息", "管理参数"];
-//                     oldRadioDdzh.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioDdzh.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioDdzh.value = "operator";
-//                   }
-//                   permissonDdzh.value = oldRadioDdzh.value;
-//                 }
-//                 if (roleList[index].roleSystem == "垃圾全生命周期管家") {
-//                   radioCclj.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioCclj.value = ["浏览信息"];
-//                     oldRadioCclj.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioCclj.value = ["浏览信息", "管理参数"];
-//                     oldRadioCclj.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioCclj.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioCclj.value = "operator";
-//                   }
-//                   permissonCclj.value = oldRadioCclj.value;
-//                 }
-//                 if (roleList[index].roleSystem == "餐饮油烟管家") {
-//                   radioCyyy.value = [];
-//                   if (roleList[index].roleName == "viewer") {
-//                     radioCyyy.value = ["浏览信息"];
-//                     oldRadioCyyy.value = "viewer";
-//                   }
-//                   if (roleList[index].roleName == "admin") {
-//                     radioCyyy.value = ["浏览信息", "管理参数"];
-//                     oldRadioCyyy.value = "admin";
-//                   }
-//                   if (roleList[index].roleName == "operator") {
-//                     radioCyyy.value = ["浏览信息", "管理参数", "操作系统"];
-//                     oldRadioCyyy.value = "operator";
-//                   }
-//                   permissonCyyy.value = oldRadioCyyy.value;
-//                 }
-//               }
-//             }
-//           });
-//           formLoading.value = false;
-//         }
-//       }
-//     });
-//   }
-// };
-
-//申请：添加/删除权限操作
-
-
+// --- 7. API 请求函数 ---
 const selfPermisson = (systemName, operateType, roleName) => {
-  axios({
+  // 必须 return axios promise
+  return axios({ 
     url: "/api/auth/apply_for_permission",
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + params.token,
     },
-    data: JSON.parse(
-      JSON.stringify({
-        operator: params.username,
-        userName: permissonTelephone.value,
-        operateType: operateType,
-        roleSystem: systemName,
-        roleName: roleName,
-      })
-    ),
+    data: {
+      operator: params.username,
+      userName: permissonTelephone.value,
+      operateType: operateType, // 'add' or 'delete'
+      roleSystem: systemName,   // '共享单车管家'
+      roleName: roleName,       // 'admin'
+    },
     method: "post",
-  }).then(function (resp) {
   });
 };
 
-const cellStyle = ({ row, column, rowIndex, columnIndex }) => {
-  const styleObject = {
-    // background: "#303133 !important",
-    // color: "#ffffff",
+// --- 8. 提交逻辑 (优化后) ---
+const submitPermisson = async () => {
+  let isChanged = false;
+  const requestPromises = []; // 存储所有请求
+
+  // 遍历配置项，自动对比
+  for (const item of formConfig) {
+    const prop = item.prop;          // 'gxdc'
+    const systemName = item.label;   // '共享单车管家' (提交给后端的名称)
+
+    // 1. 获取新旧状态
+    const newRoleCode = getRoleCodeFromRights(ruleForm[prop]); // 根据勾选计算 'admin'
+    const oldRoleCode = originalPermissions[prop] || "";       // 获取原始状态 'viewer'
+
+    // 2. 如果状态不一致，生成请求
+    if (newRoleCode !== oldRoleCode) {
+      isChanged = true;
+      // 情况 A: 原来有权限，现在变了（或者是全删了） -> 先删除旧的
+      if (oldRoleCode) {
+        requestPromises.push(selfPermisson(systemName, "delete", oldRoleCode));
+      }
+      
+      // 情况 B: 现在有权限（新增或者修改后） -> 添加新的
+      if (newRoleCode) {
+        requestPromises.push(selfPermisson(systemName, "add", newRoleCode));
+      }
+    }
+  }
+
+  // 3. 处理结果
+  if (!isChanged) {
+    return ElMessage.error("您未作任何更改，请更改之后再提交！");
+  }
+
+  if (!confirm("是否提交更改申请？")) return;
+
+  try {
+    formLoading.value = true;
+    // 并发执行所有 API 请求
+    await Promise.all(requestPromises);
+    
+    ElMessage.success("权限更改申请成功！");
+    handleEvent.value = false; // 关闭弹窗
+    
+    // 刷新列表 (请确保这些函数在你的代码中存在)
+    if (typeof getPermissionList === 'function') {
+        getPermissionList(currentRowPage.value, "", ""); // 参数根据实际情况填
+    }
+    if (typeof getPermissonApplicationListList === 'function') {
+        getPermissonApplicationListList(1);
+    }
+    
+  } catch (error) {
+    console.error("提交失败", error);
+    ElMessage.error("提交申请失败，请查看控制台日志");
+  } finally {
+    formLoading.value = false;
+  }
+};
+
+// --- 9. 样式优化 ---
+
+// 列索引到属性名的映射 (请核对你的 el-table column 顺序)
+const columnIndexToProp = {
+  3: 'zhxz',   // 突出问题
+  4: 'cyyy',   // 餐饮油烟
+  5: 'ddzh',   // 调度指挥
+  6: 'yczl',   // 扬尘治理
+  7: 'gxdc',   // 共享单车
+  8: 'jgzm',   // 景观照明
+  9: 'ggzp',   // 临街店铺
+  10: 'shlj',  // 智慧公厕
+  11: 'cclj',  // 垃圾全生命
+  12: 'ljsj',  // 垃圾数据
+  13: 'cgAI',  // 城管AI
+  14: 'szhcs', // 数字化城市
+  15: 'cgsyd', // 网络理政
+  16: 'hwzy',  // 环卫作业
+  17: 'newZmgj' // 照明管家(新)
+};
+
+const cellStyle = ({ row, columnIndex }) => {
+  const baseStyle = {
     "text-align": "center",
     "font-size": "1.2rem",
     background: "#DEE4F7 !important",
   };
-  const newstyleObject = {
-    "font-size": "1.2rem",
-    "text-align": "center",
-    background: "#DEE4F7 !important",
-    "font-weight": "bold",
 
-    color: "red",
-  };
-  if ((row.zhxz === "√(待定)" || row.zhxz === "×(待定)") && columnIndex === 3) {
-    return newstyleObject;
-  } else if (
-    (row.cyyy === "√(待定)" || row.cyyy === "×(待定)") &&
-    columnIndex === 4
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.ddzh === "√(待定)" || row.ddzh === "×(待定)") &&
-    columnIndex === 5
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.hwzy === "√(待定)" || row.hwzy === "×(待定)") &&
-    columnIndex === 16
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.yczl === "√(待定)" || row.yczl === "×(待定)") &&
-    columnIndex === 6
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.gxdc === "√(待定)" || row.gxdc === "×(待定)") &&
-    columnIndex === 7
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.jgzm === "√(待定)" || row.jgzm === "×(待定)") &&
-    columnIndex === 8
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.ggzp === "√(待定)" || row.ggzp === "×(待定)") &&
-    columnIndex === 9
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.shlj === "√(待定)" || row.shlj === "×(待定)") &&
-    columnIndex === 10
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.cclj === "√(待定)" || row.cclj === "×(待定)") &&
-    columnIndex === 11
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.ljsj === "√(待定)" || row.ljsj === "×(待定)") &&
-    columnIndex === 12
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.cgAI === "√(待定)" || row.cgAI === "×(待定)") &&
-    columnIndex === 13
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.szhcs === "√(待定)" || row.szhcs === "×(待定)") &&
-    columnIndex === 14
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.cgsyd === "√(待定)" || row.cgsyd === "×(待定)") &&
-    columnIndex === 15
-  ) {
-    return newstyleObject;
-  } else if (
-    (row.newZmgj === "√(待定)" || row.newZmgj === "×(待定)") &&
-    columnIndex === 16
-  ) {
-    return newstyleObject;
-  } else {
-    return styleObject;
+  const prop = columnIndexToProp[columnIndex];
+  
+  // 检查该单元格的值是否包含 "(待定)"
+  if (prop && row[prop] && (row[prop].includes("√(待定)") || row[prop].includes("×(待定)"))) {
+    return {
+      ...baseStyle,
+      "font-weight": "bold",
+      color: "red",
+    };
   }
+
+  return baseStyle;
 };
 
-//提交权限修改表单
-const submitPermisson = (permissionForm) => {
-
-  if (
-    oldRadioGxdc.value == permissonGxdc.value &&
-    oldRadioLjsj.value == permissonLjsj.value &&
-    oldRadioCgAI.value == permissonCgAI.value &&
-    oldRadioCgsyd.value == permissonCgsyd.value &&
-    oldRadioGgzp.value == permissonGgzp.value &&
-    oldRadioYczl.value == permissonYczl.value &&
-    oldRadioSzhcs.value == permissonSzhcs.value &&
-    oldRadioJgzm.value == permissonJgzm.value &&
-    oldRadioShlj.value == permissonShlj.value &&
-    oldRadioZhxz.value == permissonZhxz.value &&
-    oldRadioDdzh.value == permissonDdzh.value &&
-    oldRadioCclj.value == permissonCclj.value &&
-    oldRadioCyyy.value == permissonCyyy.value &&
-    oldRadioHwzy.value == permissonHwzy.value &&
-    oldRadioNewZmgj.value == permissonNewZmgj.value 
-  ) {
-    ElMessage({
-      message: "您未作任何更改，请更改之后再提交！",
-      type: "error",
-    });
-  } else {
-    var res = confirm(`是否提交更改申请？`);
-    if (res) {
-      //子系统修改的为 1 -->才提交，子系统未修改的为0 不用提交
-      if (checkGxdc.value == true) {
-        if (permissonGxdc.value != "") {
-          if (oldRadioGxdc.value != "") {
-            selfPermisson("共享单车管家", "delete", oldRadioGxdc.value);
-          }
-          selfPermisson("共享单车管家", "add", permissonGxdc.value);
-        } else {
-          selfPermisson("共享单车管家", "delete", oldRadioGxdc.value);
-        }
-      }
-      if (checkHwzy.value == true) {
-        if (permissonHwzy.value != "") {
-          if (oldRadioHwzy.value != "") {
-            selfPermisson("环卫作业管家", "delete", oldRadioHwzy.value);
-          }
-          selfPermisson("环卫作业管家", "add", permissonHwzy.value);
-        } else {
-          selfPermisson("环卫作业管家", "delete", oldRadioHwzy.value);
-        }
-      }
-      // if (checkLjsj.value == true) {
-      //   if (permissonLjsj.value != "") {
-      //     if (oldRadioLjsj.value != "") {
-      //       selfPermisson("垃圾数据归集管家", "delete", oldRadioLjsj.value);
-      //     }
-      //     selfPermisson("垃圾数据归集管家", "add", permissonLjsj.value);
-      //   } else {
-      //     selfPermisson("垃圾数据归集管家", "delete", oldRadioLjsj.value);
-      //   }
-      // }
-      if (checkCgAI.value == true) {
-        if (permissonCgAI.value != "") {
-          if (oldRadioCgAI.value != "") {
-            selfPermisson("城管AI识别管家", "delete", oldRadioCgAI.value);
-          }
-          selfPermisson("城管AI识别管家", "add", permissonCgAI.value);
-        } else {
-          selfPermisson("城管AI识别管家", "delete", oldRadioCgAI.value);
-        }
-      }
-      if (checkCgsyd.value == true) {
-        if (permissonCgsyd.value != "") {
-          if (oldRadioCgsyd.value != "") {
-            selfPermisson("网络理政管家", "delete", oldRadioCgsyd.value);
-          }
-          selfPermisson("网络理政管家", "add", permissonCgsyd.value);
-        } else {
-          selfPermisson("网络理政管家", "delete", oldRadioCgsyd.value);
-        }
-      }
-      if (checkGgzp.value == true) {
-        if (permissonGgzp.value != "") {
-          if (oldRadioGgzp.value != "") {
-            selfPermisson("广告招牌二维码管家", "delete", oldRadioGgzp.value);
-          }
-          selfPermisson("广告招牌二维码管家", "add", permissonGgzp.value);
-        } else {
-          selfPermisson("广告招牌二维码管家", "delete", oldRadioGgzp.value);
-        }
-      }
-      if (checkYczl.value == true) {
-        if (permissonYczl.value != "") {
-          if (oldRadioYczl.value != "") {
-            selfPermisson(
-              "扬尘治理大数据协同管家",
-              "delete",
-              oldRadioYczl.value
-            );
-          }
-          selfPermisson("扬尘治理大数据协同管家", "add", permissonYczl.value);
-        } else {
-          selfPermisson("扬尘治理大数据协同管家", "delete", oldRadioYczl.value);
-        }
-      }
-      if (checkSzhcs.value == true) {
-        if (permissonSzhcs.value != "") {
-          if (oldRadioSzhcs.value != "") {
-            selfPermisson("数字化城市信息管家", "delete", oldRadioSzhcs.value);
-          }
-          selfPermisson("数字化城市信息管家", "add", permissonSzhcs.value);
-        } else {
-          selfPermisson("数字化城市信息管家", "delete", oldRadioSzhcs.value);
-        }
-      }
-      if (checkJgzm.value == true) {
-        if (permissonJgzm.value != "") {
-          if (oldRadioJgzm.value != "") {
-            selfPermisson("景观照明集中控制管家", "delete", oldRadioJgzm.value);
-          }
-          selfPermisson("景观照明集中控制管家", "add", permissonJgzm.value);
-        } else {
-          selfPermisson("景观照明集中控制管家", "delete", oldRadioJgzm.value);
-        }
-      }
-      if (checkNewZmgj.value == true) {
-        if (permissonNewZmgj.value != "") {
-          if (oldRadioNewZmgj.value != "") {
-            selfPermisson("照明管家（新）", "delete", oldRadioNewZmgj.value);
-          }
-          selfPermisson("照明管家（新）", "add", permissonNewZmgj.value);
-        } else {
-          selfPermisson("照明管家（新）", "delete", oldRadioNewZmgj.value);
-        }
-      }
-      if (checkShlj.value == true) {
-        if (permissonShlj.value != "") {
-          if (oldRadioShlj.value != "") {
-            selfPermisson("智慧公厕管家", "delete", oldRadioShlj.value);
-          }
-          selfPermisson("智慧公厕管家", "add", permissonShlj.value);
-        } else {
-          selfPermisson("智慧公厕管家", "delete", oldRadioShlj.value);
-        }
-      }
-      if (checkZhxz.value == true) {
-        if (permissonZhxz.value != "") {
-          if (oldRadioZhxz.value != "") {
-            selfPermisson("突出问题管家", "delete", oldRadioZhxz.value);
-          }
-          selfPermisson("突出问题管家", "add", permissonZhxz.value);
-        } else {
-          selfPermisson("突出问题管家", "delete", oldRadioZhxz.value);
-        }
-      }
-      if (checkDdzh.value == true) {
-        if (permissonDdzh.value != "") {
-          if (oldRadioDdzh.value != "") {
-            selfPermisson("调度指挥管家", "delete", oldRadioDdzh.value);
-          }
-          selfPermisson("调度指挥管家", "add", permissonDdzh.value);
-        } else {
-          selfPermisson("调度指挥管家", "delete", oldRadioDdzh.value);
-        }
-      }
-
-      if (checkCclj.value == true) {
-        if (permissonCclj.value != "") {
-          if (oldRadioCclj.value != "") {
-            selfPermisson("垃圾全生命周期管家", "delete", oldRadioCclj.value);
-          }
-          selfPermisson("垃圾全生命周期管家", "add", permissonCclj.value);
-        } else {
-          selfPermisson("垃圾全生命周期管家", "delete", oldRadioCclj.value);
-        }
-      }
-      if (checkCyyy.value == true) {
-        if (permissonCyyy.value != "") {
-          if (oldRadioCyyy.value != "") {
-            selfPermisson("餐饮油烟管家", "delete", oldRadioCyyy.value);
-          }
-          selfPermisson("餐饮油烟管家", "add", permissonCyyy.value);
-        } else {
-          selfPermisson("餐饮油烟管家", "delete", oldRadioCyyy.value);
-        }
-      }
-
-      handleEvent.value = false;
-      ElMessage({
-        message: "权限更改申请成功！",
-        type: "success",
-      });
-    }
-    loading.value = true;
-    getPermissionList(currentRowPage, searchName.value, searchPhone.value);
-    getPermissonApplicationListList(1);
-  }
-};
-
-//多选框--》角色分配
-const radioChangeGxdc = (value) => {
-  if (value.length == 0) {
-    permissonGxdc.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonGxdc.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioGxdc.value = ["浏览信息", "管理参数"];
-      permissonGxdc.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioGxdc.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonGxdc.value = "operator";
-    }
-  }
-  checkGxdc.value = true;
-};
-
-const radioChangeHwzy = (value) => {
-  if (value.length == 0) {
-    permissonHwzy.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonHwzy.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioHwzy.value = ["浏览信息", "管理参数"];
-      permissonHwzy.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioHwzy.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonHwzy.value = "operator";
-    }
-  }
-  checkHwzy.value = true;
-};
-
-const radioChangeLjsj = (value) => {
-  if (value.length == 0) {
-    permissonLjsj.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonLjsj.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioLjsj.value = ["浏览信息", "管理参数"];
-      permissonLjsj.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioLjsj.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonLjsj.value = "operator";
-    }
-  }
-  checkLjsj.value = true;
-};
-
-const radioChangeCgAI = (value) => {
-  if (value.length == 0) {
-    permissonCgAI.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonCgAI.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioCgAI.value = ["浏览信息", "管理参数"];
-      permissonCgAI.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioCgAI.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonCgAI.value = "operator";
-    }
-  }
-  checkCgAI.value = true;
-};
-
-const radioChangeCgsyd = (value) => {
-  if (value.length == 0) {
-    permissonCgsyd.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonCgsyd.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioCgsyd.value = ["浏览信息", "管理参数"];
-      permissonCgsyd.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioCgsyd.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonCgsyd.value = "operator";
-    }
-  }
-  checkCgsyd.value = true;
-};
-
-const radioChangeGgzp = (value) => {
-  if (value.length == 0) {
-    permissonGgzp.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonGgzp.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioGgzp.value = ["浏览信息", "管理参数"];
-      permissonGgzp.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioGgzp.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonGgzp.value = "operator";
-    }
-  }
-  checkGgzp.value = true;
-};
-
-const radioChangeYczl = (value) => {
-  if (value.length == 0) {
-    permissonYczl.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonYczl.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioYczl.value = ["浏览信息", "管理参数"];
-      permissonYczl.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioYczl.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonYczl.value = "operator";
-    }
-  }
-  checkYczl.value = true;
-};
-
-const radioChangeSzhcs = (value) => {
-  if (value.length == 0) {
-    permissonSzhcs.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonSzhcs.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioSzhcs.value = ["浏览信息", "管理参数"];
-      permissonSzhcs.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioSzhcs.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonSzhcs.value = "operator";
-    }
-  }
-  checkSzhcs.value = true;
-};
-
-const radioChangeJgzm = (value) => {
-  if (value.length == 0) {
-    permissonJgzm.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonJgzm.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioJgzm.value = ["浏览信息", "管理参数"];
-      permissonJgzm.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioJgzm.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonJgzm.value = "operator";
-    }
-  }
-  checkJgzm.value = true;
-};
-
-const radioChangeNewZmgj = (value) => {
-  if (value.length == 0) {
-    permissonNewZmgj.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonNewZmgj.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioNewZmgj.value = ["浏览信息", "管理参数"];
-      permissonNewZmgj.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioNewZmgj.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonNewZmgj.value = "operator";
-    }
-  }
-  checkNewZmgj.value = true;
-};
-
-const radioChangeShlj = (value) => {
-  if (value.length == 0) {
-    permissonShlj.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonShlj.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioShlj.value = ["浏览信息", "管理参数"];
-      permissonShlj.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioShlj.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonShlj.value = "operator";
-    }
-  }
-  checkShlj.value = true;
-};
-
-const radioChangeZhxz = (value) => {
-  if (value.length == 0) {
-    permissonZhxz.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonZhxz.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioZhxz.value = ["浏览信息", "管理参数"];
-      permissonZhxz.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioZhxz.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonZhxz.value = "operator";
-    }
-  }
-  checkZhxz.value = true;
-};
-
-const radioChangeDdzh = (value) => {
-  if (value.length == 0) {
-    permissonDdzh.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonDdzh.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioDdzh.value = ["浏览信息", "管理参数"];
-      permissonDdzh.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioDdzh.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonDdzh.value = "operator";
-    }
-  }
-  checkDdzh.value = true;
-};
-
-const radioChangeCclj = (value) => {
-  if (value.length == 0) {
-    permissonCclj.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonCclj.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioCclj.value = ["浏览信息", "管理参数"];
-      permissonCclj.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioCclj.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonCclj.value = "operator";
-    }
-  }
-  checkCclj.value = true;
-};
-
-const radioChangeCyyy = (value) => {
-  if (value.length == 0) {
-    permissonCyyy.value = "";
-  }
-  for (var index in value) {
-    if (value[index] == "浏览信息") {
-      permissonCyyy.value = "viewer";
-    }
-    if (value[index] == "管理参数") {
-      radioCyyy.value = ["浏览信息", "管理参数"];
-      permissonCyyy.value = "admin";
-    }
-    if (value[index] == "操作系统") {
-      radioCyyy.value = ["浏览信息", "管理参数", "操作系统"];
-      permissonCyyy.value = "operator";
-    }
-  }
-  checkCyyy.value = true;
-};
 
 //==============================================================================================================
 
@@ -9069,257 +7748,6 @@ const echartInit_ddzh = () => {
     myChart_ddzh3.setOption(option3);
 };
 
-// const echartInit_ddzh = () => {
-//   if (ddzh_tableData2.value.length == 3) {
-//     ddzh_tableData2.value.unshift({
-//       isNormal: false,
-//       identity: "办公室人员",
-//       num: 0,
-//     });
-//   }
-//   if (ddzh_tableData2.value.length == 4) {
-//     ddzh_tableData2.value.push({
-//       isNormal: false,
-//       identity: "执法人员",
-//       num: 0,
-//     });
-//   }
-//   document
-//     .getElementById("container_ddzh1")
-//     .removeAttribute("_echarts_instance_");
-//   var myChart_ddzh1 = echarts.init(document.getElementById("container_ddzh1"));
-//   document
-//     .getElementById("container_ddzh2")
-//     .removeAttribute("_echarts_instance_");
-//   var myChart_ddzh2 = echarts.init(document.getElementById("container_ddzh2"));
-//   document
-//     .getElementById("container_ddzh3")
-//     .removeAttribute("_echarts_instance_");
-//   var myChart_ddzh3 = echarts.init(document.getElementById("container_ddzh3"));
-//   var option1 = {
-//     title: {
-//       text: "打卡率统计",
-//       textStyle: {
-//         color: "#ccc",
-//       },
-//     },
-//     tooltip: {
-//       trigger: "axis",
-//       axisPointer: {
-//         type: "shadow",
-//       },
-//       formatter: function (params) {
-//         // 获取横坐标的内容
-//         let xAxisLabel = params[0].axisValue;
-
-//         // 获取数据项的数值
-//         let dataValue = params[0].value;
-
-//         // 构建 tooltip 内容并换行显示
-//         return xAxisLabel + "<br>打卡率 " + dataValue + "%";
-//       },
-//     },
-//     xAxis: {
-//       type: "category",
-//       data: ddzh_tableData1.value.map(item => item.department),
-//       // data: [
-//       //   ddzh_tableData1.value[0].department,
-//       //   ddzh_tableData1.value[1].department,
-//       //   ddzh_tableData1.value[2].department,
-//       //   ddzh_tableData1.value[3].department,
-//       //   ddzh_tableData1.value[4].department,
-//       //   ddzh_tableData1.value[5].department,
-//       //   ddzh_tableData1.value[6].department,
-//       //   ddzh_tableData1.value[7].department,
-//       //   ddzh_tableData1.value[8].department,
-//       //   ddzh_tableData1.value[9].department,
-//       //   ddzh_tableData1.value[10].department,
-//       //   ddzh_tableData1.value[11].department,
-//       //   ddzh_tableData1.value[12].department,
-//       //   ddzh_tableData1.value[13].department,
-//       //   ddzh_tableData1.value[14].department,
-//       //   ddzh_tableData1.value[15].department,
-//       //   ddzh_tableData1.value[16].department,
-//       //   ddzh_tableData1.value[17].department,
-//       //   ddzh_tableData1.value[18].department,
-//       //   ddzh_tableData1.value[19].department,
-//       //   ddzh_tableData1.value[20].department,
-//       //   ddzh_tableData1.value[21].department,
-//       //   ddzh_tableData1.value[22].department,
-//       //   ddzh_tableData1.value[23].department,
-//       //   ddzh_tableData1.value[24].department,
-//       //   ddzh_tableData1.value[25].department,
-//       //   ddzh_tableData1.value[26].department,
-//       //   ddzh_tableData1.value[27].department,
-//       //   ddzh_tableData1.value[28].department,
-//       // ],
-//       axisLabel: {
-//         //x轴文字的配置
-//         show: true,
-//         interval: 0, //使x轴文字显示全
-//         rotate: 20,
-//       },
-//     },
-//     grid: {
-//       left: "3%",
-//       right: "4%",
-//       bottom: "3%",
-//       containLabel: true,
-//       textStyle: {
-//         color: "white",
-//       },
-//     },
-//     yAxis: {
-//       type: "value",
-//     },
-//     series: [
-//       {
-//         barWidth: '10%',
-//         data: ddzh_tableData1.value.map(item => (item.checkRate * 100).toFixed(1)),
-//         // data: [
-//         //   (ddzh_tableData1.value[0].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[1].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[2].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[3].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[4].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[5].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[6].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[7].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[8].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[9].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[10].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[11].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[12].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[13].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[14].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[15].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[16].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[17].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[18].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[19].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[20].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[21].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[22].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[23].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[24].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[25].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[26].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[27].checkRate * 100).toFixed(1),
-//         //   (ddzh_tableData1.value[28].checkRate * 100).toFixed(1),
-//         // ],
-//         type: "bar",
-//         showBackground: true,
-//         backgroundStyle: {
-//           color: "rgba(180, 180, 180, 0.2)",
-//         },
-//         emphasis: {
-//           focus: "series",
-//         },
-//         textStyle: {
-//           color: "white",
-//         },
-//         label: {
-//           show: true,
-//         },
-//       },
-//     ],
-//   };
-//   var option2 = {
-//     title: {
-//       text: "执法人员定位情况",
-//       left: "center",
-//       textStyle: {
-//         color: "white",
-//       },
-//     },
-//     tooltip: {
-//       trigger: "item",
-//     },
-//     legend: {
-//       orient: "vertical",
-//       left: "left",
-//       textStyle: {
-//         color: "#ccc",
-//       },
-//     },
-//     series: [
-//       {
-//         name: "执法人员",
-//         type: "pie",
-//         radius: "50%",
-//         data: [
-//           { value: ddzh_tableData2.value[3].num, name: "定位正常人员" },
-//           { value: ddzh_tableData2.value[1].num, name: "定位异常人员" },
-//           // { value: 111, name: 222 },
-//         ],
-//         label: {
-//           show: true,
-//           formatter(param) {
-//             // correct the percentage
-//             return param.name + +param.value + " (" + param.percent + "%)";
-//           },
-//         },
-//         emphasis: {
-//           itemStyle: {
-//             shadowBlur: 10,
-//             shadowOffsetX: 0,
-//             shadowColor: "rgba(0, 0, 0, 0.5)",
-//           },
-//         },
-//       },
-//     ],
-//   };
-//   var option3 = {
-//     title: {
-//       text: "协管人员定位情况",
-//       left: "center",
-//       textStyle: {
-//         color: "white",
-//       },
-//     },
-//     tooltip: {
-//       trigger: "item",
-//     },
-//     legend: {
-//       orient: "vertical",
-//       left: "left",
-//       textStyle: {
-//         color: "#ccc",
-//       },
-//     },
-//     series: [
-//       {
-//         name: "协管人员",
-//         type: "pie",
-//         radius: "50%",
-//         data: [
-//           { value: ddzh_tableData2.value[2].num, name: "定位正常人员" },
-//           { value: ddzh_tableData2.value[0].num, name: "定位异常人员" },
-//           // { value: 111, name: 222 },
-//         ],
-//         label: {
-//           show: true,
-//           formatter(param) {
-//             // correct the percentage
-//             return param.name + " (" + param.percent + "%)";
-//           },
-//         },
-//         emphasis: {
-//           itemStyle: {
-//             shadowBlur: 10,
-//             shadowOffsetX: 0,
-//             shadowColor: "rgba(0, 0, 0, 0.5)",
-//           },
-//         },
-//       },
-//     ],
-//   };
-//   myChart_ddzh1.setOption(option1);
-//   myChart_ddzh2.setOption(option2);
-//   myChart_ddzh3.setOption(option3);
-// };
-
-//客流量趋势
 var weeklyChart = null;
 //页面跳转之前销毁图表
 onBeforeUnmount(() => {
@@ -9428,166 +7856,7 @@ const showWeeklyChart = async () => {
       ElMessage.error("客流量数据加载失败！");
   }
 };
-// const showWeeklyChart = () => {
-//   const chartContainer = weeklyChartRef.value;
-//   document.getElementById("weekly_chart").removeAttribute("_echarts_instance_");
-//   var chartDom = document.getElementById("weekly_chart");
-//   if (!chartDom) {
-//     console.error("ECharts 容器未找到，ID可能错误或DOM尚未渲染！");
-//     return;
-//   }
-//   weeklyChart = echarts.init(chartDom);
 
-//   var showPersonStart = moment().add(-6, "d").format("YYYY-MM-DD");
-//   var showPersonEnd = moment().add(1, "d").format("YYYY-MM-DD");
-//   axios({
-//     url:
-//       "/api/toilet/getSumByDuration/枣子巷/" +
-//       showPersonStart +
-//       "/" +
-//       showPersonEnd +
-//       "/threeType",
-//     headers: {
-//       Authorization: "Bearer" + params.token,
-//       "Content-Type": " application/json",
-//     },
-//     method: "get",
-//   }).then((dataTable) => {
-//     dataTable = dataTable.data.data;
-//     const filteredData1 = dataTable.filter(
-//       (item) => item.gender === "男卫生间"
-//     );
-//     const flowValues1 = filteredData1.map((item) => item.flowValue);
-//     const DateValues1 = filteredData1.map((item) => item.startDate);
-//     const filteredData2 = dataTable.filter(
-//       (item) => item.gender === "女卫生间"
-//     );
-//     const flowValues2 = filteredData2.map((item) => item.flowValue);
-
-//     const filteredData3 = dataTable.filter(
-//       (item) => item.gender === "第三卫生间"
-//     );
-//     const flowValues3 = filteredData3.map((item) => item.flowValue);
-
-//     // 处理成功响应
-//     var option;
-
-//     option = {
-//       title: {
-//         text: "最近一周每日客流量统计",
-//         textStyle: {
-//           color: "white",
-//         },
-//       },
-//       tooltip: {
-//         trigger: "axis",
-//         axisPointer: {
-//           type: "shadow",
-//         },
-//         formatter: function (params) {
-//           // 获取横坐标的内容
-//           let xAxisLabel = params[0].axisValue;
-
-//           // 获取数据项的数值
-//           let dataValue = params[0].value;
-//           let dataValue1 = params[1].value;
-//           let dataValue2 = params[2].value;
-
-//           // 构建 tooltip 内容并换行显示
-//           return (
-//             xAxisLabel +
-//             "<br>第三卫生间 " +
-//             dataValue2 +
-//             "人" +
-//             "<br>女卫生间 " +
-//             dataValue1 +
-//             "人" +
-//             "<br>男卫生间 " +
-//             dataValue +
-//             "人"
-//           );
-//         },
-//       },
-//       legend: {
-//         textStyle: {
-//           color: "white",
-//         },
-//       },
-//       grid: {
-//         left: "3%",
-//         right: "4%",
-//         bottom: "3%",
-//         containLabel: true,
-//         textStyle: {
-//           color: "white",
-//         },
-//       },
-//       xAxis: [
-//         {
-//           type: "category",
-//           data: DateValues1,
-//         },
-//       ],
-//       yAxis: [
-//         {
-//           type: "value",
-//           axisLabel: {
-//             formatter: "{value} 人",
-//           },
-//         },
-//       ],
-//       series: [
-//         {
-//           name: "男卫生间",
-//           type: "bar",
-//           stack: "Ad",
-//           label: {
-//             show: true,
-//           },
-//           emphasis: {
-//             focus: "series",
-//           },
-//           textStyle: {
-//             color: "white",
-//           },
-//           data: flowValues1,
-//         },
-//         {
-//           name: "女卫生间",
-//           type: "bar",
-//           stack: "Ad",
-//           label: {
-//             show: true,
-//           },
-//           emphasis: {
-//             focus: "series",
-//           },
-//           textStyle: {
-//             color: "white",
-//           },
-//           data: flowValues2,
-//         },
-//         {
-//           name: "第三卫生间",
-//           type: "bar",
-//           stack: "Ad",
-//           label: {
-//             show: true,
-//           },
-//           emphasis: {
-//             focus: "series",
-//           },
-//           textStyle: {
-//             color: "white",
-//           },
-//           data: flowValues3,
-//         },
-//       ],
-//     };
-
-//     option && weeklyChart.setOption(option);
-//   });
-// };
 const echartInit_ljz = () => {
   document
     .getElementById("container_ljz1")
@@ -11519,7 +9788,7 @@ onMounted(() => {
     // 使用 Promise.allSettled（推荐）或 Promise.all 执行所有请求
     // Promise.allSettled 会等待所有请求完成，无论成功或失败，不会中断
     Promise.allSettled(promises)
-        .then(() => {console.log("所有头像 URL 请求处理完毕。");
+        .then(() => {
         })
         .catch(error => {
             console.error("并发请求管理出现未预期错误:", error);
@@ -11917,6 +10186,13 @@ onMounted(() => {
   color: white;
   margin-top: 10px;
 }
+
+
+/* .large-label :deep(.el-form-item__label) {
+  font-size: 2rem;
+  line-height: 1.5;
+  font-weight: bold;
+} */
 
 .el-button-hjws-title {
   font-size: 1.8rem;

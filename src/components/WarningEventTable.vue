@@ -667,7 +667,6 @@ const getAllWarningPersonList = () => {
     },
   }).then((resp) => {
     warningPersonList.value = resp.data;
-    console.log("人员列表：", warningPersonList);
   })
       .catch((err) => {
         console.error("获取人员信息失败：", err);

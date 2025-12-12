@@ -54,6 +54,14 @@ module.exports = defineConfig({
         },
       },
 
+      "/toilet": {
+        target: "http://119.4.191.13:8860",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/toilet": "",
+        },
+      },
+
       "/youyan": {
         target: "https://119.4.191.13:4585",
         changeOrigin: true,
