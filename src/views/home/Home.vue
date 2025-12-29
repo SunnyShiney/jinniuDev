@@ -8,31 +8,34 @@
     <template #time>
       <div class="text-week">今天是: {{ date }} {{ week }}</div>
     </template>
-
     <template #warning>
       <div class="alarm-indicator">
-        <div id="dotClass" title="点击查看详情" @click="fault_details">
-          <div id="lamp" :style="{ display: hasAlarm ? 'block' : 'none' }"></div>
+        <div 
+          class="dot-class" 
+          :style="dotStyle" 
+          :title="dotTitle" 
+          @click="fault_details"
+        >
+          <div v-show="hasAlarm" class="lamp"></div>
         </div>
 
         <el-dialog
           v-model="defaultVisible"
           title="事故详情"
           width="min(90%, 1200px)"
-          destroy-on-close
           @close="handleClose"
         >
           <AlarmDetailsDialog
-              :default-list="defaultList"
-              :event-history-list="EventHistoryList"
-              :change-value="changeValue"
-              :warning-current-page="warningCurrentPage"
-              :warning-total-records="warningTotalRecords"
-              :disabled-date="disabledDate"
-              :shortcuts="shortcuts"
-              @warning-handle-click="warningHandleClick"
-              @change-date="changeDate"
-              @current-change="getTransport"
+            :default-list="defaultList"
+            :event-history-list="EventHistoryList"
+            :change-value="changeValue"
+            :warning-current-page="warningCurrentPage"
+            :warning-total-records="warningTotalRecords"
+            :disabled-date="disabledDate"
+            :shortcuts="shortcuts"
+            @warning-handle-click="warningHandleClick"
+            @change-date="changeDate"
+            @current-change="getTransport"
           />
         </el-dialog>
 
@@ -44,7 +47,7 @@
           @close="handleClose"
         >
           <el-form
-            ref="warningRuleFormRef"
+            ref="accidentHandlingFormRef"
             :model="warningRuleForm"
             :rules="warningRules"
             label-width="120px"
@@ -76,13 +79,15 @@
             <el-form-item>
               <el-button
                 type="primary"
-                @click="warningSubmitForm(warningRuleFormRef)"
+                @click="warningSubmitForm(accidentHandlingFormRef)"
               >提交</el-button>
             </el-form-item>
           </el-form>
         </el-dialog>
       </div>
     </template>
+
+
 
     <template #userinfo>
       <div class="router">
@@ -4950,7 +4955,7 @@ import moment from "moment";
 
 import axios from "axios";
 
-
+import AlarmDetailsDialog from './components/AlarmDetailsDialog.vue'
 
 
 const isAdmin = computed(() => params.role === '管理员');
@@ -4961,7 +4966,6 @@ const canViewLog = computed(() => {
   ];
   return isAdmin.value || privilegedUsers.includes(params.realname);
 });
-const hasAlarm = computed(() => defaultList.values.length > 0);
 
 const cityRoad = reactive([]);
 const trucksData = reactive([]);
@@ -5252,7 +5256,6 @@ function changeDateLog() {
 }
 
 const warningRuleFormRef = ref(null);
-const defaultList = reactive([]);
 const EventHistoryList = reactive([]);
 const defaultVisible = ref(false);
 const warningHandleEvent = ref(false);
@@ -5275,91 +5278,180 @@ const warningRules = reactive({
   content: [{ required: "true", message: "指令内容不能为空", trigger: "blur" }],
 });
 
-const warningSubmitForm = async () => {
-  const selectedValue = JSON.parse(warningRuleForm.info);
+const warningSubmitForm = async (el) => {
+  const formEl = Array.isArray(el) ? el[0] : el;
+  if (!formEl) return
 
-  if (!warningRuleFormRef) return;
-
-  warningRuleFormRef.value.validate((valid) => {
-    if (valid) {
-      var telph = selectedValue.phone;
-      var res = confirm("确认提交？");
-      if (res) {
-        var re = /^1[3,4,5,6,7,8,9][0-9]{9}$/;
-        if (re.test(telph) == false) {
-          alert("电话号码输入有误！");
-          return false;
-        }
-      }
-      // instructTime.value = moment().format("YYYY-MM-DD HH:mm:ss");
-
-      axios({
-        url: "/ddzh/ws-message/single/web",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: warningToken.value,
-        },
-        data: JSON.stringify({
-          patrolTelephone: selectedValue.phone,
-          message: warningRuleForm.content,
-        }),
-        method: "post",
-      }).then(function (resp) {
-
-      });
-      //发送短信（新增部分）
-      axios({
-        url: "api/sms/sendMessage",
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: warningToken.value,
-        },
-        data: {
-          mobile: selectedValue.phone,
-          message: warningRuleForm.content,
-        },
-      }).then(function (res) {
-            console.log("短信发送成功：", res);
-          })
-          .catch(function (err) {
-            console.error("短信发送失败：", err);
-          });
-
-      axios({
-        url: "/api/event-query/updateHandleEvent",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + params.token,
-        },
-        data: JSON.parse(
-          JSON.stringify({
-            id: event_uuid.value,
-            eventHandler: selectedValue.name,
-            handlerPhone: selectedValue.phone,
-            handlerWork: selectedValue.company,
-            instructionContent: warningRuleForm.content,
-          })
-        ),
-        method: "post",
-      }).then(function (resp) {
-        systemData.out.println("event_uuid:" + event_uuid);
-      });
-      alert("提交成功！");
-      warningHandleEvent.value = false;
-      // defaultList.pop(rowIndex);
-      // for(let i = 0;i < defaultList.length; i++){
-      // if(defaultList[i].event_id == event_uuid.value){
-      //   defaultList.pop(defaultList[i-1])
-      //     }
-      //  }
-      changeColor();
-    } else {
-      alert("提交失败！");
-      return false;
+  console.log('方案 B 获取到的对象:', formEl);
+  // 1. 表单验证
+  await formEl.validate(async (valid) => {
+    if (!valid) {
+      console.log('表单验证未通过')
+      return
     }
-  });
-};
+
+    // 2. 解析选中人信息 (放在验证通过后更安全)
+    let selectedValue = {}
+    try {
+      selectedValue = JSON.parse(warningRuleForm.info)
+    } catch (e) {
+      ElMessage.error('处置人信息解析失败，请重新选择')
+      return
+    }
+    console.log('电话号码:', selectedValue.phone);
+    // 3. 校验电话号码格式
+    const phoneReg = /^1[3-9]\d{9}$/
+    if (!phoneReg.test(selectedValue.phone)) {
+      ElMessage.error('处置人电话号码格式有误！')
+      return
+    }
+
+    // 4. 二次确认 (使用 Element UI 风格)
+    try {
+      await ElMessageBox.confirm('确认提交处置指令吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+    } catch {
+      // 用户点击了取消
+      return
+    }
+
+    // 5. 准备请求数据
+    const commonHeaders = {
+      'Content-Type': 'application/json',
+      Authorization: warningToken.value // 注意：检查这里是否需要 params.token 还是 warningToken
+    }
+    
+    // 构造三个请求的 Promise
+    // 请求A: ws-message
+    const reqSocket = axios.post('/ddzh/ws-message/single/web', {
+        patrolTelephone: selectedValue.phone,
+        message: warningRuleForm.content,
+      }, { headers: commonHeaders })
+
+    // 请求B: 发送短信
+    const reqSms = axios.post('api/sms/sendMessage', {
+        mobile: selectedValue.phone,
+        message: warningRuleForm.content,
+      }, { headers: commonHeaders })
+
+    // 请求C: 更新事件处理状态 (业务主接口)
+    const reqUpdate = axios.post('/api/event-query/updateHandleEvent', {
+        id: event_uuid.value,
+        eventHandler: selectedValue.name,
+        handlerPhone: selectedValue.phone,
+        handlerWork: selectedValue.company, // 假设 company 对应原代码 selectedValue.company
+        instructionContent: warningRuleForm.content,
+      }, { 
+        headers: {
+          ...commonHeaders,
+          Authorization: "Bearer " + params.token // 这里保留了你原代码中特殊的 token 写法
+        }
+      })
+
+    // 6. 并发执行所有请求
+    try {
+      // Promise.all 会等待所有请求都完成
+      // 如果其中任何一个失败，都会进入 catch
+      await Promise.all([reqUpdate, reqSocket, reqSms])
+
+      // 全部成功后的操作
+      ElMessage.success('提交成功！')
+      warningHandleEvent.value = false // 关闭弹窗
+      
+      // 如果你需要重置表单
+      // formEl.resetFields() 
+      
+      changeColor() // 刷新状态颜色
+
+    } catch (error) {
+      console.error('接口请求失败:', error)
+      ElMessage.error('提交失败，请检查网络或联系管理员')
+    }
+  })
+}
+
+// const warningSubmitForm = async () => {
+//   const selectedValue = JSON.parse(warningRuleForm.info);
+
+//   if (!warningRuleFormRef) return;
+
+//   warningRuleFormRef.value.validate((valid) => {
+//     if (valid) {
+//       var telph = selectedValue.phone;
+//       var res = confirm("确认提交？");
+//       if (res) {
+//         var re = /^1[3,4,5,6,7,8,9][0-9]{9}$/;
+//         if (re.test(telph) == false) {
+//           alert("电话号码输入有误！");
+//           return false;
+//         }
+//       }
+//       // instructTime.value = moment().format("YYYY-MM-DD HH:mm:ss");
+
+//       axios({
+//         url: "/ddzh/ws-message/single/web",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: warningToken.value,
+//         },
+//         data: JSON.stringify({
+//           patrolTelephone: selectedValue.phone,
+//           message: warningRuleForm.content,
+//         }),
+//         method: "post",
+//       }).then(function (resp) {
+
+//       });
+//       //发送短信（新增部分）
+//       axios({
+//         url: "api/sms/sendMessage",
+//         method: "post",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: warningToken.value,
+//         },
+//         data: {
+//           mobile: selectedValue.phone,
+//           message: warningRuleForm.content,
+//         },
+//       }).then(function (res) {
+//             console.log("短信发送成功：", res);
+//           })
+//           .catch(function (err) {
+//             console.error("短信发送失败：", err);
+//           });
+
+//       axios({
+//         url: "/api/event-query/updateHandleEvent",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: "Bearer " + params.token,
+//         },
+//         data: JSON.parse(
+//           JSON.stringify({
+//             id: event_uuid.value,
+//             eventHandler: selectedValue.name,
+//             handlerPhone: selectedValue.phone,
+//             handlerWork: selectedValue.company,
+//             instructionContent: warningRuleForm.content,
+//           })
+//         ),
+//         method: "post",
+//       }).then(function (resp) {
+//         systemData.out.println("event_uuid:" + event_uuid);
+//       });
+//       alert("提交成功！");
+//       warningHandleEvent.value = false;
+//       changeColor();
+//     } else {
+//       alert("提交失败！");
+//       return false;
+//     }
+//   });
+// };
 
 const warningHandleClick = (index, row) => {
   event_uuid.value = row.event_id;
@@ -5371,14 +5463,7 @@ const warningHandleClick = (index, row) => {
   warningRuleForm.content = "";
 };
 const fault_details = () => {
-  var div = document.getElementById("dotClass");
-  if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    defaultVisible.value = true;
-  }
-  // 出现事故
-  if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    defaultVisible.value = true;
-  }
+  defaultVisible.value = true;
 };
 const fault_details_hwzy = () => {
   var div = document.getElementById("dotClass-hwzy");
@@ -5537,12 +5622,15 @@ const hwzyVisible = ref(false);
 const ljqsmVisible = ref(false);
 const toiletWarningVisible = ref(false);
 const hjwsVisible = ref(false);
-//四大板块的告警事件列表，如果列表不为空，则指示灯闪烁
+
+// --- 1. 定义响应式数据列表 ---
+const defaultList = reactive([]);
 const hjwsList = reactive([]);
 const srzxList = reactive([]);
 const csjgList = reactive([]);
 const szcgList = reactive([]);
-//每个子系统的告警事件列表
+
+// 子系统列表
 const hwzyList = reactive([]);
 const ljqsmList = reactive([]);
 const toiletWarningList = reactive([]);
@@ -5557,276 +5645,259 @@ const tcwtList = reactive([]);
 const cgaiList = reactive([]);
 const wllzList = reactive([]);
 const szhcsList = reactive([]);
-//刷新告警指示灯颜色
-// 定义系统名称到目标数组的映射 (提高可维护性)
+
+// --- 2. 核心优化：计算属性 (替代 updateDomIndicators) ---
+
+// 是否有告警
+const hasAlarm = computed(() => defaultList.length > 0);
+
+// 动态计算指示灯样式
+const dotStyle = computed(() => ({
+  backgroundColor: hasAlarm.value ? "#E12911" : "#11e1b0",
+  cursor: 'pointer'
+}));
+
+// 动态计算 Title
+const dotTitle = computed(() => 
+  hasAlarm.value ? "出现异常！请点击查看详情！" : "点击查看详情"
+);
+
+// --- 3. 系统映射表 ---
 const SYSTEM_MAP = new Map([
-    ["垃圾系统", hwzyList],
-    ["垃圾分类系统", ljqsmList],
-    ["厕所系统", toiletWarningList],
-    ["餐饮油烟系统", cyyyList],
-    ["调度指挥系统", ddzhList],
-    ["共享单车系统", gxdcList],
-    ["扬尘治理系统", yczlList],
-    ["景观照明系统", jgzmList],
-    ["照明管家系统", zmgjList],
-    ["临街店铺系统", ljdpList],
-    ["突出问题系统", tcwtList],
-    ["城管ai系统", cgaiList],
-    ["网络理政系统", wllzList],
-    ["数字城管系统", szhcsList],
+  ["垃圾系统", hwzyList],
+  ["垃圾分类系统", ljqsmList],
+  ["厕所系统", toiletWarningList],
+  ["餐饮油烟系统", cyyyList],
+  ["调度指挥系统", ddzhList],
+  ["共享单车系统", gxdcList],
+  ["扬尘治理系统", yczlList],
+  ["景观照明系统", jgzmList],
+  ["照明管家系统", zmgjList],
+  ["临街店铺系统", ljdpList],
+  ["突出问题系统", tcwtList],
+  ["城管ai系统", cgaiList],
+  ["网络理政系统", wllzList],
+  ["数字城管系统", szhcsList],
 ]);
-// 定义需要清理的所有数组
+
 const ALL_LISTS = [
-    defaultList, hjwsList, srzxList, csjgList, szcgList,
-    hwzyList, ljqsmList, toiletWarningList, cyyyList, ddzhList,
-    gxdcList, yczlList, jgzmList, zmgjList, ljdpList,
-    tcwtList, cgaiList, wllzList, szhcsList
+  defaultList, hjwsList, srzxList, csjgList, szcgList,
+  hwzyList, ljqsmList, toiletWarningList, cyyyList, ddzhList,
+  gxdcList, yczlList, jgzmList, zmgjList, ljdpList,
+  tcwtList, cgaiList, wllzList, szhcsList
 ];
-// 定义需要更新 DOM 的配置
-const DOM_CONFIGS = [
-    { list: defaultList, prefix: "" }, // 默认配置
-    { list: hwzyList, prefix: "hwzy" },
-    { list: ljqsmList, prefix: "ljqsm" },
-    { list: toiletWarningList, prefix: "toiletWarning" },
-    { list: hjwsList, prefix: "hjws" },
-];
+
+// --- 4. 数据处理逻辑 ---
 const changeColor = async () => {
-    const API_URL = "/api/event-query/getNeedHandleEvent";
-    const token = params.token;
-    ALL_LISTS.forEach(list => {
-      list.length = 0; // 如果是 reactive([]) 或普通数组
+  const API_URL = "/api/event-query/getNeedHandleEvent";
+  const token = params.token; // 假设 params 已在外部定义或通过 props 传入
+
+  // 清空现有数据
+  ALL_LISTS.forEach(list => list.length = 0);
+
+  try {
+    const resp = await axios.get(API_URL, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    try {
-        // 2. 执行 API 请求 (使用 async/await 简化)
-        const resp = await axios.get(API_URL, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        // 3. 提取数据
-        const data = resp.data.data || [];
-        // 4. 数据处理：使用 for...of 遍历 (比 for...in 更适用于数组)
-        const newHwzyList = [];
-        const newLjqsmList = [];
-        const newToiletWarningList = [];
-        data.forEach(item => {
-            // 提取公共事件结构
-            const event = {
-                event_time: item.eventTime,
-                site_name: item.eventSource,
-                Accident_cause: item.eventCause,
-                event_id: item.id,
-            };
-            // 归类到 defaultList
-            defaultList.push(event);
+    const data = resp.data.data || [];
+    // 用于环境卫生板块去重的临时集合
+    const tempHjws = [];
+    data.forEach(item => {
+      const event = {
+        event_time: item.eventTime,
+        site_name: item.eventSource,
+        Accident_cause: item.eventCause,
+        event_id: item.id,
+      };
 
-            // 归类到特定系统列表
-            const targetList = SYSTEM_MAP.get(item.systemName);
-            if (targetList) {
-                targetList.push(event); // 将事件添加到对应的响应式数组中
-            }
+      // 1. 存入总表
+      defaultList.push(event);
 
-            // 特殊处理，提前保存，以便后续合并去重
-            if (item.systemName === "垃圾系统") newHwzyList.push(event);
-            if (item.systemName === "垃圾分类系统") newLjqsmList.push(event);
-            if (item.systemName === "厕所系统") newToiletWarningList.push(event);
-        });
+      // 2. 根据系统名称分发到子表
+      const targetList = SYSTEM_MAP.get(item.systemName);
+      if (targetList) targetList.push(event);
 
-        // 5. 复杂列表的合并与去重 (在循环外进行，效率更高)
+      // 3. 特殊逻辑：环境卫生板块归类
+      if (["垃圾系统", "垃圾分类系统", "厕所系统"].includes(item.systemName)) {
+        tempHjws.push(event);
+      }
+    });
+    // --- 5. 批量更新各板块汇总列表 (Vue 自动触发视图更新) ---
+    
+    // 环境卫生去重合并
+    const uniqueHjws = Array.from(new Map(tempHjws.map(e => [e.event_id, e])).values());
+    hjwsList.splice(0, hjwsList.length, ...uniqueHjws);
 
-        // 合并 hjwsList (原 hwzyList, ljqsmList, toiletWarningList 的去重合并)
-        const mergedHjws = [...newHwzyList, ...newLjqsmList, ...newToiletWarningList];
-        const uniqueHjwsMap = new Map();
-        mergedHjws.forEach(item => uniqueHjwsMap.set(item.event_id, item));
-        hjwsList.splice(0, hjwsList.length, ...uniqueHjwsMap.values()); // 更新 hjwsList
+    // 市容秩序
+    srzxList.splice(0, srzxList.length, ...cyyyList, ...ddzhList, ...gxdcList, ...yczlList);
+    
+    // 城市景观
+    csjgList.splice(0, csjgList.length, ...jgzmList, ...zmgjList, ...ljdpList);
+    
+    // 数字城管
+    szcgList.splice(0, szcgList.length, ...tcwtList, ...cgaiList, ...wllzList, ...szhcsList);
 
-        // 合并 srzxList, csjgList, szcgList (使用 concat 或扩展运算符进行浅拷贝合并)
-        srzxList.splice(0, srzxList.length,
-            ...cyyyList, ...ddzhList, ...gxdcList, ...yczlList
-        );
-        csjgList.splice(0, csjgList.length,
-            ...jgzmList, ...zmgjList, ...ljdpList
-        );
-        szcgList.splice(0, szcgList.length,
-            ...tcwtList, ...cgaiList, ...wllzList, ...szhcsList
-        );
-
-        // 6. 集中更新 DOM
-        updateDomIndicators();
-
-    } catch (error) {
-        console.error("获取待处理事件失败:", error);
-        // 发生错误时，清空数组或保持不变
-    }
+  } catch (error) {
+    console.error("获取待处理事件失败:", error);
+  }
 };
 
-/**
- * 封装 DOM 操作逻辑，使 changeColor 更专注于数据处理。
- * ⚠️ 警告: 直接操作 DOM (document.getElementById) 违背了 Vue 的原则，
- * 推荐改为通过 Vue 的响应式数据 (v-bind:style/v-if) 来控制样式。
- */
-const updateDomIndicators = () => {
-    DOM_CONFIGS.forEach(config => {
-        const hasWarning = config.list.length !== 0;
-        const idPrefix = config.prefix ? `-${config.prefix}` : '';
-        const dotId = `dotClass${idPrefix}`;
-        const lampId = `lamp${idPrefix}`;
+// //四大板块的告警事件列表，如果列表不为空，则指示灯闪烁
+// const hjwsList = reactive([]);
+// const srzxList = reactive([]);
+// const csjgList = reactive([]);
+// const szcgList = reactive([]);
+// //每个子系统的告警事件列表
+// const hwzyList = reactive([]);
+// const ljqsmList = reactive([]);
+// const toiletWarningList = reactive([]);
+// const cyyyList = reactive([]);
+// const ddzhList = reactive([]);
+// const gxdcList = reactive([]);
+// const yczlList = reactive([]);
+// const jgzmList = reactive([]);
+// const zmgjList = reactive([]);
+// const ljdpList = reactive([]);
+// const tcwtList = reactive([]);
+// const cgaiList = reactive([]);
+// const wllzList = reactive([]);
+// const szhcsList = reactive([]);
+// //刷新告警指示灯颜色
+// // 定义系统名称到目标数组的映射 (提高可维护性)
+// const SYSTEM_MAP = new Map([
+//     ["垃圾系统", hwzyList],
+//     ["垃圾分类系统", ljqsmList],
+//     ["厕所系统", toiletWarningList],
+//     ["餐饮油烟系统", cyyyList],
+//     ["调度指挥系统", ddzhList],
+//     ["共享单车系统", gxdcList],
+//     ["扬尘治理系统", yczlList],
+//     ["景观照明系统", jgzmList],
+//     ["照明管家系统", zmgjList],
+//     ["临街店铺系统", ljdpList],
+//     ["突出问题系统", tcwtList],
+//     ["城管ai系统", cgaiList],
+//     ["网络理政系统", wllzList],
+//     ["数字城管系统", szhcsList],
+// ]);
+// // 定义需要清理的所有数组
+// const ALL_LISTS = [
+//     defaultList, hjwsList, srzxList, csjgList, szcgList,
+//     hwzyList, ljqsmList, toiletWarningList, cyyyList, ddzhList,
+//     gxdcList, yczlList, jgzmList, zmgjList, ljdpList,
+//     tcwtList, cgaiList, wllzList, szhcsList
+// ];
+// // 定义需要更新 DOM 的配置
+// const DOM_CONFIGS = [
+//     { list: defaultList, prefix: "" }, // 默认配置
+//     { list: hwzyList, prefix: "hwzy" },
+//     { list: ljqsmList, prefix: "ljqsm" },
+//     { list: toiletWarningList, prefix: "toiletWarning" },
+//     { list: hjwsList, prefix: "hjws" },
+// ];
+// const changeColor = async () => {
+//     const API_URL = "/api/event-query/getNeedHandleEvent";
+//     const token = params.token;
+//     ALL_LISTS.forEach(list => {
+//       list.length = 0; // 如果是 reactive([]) 或普通数组
+//     });
+//     try {
+//         // 2. 执行 API 请求 (使用 async/await 简化)
+//         const resp = await axios.get(API_URL, {
+//             headers: { Authorization: `Bearer ${token}` },
+//         });
+//         // 3. 提取数据
+//         const data = resp.data.data || [];
+//         // 4. 数据处理：使用 for...of 遍历 (比 for...in 更适用于数组)
+//         const newHwzyList = [];
+//         const newLjqsmList = [];
+//         const newToiletWarningList = [];
+//         data.forEach(item => {
+//             // 提取公共事件结构
+//             const event = {
+//                 event_time: item.eventTime,
+//                 site_name: item.eventSource,
+//                 Accident_cause: item.eventCause,
+//                 event_id: item.id,
+//             };
+//             // 归类到 defaultList
+//             defaultList.push(event);
 
-        const dotElement = document.getElementById(dotId);
-        const lampElement = document.getElementById(lampId);
+//             // 归类到特定系统列表
+//             const targetList = SYSTEM_MAP.get(item.systemName);
+//             if (targetList) {
+//                 targetList.push(event); // 将事件添加到对应的响应式数组中
+//             }
 
-        if (dotElement) {
-            dotElement.style.backgroundColor = hasWarning ? "#E12911" : "#11e1b0";
-            if (config.prefix !== "") {
-                dotElement.title = hasWarning ? "出现异常！请点击查看详情！" : "";
-            }
-        }
+//             // 特殊处理，提前保存，以便后续合并去重
+//             if (item.systemName === "垃圾系统") newHwzyList.push(event);
+//             if (item.systemName === "垃圾分类系统") newLjqsmList.push(event);
+//             if (item.systemName === "厕所系统") newToiletWarningList.push(event);
+//         });
 
-        if (lampElement) {
-            lampElement.style.display = hasWarning ? "block" : "none";
-        }
-    });
+//         // 5. 复杂列表的合并与去重 (在循环外进行，效率更高)
 
-    // 默认情况需要特殊处理 title
-    if (document.getElementById("dotClass")) {
-        document.getElementById("dotClass").title =
-            defaultList.length !== 0 ? "出现异常！请点击查看详情！" : "";
-    }
-};
+//         // 合并 hjwsList (原 hwzyList, ljqsmList, toiletWarningList 的去重合并)
+//         const mergedHjws = [...newHwzyList, ...newLjqsmList, ...newToiletWarningList];
+//         const uniqueHjwsMap = new Map();
+//         mergedHjws.forEach(item => uniqueHjwsMap.set(item.event_id, item));
+//         hjwsList.splice(0, hjwsList.length, ...uniqueHjwsMap.values()); // 更新 hjwsList
 
-// const changeColor = () => {
-//   axios({
-//     url: "/api/event-query/getNeedHandleEvent",
-//     method: "get",
-//     headers: {Authorization: "Bearer " + params.token,},
-//   }).then(function (resp) {
-//      defaultList.splice(0, defaultList.length);
-//     [
-//       hjwsList, srzxList, csjgList, szcgList,
-//       hwzyList, ljqsmList, toiletWarningList,
-//       cyyyList, ddzhList, gxdcList, yczlList,
-//       jgzmList,zmgjList,ljdpList,
-//       tcwtList, cgaiList, wllzList, szhcsList
-//     ].forEach(list => list.splice(0, list.length));
-//     var data = resp.data.data;
-//     for (var key in data) {
-//       var default_site = {
-//         event_time: data[key].eventTime,
-//         site_name: data[key].eventSource,
-//         Accident_cause: data[key].eventCause,
-//         event_id: data[key].id,
-//       };
-//       defaultList.push(default_site);
-//       switch (data[key].systemName) {
-//         case "垃圾系统":
-//           hwzyList.push(default_site);
-//           break;
-//         case "垃圾分类系统":
-//           ljqsmList.push(default_site);
-//           break;
-//         case "厕所系统":
-//           toiletWarningList.push(default_site);
-//           break;
-//         case "餐饮油烟系统":
-//           cyyyList.push(default_site);
-//           break;
-//         case "调度指挥系统":
-//           ddzhList.push(default_site);
-//           break;
-//         case "共享单车系统":
-//           gxdcList.push(default_site);
-//           break;
-//         case "扬尘治理系统":
-//           yczlList.push(default_site);
-//           break;
-//         case "景观照明系统":
-//           jgzmList.push(default_site);
-//           break;
-//         case "照明管家系统":
-//           zmgjList.push(default_site);
-//           break;
-//         case "临街店铺系统":
-//           ljdpList.push(default_site);
-//           break;
-//         case "突出问题系统":
-//           tcwtList.push(default_site);
-//           break;
-//         case "城管ai系统":
-//           cgaiList.push(default_site);
-//           break;
-//         case "网络理政系统":
-//           wllzList.push(default_site);
-//           break;
-//         case "数字城管系统":
-//           szhcsList.push(default_site);
-//           break;
-//         default:
-//           //未匹配到的系统名处理
-//           break;
-//       }
+//         // 合并 srzxList, csjgList, szcgList (使用 concat 或扩展运算符进行浅拷贝合并)
+//         srzxList.splice(0, srzxList.length,
+//             ...cyyyList, ...ddzhList, ...gxdcList, ...yczlList
+//         );
+//         csjgList.splice(0, csjgList.length,
+//             ...jgzmList, ...zmgjList, ...ljdpList
+//         );
+//         szcgList.splice(0, szcgList.length,
+//             ...tcwtList, ...cgaiList, ...wllzList, ...szhcsList
+//         );
 
-//       const merged = [...hwzyList, ...ljqsmList, ...toiletWarningList];
+//         // 6. 集中更新 DOM
+//         updateDomIndicators();
 
-//       // 使用 Map 去重（以 event_id 作为唯一标识）
-//       const uniqueMap = new Map();
-//       for (const item of merged) {
-//         uniqueMap.set(item.event_id, item); // 若重复，会覆盖旧值
-//       }
-
-//       // 转为数组
-//       hjwsList.splice(0, hjwsList.length, ...uniqueMap.values());
-//       srzxList.push(...cyyyList, ...ddzhList, ...gxdcList, ...yczlList);
-//       csjgList.push(...jgzmList, ...zmgjList, ...ljdpList);
-//       szcgList.push(...tcwtList, ...cgaiList, ...wllzList, ...szhcsList);
+//     } catch (error) {
+//         console.error("获取待处理事件失败:", error);
+//         // 发生错误时，清空数组或保持不变
 //     }
-
-//     // 出现事故
-//     if (defaultList.length != 0) {
-//       document.getElementById("dotClass").title = "出现异常！请点击查看详情！";
-//       document.getElementById("dotClass").style.backgroundColor = "#E12911";
-//       document.getElementById("lamp").style.display = "block";
-//     } else {
-//       document.getElementById("dotClass").style.backgroundColor = "#11e1b0";
-//       document.getElementById("lamp").style.display = "none";
-//     }
-
-//     if (hwzyList.length != 0) {
-//       document.getElementById("dotClass-hwzy").style.backgroundColor = "#E12911";
-//       document.getElementById("lamp-hwzy").style.display = "block";
-//     } else {
-//       document.getElementById("dotClass-hwzy").style.backgroundColor = "#11e1b0";
-//       document.getElementById("lamp-hwzy").style.display = "none";
-//     }
-
-//     if (ljqsmList.length != 0) {
-//       document.getElementById("dotClass-ljqsm").title = "出现异常！请点击查看详情！";
-//       document.getElementById("dotClass-ljqsm").style.backgroundColor = "#E12911";
-//       document.getElementById("lamp-ljqsm").style.display = "block";
-//     } else {
-//       document.getElementById("dotClass-ljqsm").style.backgroundColor = "#11e1b0";
-//       document.getElementById("lamp-ljqsm").style.display = "none";
-//     }
-
-//     if (toiletWarningList.length != 0) {
-//       document.getElementById("dotClass-toiletWarning").title = "出现异常！请点击查看详情！";
-//       document.getElementById("dotClass-toiletWarning").style.backgroundColor = "#E12911";
-//       document.getElementById("lamp-toiletWarning").style.display = "block";
-//     } else {
-//       document.getElementById("dotClass-toiletWarning").style.backgroundColor = "#11e1b0";
-//       document.getElementById("lamp-toiletWarning").style.display = "none";
-//     }
-
-//     if (hjwsList.length != 0) {
-//       document.getElementById("dotClass-hjws").title = "出现异常！请点击查看详情！";
-//       document.getElementById("dotClass-hjws").style.backgroundColor = "#E12911";
-//       document.getElementById("lamp-hjws").style.display = "block";
-//     } else {
-//       document.getElementById("dotClass-hjws").style.backgroundColor = "#11e1b0";
-//       document.getElementById("lamp-hjws").style.display = "none";
-//     }
-
-//   });
 // };
 
-queryAllWarning(warningStart, warningEnd, 1);
+// /**
+//  * 封装 DOM 操作逻辑，使 changeColor 更专注于数据处理。
+//  * ⚠️ 警告: 直接操作 DOM (document.getElementById) 违背了 Vue 的原则，
+//  * 推荐改为通过 Vue 的响应式数据 (v-bind:style/v-if) 来控制样式。
+//  */
+// const updateDomIndicators = () => {
+//     DOM_CONFIGS.forEach(config => {
+//         const hasWarning = config.list.length !== 0;
+//         const idPrefix = config.prefix ? `-${config.prefix}` : '';
+//         const dotId = `dotClass${idPrefix}`;
+//         const lampId = `lamp${idPrefix}`;
+
+//         const dotElement = document.getElementById(dotId);
+//         const lampElement = document.getElementById(lampId);
+
+//         if (dotElement) {
+//             dotElement.style.backgroundColor = hasWarning ? "#E12911" : "#11e1b0";
+//             if (config.prefix !== "") {
+//                 dotElement.title = hasWarning ? "出现异常！请点击查看详情！" : "";
+//             }
+//         }
+
+//         if (lampElement) {
+//             lampElement.style.display = hasWarning ? "block" : "none";
+//         }
+//     });
+
+//     // 默认情况需要特殊处理 title
+//     if (document.getElementById("dotClass")) {
+//         document.getElementById("dotClass").title =
+//             defaultList.length !== 0 ? "出现异常！请点击查看详情！" : "";
+//     }
+// };
+
+// queryAllWarning(warningStart, warningEnd, 1);
 changeColor();
 setInterval(() => {
     changeColor();
@@ -7107,6 +7178,10 @@ const getRoleCodeFromRights = (rightsArray) => {
   if (rightsArray.includes("管理参数")) return "admin";
   if (rightsArray.includes("浏览信息")) return "viewer";
   return "";
+};
+
+const handleAdd = () => {
+  peopleAdd.value = true;
 };
 
 // --- 6. 核心业务逻辑：点击修改 (handleClick) ---
@@ -9797,6 +9872,21 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+
+
+.dot-class {
+  width: 20px; /* 根据实际需求调整 */
+  height: 20px;
+  border-radius: 50%;
+  position: relative;
+  top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+
+
+
 .my-el-popover {
   background-color: #1677d9;
 }
