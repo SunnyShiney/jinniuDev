@@ -2963,7 +2963,7 @@ li {
 }
 
 /* dialog弹框代码可复制 */
-/deep/ .el-dialog__body {
+:deep(.el-dialog__body) {
   user-select: none;
 }
 </style>

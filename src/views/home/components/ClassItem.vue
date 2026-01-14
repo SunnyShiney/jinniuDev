@@ -2,7 +2,7 @@
   <div id="item">
     <el-image
       class="logo"
-      :src="require('@/assets/home/' + logo)"
+      :src="getHomeAsset(logo)"
       style="width: 35px"
     ></el-image>
     <el-tooltip
@@ -59,6 +59,12 @@ defineProps({
   styleName: String,
   systemName: String,
 });
+
+const getHomeAsset = (imgName) => {
+  // ⚠️ 注意：这里必须用相对路径，不能用 @
+  // ../assets/home/ 对应你的文件结构：从 components 目录跳出来，进 assets/home
+  return new URL(`../../../assets/home/${imgName}`, import.meta.url).href
+}
 </script>
 
 <style>

@@ -90,9 +90,6 @@
         </el-dialog>
       </div>
     </template>
-
-
-
     <template #userinfo>
       <div class="router">
           <el-button
@@ -153,7 +150,7 @@
         <!-- logo -->
         <el-image
           class="text-logo"
-          :src="require('@/assets/home/logo-title.jpg')"
+          :src="logoTitleImg"
           fit="scale-down"
         ></el-image>
         <div class="classification" v-if="showDepts">
@@ -4612,6 +4609,10 @@ import moment from "moment";
 import axios from "axios";
 
 import AlarmDetailsDialog from './components/AlarmDetailsDialog.vue'
+
+import logoTitleImg from '@/assets/home/logo-title.jpg'
+
+
 const store = useStore();
 const isAdmin = computed(() => params.role === '管理员');
 const canViewLog = computed(() => {
@@ -4646,28 +4647,30 @@ const tableData = [
   { name: '一品天下', controlDevices: 0, videoDevices: 2, lightingBuildings: 0, lightingBridges: 0 },
   { name: '合计', controlDevices: 317, videoDevices: 36, lightingBuildings: 302, lightingBridges: 11 }
 ];
-//==============================================================================2024.04.12 告警指示灯
-const query = ref("");
-const value = ref("");
-const warningPersonList = ref([]);
 
+
+
+// #region  获取预警人员列表
+const warningPersonList = ref([]);
+const getAllWarningPersonList = async () => {
+  try {
+    const resp = await axios({
+      url: "/api/auth/allWarningPersonList",
+      method: "get",
+      headers: {
+        Authorization: "Bearer " + params.token,
+      },
+    });
+    warningPersonList.value = resp.data.data;
+  } catch (err) {
+    console.error("获取人员信息失败：", err);
+  }
+};
 onMounted(() => {
   getAllWarningPersonList();
 });
-const getAllWarningPersonList = () => {
-  axios({
-    url: "/api/auth/allWarningPersonList",
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
-  }).then((resp) => {
-        warningPersonList.value = resp.data;
-      })
-      .catch((err) => {
-        console.error("获取人员信息失败：", err);
-      });
-};
+
+
 const warningFormatResult = (result) => {
   return `${result.name} - ${result.phone} - ${result.company}`;
 };
@@ -4726,55 +4729,60 @@ const getCompanyByPerson = (person) => {
     return "办公室";
 };
 
+// const getwarningPersonList = async (pageNum) => { // 使用 async/await 简化
 
-const getwarningPersonList = async (pageNum) => { // 使用 async/await 简化
+//     const API_URL = "/api/auth/all_permission";
+//     const token = params.token;
 
-    const API_URL = "/api/auth/all_permission";
-    const token = params.token;
+//     try {
+//         // 3. 执行 API 请求
+//         const resp = await axios.get(API_URL, {
+//             headers: { Authorization: `Bearer ${token}` },
+//         });
 
-    try {
-        // 3. 执行 API 请求
-        const resp = await axios.get(API_URL, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+//         // 确保数据是数组，使用 Object.values() 处理 for...in 遗留问题
+//         const rawData = resp.data || {};
+//         const userArray = Array.isArray(rawData) ? rawData : Object.values(rawData);
 
-        // 确保数据是数组，使用 Object.values() 处理 for...in 遗留问题
-        const rawData = resp.data || {};
-        const userArray = Array.isArray(rawData) ? rawData : Object.values(rawData);
+//         // 4. 数据处理：使用 map() 进行转换和归类
+//         const processedList = userArray.map(person => {
+//             // 安全性检查：确保 realName 和 telephone 存在
+//             if (!person || !person.realName || !person.telephone) {
+//                 return null; // 跳过无效记录
+//             }
 
-        // 4. 数据处理：使用 map() 进行转换和归类
-        const processedList = userArray.map(person => {
-            // 安全性检查：确保 realName 和 telephone 存在
-            if (!person || !person.realName || !person.telephone) {
-                return null; // 跳过无效记录
-            }
+//             // 调用辅助函数获取公司名称
+//             const companyName = getCompanyByPerson(person);
 
-            // 调用辅助函数获取公司名称
-            const companyName = getCompanyByPerson(person);
+//             // 返回目标对象
+//             return {
+//                 name: person.realName,
+//                 phone: person.telephone,
+//                 company: companyName,
+//             };
+//         }).filter(item => item !== null); // 过滤掉无效记录
 
-            // 返回目标对象
-            return {
-                name: person.realName,
-                phone: person.telephone,
-                company: companyName,
-            };
-        }).filter(item => item !== null); // 过滤掉无效记录
+//         // 5. 更新响应式列表 (使用 .value 整体替换)
+//         // 假设 warningPersonList 是 ref([])
+//         warningPersonList.value = processedList;
 
-        // 5. 更新响应式列表 (使用 .value 整体替换)
-        // 假设 warningPersonList 是 ref([])
-        warningPersonList.value = processedList;
+//         // 6. 假设这里需要更新分页状态，但代码中没有，保持精简。
 
-        // 6. 假设这里需要更新分页状态，但代码中没有，保持精简。
+//     } catch (error) {
+//         console.error("获取预警人员列表失败:", error);
+//         // 失败时清空列表
+//         warningPersonList.value = [];
+//     }
+// };
+// setInterval(() => {
+//     getwarningPersonList(1);
+// }, 60000);
 
-    } catch (error) {
-        console.error("获取预警人员列表失败:", error);
-        // 失败时清空列表
-        warningPersonList.value = [];
-    }
-};
-setInterval(() => {
-    getwarningPersonList(1);
-}, 60000);
+
+
+// #endregion
+
+
 
 let warningStart = moment("2025-01-01").format("YYYY-MM-DD");
 let warningEnd = moment().format("YYYY-MM-DD");
@@ -4823,7 +4831,6 @@ const warningSubmitForm = async (el) => {
   const formEl = Array.isArray(el) ? el[0] : el;
   if (!formEl) return
 
-  console.log('方案 B 获取到的对象:', formEl);
   // 1. 表单验证
   await formEl.validate(async (valid) => {
     if (!valid) {
@@ -4839,7 +4846,6 @@ const warningSubmitForm = async (el) => {
       ElMessage.error('处置人信息解析失败，请重新选择')
       return
     }
-    console.log('电话号码:', selectedValue.phone);
     // 3. 校验电话号码格式
     const phoneReg = /^1[3-9]\d{9}$/
     if (!phoneReg.test(selectedValue.phone)) {
@@ -4867,10 +4873,10 @@ const warningSubmitForm = async (el) => {
     
     // 构造三个请求的 Promise
     // 请求A: ws-message
-    const reqSocket = axios.post('/ddzh/ws-message/single/web', {
-        patrolTelephone: selectedValue.phone,
-        message: warningRuleForm.content,
-      }, { headers: commonHeaders })
+    // const reqSocket = axios.post('/ddzh/ws-message/single/web', {
+    //     patrolTelephone: selectedValue.phone,
+    //     message: warningRuleForm.content,
+    //   }, { headers: commonHeaders })
 
     // 请求B: 发送短信
     const reqSms = axios.post('api/sms/sendMessage', {
@@ -4896,7 +4902,8 @@ const warningSubmitForm = async (el) => {
     try {
       // Promise.all 会等待所有请求都完成
       // 如果其中任何一个失败，都会进入 catch
-      await Promise.all([reqUpdate, reqSocket, reqSms])
+      await Promise.all([reqUpdate, reqSms])
+      // await Promise.all([reqUpdate, reqSocket, reqSms])
 
       // 全部成功后的操作
       ElMessage.success('提交成功！')
@@ -4905,7 +4912,6 @@ const warningSubmitForm = async (el) => {
       // 如果你需要重置表单
       // formEl.resetFields() 
       
-      // changeColor() // 刷新状态颜色
 
     } catch (error) {
       console.error('接口请求失败:', error)
@@ -5040,7 +5046,8 @@ const toiletWarningVisible = ref(false);
 const hjwsVisible = ref(false);
 const warningTotalRecords = ref(0);
 
-// ---  系统灯控制代码 ---
+
+// #region ---  系统灯控制代码 ---
   //亮灯状态
   const lightStatus = reactive({
     "垃圾系统": false,
@@ -5095,10 +5102,11 @@ const warningTotalRecords = ref(0);
     }
   };
   initSystemLights();
+// #endregion
 
 
-
-//// --- 1. 定义响应式数据列表 ---
+// #region --- 点击灯加载未处理事件数据 ---
+//1. 定义响应式数据列表 ---
 //全部和四大板块
 const defaultList = reactive([]);
 const hjwsList = reactive([]);
@@ -5163,7 +5171,6 @@ const warningPagination = reactive({
 });
 const handleLightClick = async (systemName) => {
   currentSystemName.value = systemName;
-  console.log(`切换到系统: ${systemName}`);
   warningPagination.pageNo = 1;
   await getSystemWarningData();
 };
@@ -5189,12 +5196,10 @@ const getSystemWarningData = async () => {
       }
     });
     const pageData = resp.data?.data;
-    console.log("pageData:"+pageData);
     const records = pageData?.records || [];
     
     // 1. 更新总条数 (给分页组件用)
     warningPagination.total = pageData?.total || 0;
-    console.log("warningPagination.total:"+warningPagination.total);
 
     // 2. 【关键】清空并替换为当前页数据 (真分页是“看哪页存哪页”)
     targetList.length = 0; 
@@ -5215,76 +5220,11 @@ const getSystemWarningData = async () => {
     loading.value = false;
   }
 };
-// --- 4. 数据处理逻辑 ---
-const changeColor = async () => {
-  const API_URL = "/api/event-query/getNeedHandleEvent";
-  const token = params.token; // 假设 params 已在外部定义或通过 props 传入
-
-  // 清空现有数据
-  ALL_LISTS.forEach(list => list.length = 0);
-
-  try {
-    const resp = await axios.get(API_URL, {
-      headers: { Authorization: `Bearer ${token}` },
-      params: {
-        pageNo: warningPagination.pageNo,
-        pageSize: warningPagination.pageSize
-      }
-    });
-
-    const mpPage = resp.data.data || {};
-    console.log("获取到的待处理事件数据:", mpPage);
-    const data = mpPage.records || []; // 注意这里是 records
-    console.log("待处理事件列表数据:", data);
-    warningPagination.total = mpPage.total || 0;  // 更新总数
-    // 用于环境卫生板块去重的临时集合
-    const tempHjws = [];
+// #endregion
 
 
 
-    data.forEach(item => {
-      const event = {
-        event_time: item.eventTime,
-        site_name: item.eventSource,
-        Accident_cause: item.eventCause,
-        event_id: item.id,
-      };
-
-      // 1. 存入总表
-      defaultList.push(event);
-
-      // 2. 根据系统名称分发到子表
-      const targetList = SYSTEM_MAP.get(item.systemName);
-      if (targetList) targetList.push(event);
-
-      // 3. 特殊逻辑：环境卫生板块归类
-      if (["垃圾系统", "垃圾分类系统", "厕所系统"].includes(item.systemName)) {
-        tempHjws.push(event);
-      }
-    });
-    // --- 5. 批量更新各板块汇总列表 (Vue 自动触发视图更新) ---
-    
-    // 环境卫生去重合并
-    const uniqueHjws = Array.from(new Map(tempHjws.map(e => [e.event_id, e])).values());
-    hjwsList.splice(0, hjwsList.length, ...uniqueHjws);
-
-    // 市容秩序
-    srzxList.splice(0, srzxList.length, ...cyyyList, ...ddzhList, ...gxdcList, ...yczlList);
-    
-    // 城市景观
-    csjgList.splice(0, csjgList.length, ...jgzmList, ...zmgjList, ...ljdpList);
-    
-    // 数字城管
-    szcgList.splice(0, szcgList.length, ...tcwtList, ...cgaiList, ...wllzList, ...szhcsList);
-
-  } catch (error) {
-    console.error("获取待处理事件失败:", error);
-  }
-};
-
-// changeColor();
 setInterval(() => {
-    // changeColor();
     queryAllWarning(warningStart, warningEnd, 1);
 }, 360000);
 
@@ -5520,7 +5460,9 @@ const selfSystemPermisson = () => {
     }
   });
 };
-selfSystemPermisson();
+onMounted(() => {
+  selfSystemPermisson();
+});
 
 //=========================================================================2023/08/08 管理员管理人员访问子系统的权限
 const checkAll = ref(false);

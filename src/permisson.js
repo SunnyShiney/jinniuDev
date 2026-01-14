@@ -1,11 +1,11 @@
 import router from "@/router";
 import { getToken, removeToken, removeHwzyToken } from "@/composables/auth";
 import store from "@/store/index.js";
+import { Base64 } from 'js-base64';
 import { setToken } from "@/composables/auth";
 import { params } from "@/store/store.js";
 import { getLogin } from "@/api/home.js";
 
-const Base64 = require("js-base64").Base64;
 router.beforeEach(async (to, from, next) => {
   //获取token
   const token = getToken();
