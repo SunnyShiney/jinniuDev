@@ -12,12 +12,12 @@
         <div 
           :style="{cursor:'pointer'}" 
           id="dotClass"
-          :title="defaultList && defaultList.length > 0 ? '出现异常！请点击查看详情！' : '点击查看详情！'" 
-          @click="defaultVisible = true;"
+          :title="isLightOn ? '出现异常！请点击查看详情！' : '点击查看详情！'" 
+          @click="defaultVisible = true;handleLightClick('全部系统');"
         >
           <div 
             id="lamp" 
-            :style="(!defaultList || defaultList.length === 0) 
+            :style="!isLightOn 
               ? 'background-color: #11e1b0; background-image: none; animation: none;' 
               : ''"
           ></div>
@@ -33,13 +33,13 @@
             :default-list="defaultList"
             :event-history-list="EventHistoryList"
             :change-value="changeValue"
-            :warning-current-page="warningCurrentPage"
-            :warning-total-records="warningTotalRecords"
+            :warning-current-page="warningPagination.pageNo"
+            :warning-total-records="warningPagination.total"
             :disabled-date="disabledDate"
             :shortcuts="shortcuts"
             @warning-handle-click="warningHandleClick"
             @change-date="changeDate"
-            @current-change="getTransport"
+            @current-change="handlePageChange"
           />
         </el-dialog>
         <!-- 事故处理对话框 -->
@@ -173,12 +173,12 @@
               v-if="dept.deptName === '环境卫生'"
               :style="{cursor:'pointer'}" 
               id="dotClass-hjws"
-              :title="hjwsList && hjwsList.length > 0 ? '存在告警' : '运行正常'"
-              @click="hjwsVisible = true"
+              :title="isHjwsLightOn ? '存在告警' : '运行正常'"
+              @click="hjwsVisible = true;handleLightClick('环境卫生板块');"
             >
               <div 
                 id="lamp-hjws" 
-                :style="(!hjwsList || hjwsList.length === 0) 
+                :style="!isHjwsLightOn
                   ? 'background-color: #11e1b0; background-image: none; animation: none;' 
                   : ''"
               ></div>
@@ -188,12 +188,12 @@
               v-if="dept.deptName === '市容秩序'"
               :style="{cursor:'pointer'}" 
               id="dotClass-srzx"
-              :title="srzxList && srzxList.length > 0 ? '存在告警' : '运行正常'"
-              @click="srzxVisible = true"
+              :title="isSrzxLightOn ? '存在告警' : '运行正常'"
+              @click="srzxVisible = true;handleLightClick('市容秩序板块');"
             >
               <div 
                 id="lamp-srzx" 
-                :style="(!srzxList || srzxList.length === 0) 
+                :style="!isSrzxLightOn
                   ? 'background-color: #11e1b0; background-image: none; animation: none;' 
                   : ''"
               ></div>
@@ -203,12 +203,12 @@
               v-if="dept.deptName === '城市景观'"
               :style="{cursor:'pointer'}" 
               id="dotClass-csjg"
-              :title="csjgList && csjgList.length > 0 ? '存在告警' : '运行正常'"
-              @click="csjgVisible = true"
+              :title="isCsjgLightOn ? '存在告警' : '运行正常'"
+              @click="csjgVisible = true;handleLightClick('城市景观板块');"
             >
               <div 
                 id="lamp-csjg" 
-                :style="(!csjgList || csjgList.length === 0) 
+                :style="!isCsjgLightOn
                   ? 'background-color: #11e1b0; background-image: none; animation: none;' 
                   : ''"
               ></div>
@@ -218,12 +218,12 @@
               v-if="dept.deptName === '数字城管'"
               :style="{cursor:'pointer'}" 
               id="dotClass-szcg"
-              :title="szcgList && szcgList.length > 0 ? '存在告警' : '运行正常'"
-              @click="szcgVisible = true"
+              :title="isSzcgLightOn ? '存在告警' : '运行正常'"
+              @click="szcgVisible = true;handleLightClick('数字城管板块');"
             >
               <div 
                 id="lamp-szcg" 
-                :style="(!szcgList || szcgList.length === 0) 
+                :style="!isSzcgLightOn
                   ? 'background-color: #11e1b0; background-image: none; animation: none;' 
                   : ''"
               ></div>
@@ -649,12 +649,12 @@
                 <div 
                   id="dotClass-hwzy" 
                   :style="{cursor:'pointer'}" 
-                  :title="hwzyList && hwzyList.length > 0 ? '存在告警' : '运行正常'" 
-                  @click="hwzyVisible = true"
+                  :title="lightStatus.垃圾系统 ? '存在告警' : '运行正常'" 
+                  @click="hwzyVisible = true;handleLightClick('垃圾系统');"
                 >
                   <div 
                     id="lamp-hwzy" 
-                    :style="(!hwzyList || hwzyList.length === 0) 
+                    :style="(!lightStatus.垃圾系统) 
                       ? 'background-color: #11e1b0; background-image: none; animation: none;' 
                       : ''"
                   ></div>
@@ -1179,12 +1179,12 @@
                 <div 
                   id="dotClass-ljqsm" 
                   :style="{cursor:'pointer'}" 
-                  :title="ljqsmList && ljqsmList.length > 0 ? '存在告警' : '运行正常'" 
-                  @click="ljqsmVisible = true"
+                  :title="lightStatus.垃圾分类系统 ? '存在告警' : '运行正常'" 
+                  @click="ljqsmVisible = true;handleLightClick('垃圾分类系统');"
                 >
                   <div 
                     id="lamp-ljqsm" 
-                    :style="(!ljqsmList || ljqsmList.length === 0) 
+                    :style="!lightStatus.垃圾分类系统
                       ? 'background-color: #11e1b0; background-image: none; animation: none;' 
                       : ''"
                   ></div>
@@ -1696,8 +1696,8 @@
                 <div 
                   id="dotClass-toiletWarning" 
                   :style="{cursor:'pointer'}" 
-                  :title="toiletWarningList && toiletWarningList.length > 0 ? '存在告警' : '运行正常'" 
-                  @click="toiletWarningVisible = true"
+                  :title="lightStatus.智慧公厕管家 ? '存在告警' : '运行正常'" 
+                  @click="toiletWarningVisible = true;handleLightClick('智慧公厕管家');"
                 >
                   <div 
                     id="lamp-toiletWarning" 
@@ -4263,13 +4263,13 @@
           />
         </div>
         <el-alert
-          id="permissonAlert"
+          v-if="showPermissionAlert"
           title="请先处理完以上权限申请事务！"
           type="error"
           center
           show-icon
-          style="display: none"
           :closable="false"
+          style="margin-bottom: 10px;" 
         />
 
         <div style="font-size: 2rem; display: inline-block; float: left">
@@ -4776,10 +4776,6 @@ setInterval(() => {
     getwarningPersonList(1);
 }, 60000);
 
-const warningTotalRecords = ref(1000);
-let warningCurrentPage = ref(1);
-let warningPageCount = 0;
-
 let warningStart = moment("2025-01-01").format("YYYY-MM-DD");
 let warningEnd = moment().format("YYYY-MM-DD");
 let logStart = moment().startOf("month").format("YYYY-MM-DD");
@@ -4909,7 +4905,7 @@ const warningSubmitForm = async (el) => {
       // 如果你需要重置表单
       // formEl.resetFields() 
       
-      changeColor() // 刷新状态颜色
+      // changeColor() // 刷新状态颜色
 
     } catch (error) {
       console.error('接口请求失败:', error)
@@ -5037,22 +5033,79 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
     warningCurrentPage.value = pageNum;
   });
 };
-const getTransport = (pageNum) => {
-  warningCurrentPage.value = pageNum;
-};
+
 const hwzyVisible = ref(false);
 const ljqsmVisible = ref(false);
 const toiletWarningVisible = ref(false);
 const hjwsVisible = ref(false);
+const warningTotalRecords = ref(0);
 
-// --- 1. 定义响应式数据列表 ---
+// ---  系统灯控制代码 ---
+  //亮灯状态
+  const lightStatus = reactive({
+    "垃圾系统": false,
+    "垃圾分类系统": false,
+    "智慧公厕管家": false,
+    "餐饮油烟系统": false,
+    "调度指挥系统": false,
+    "共享单车系统": false,
+    "扬尘治理系统": false,
+    "景观照明系统": false,
+    "照明管家系统": false,
+    "临街店铺系统": false,
+    "突出问题系统": false,
+    "城管ai系统": false,
+    "网络理政系统": false,
+    "数字城管系统": false
+  });
+  //整体亮灯状态——只要有任意子系统为 true，整体大灯就亮
+  const isLightOn = computed(() => {
+    return isHjwsLightOn || isSrzxLightOn || isCsjgLightOn || isSzcgLightOn;
+  });
+  // 四大板块的亮灯状态——只要板块下的任意子系统为 true，板块大灯就亮
+  const isHjwsLightOn = computed(() => {
+    return lightStatus["垃圾系统"] || lightStatus["垃圾分类系统"] || lightStatus["智慧公厕管家"];
+  });
+  const isSrzxLightOn = computed(() => {
+    return lightStatus["餐饮油烟系统"] || lightStatus["调度指挥系统"] || lightStatus["共享单车系统"] || lightStatus["扬尘治理系统"];
+  });
+  const isCsjgLightOn = computed(() => {
+    return lightStatus["景观照明系统"] || lightStatus["照明管家系统"] || lightStatus["临街店铺系统"];
+  });
+  const isSzcgLightOn = computed(() => {
+    return lightStatus["突出问题系统"] || lightStatus["城管ai系统"] || lightStatus["网络理政系统"] || lightStatus["数字城管系统"];
+  });
+  // --- 初始化系统灯 ---
+  const initSystemLights = async () => {
+    try {
+      // 假设后端返回格式: { "data": { "垃圾系统": true, "城管ai系统": false, ... } }
+      const resp = await axios.get("/api/event-query/getSystemStatus", {
+        headers: { Authorization: `Bearer ${params.token}` }
+      });
+      const statusMap = resp.data?.data || {};
+
+      // 更新lightStatus
+      Object.keys(statusMap).forEach(key => {
+        if (key in lightStatus) {
+          lightStatus[key] = statusMap[key];
+        }
+      });
+    } catch (error) {
+      console.error("获取系统状态失败:", error);
+    }
+  };
+  initSystemLights();
+
+
+
+//// --- 1. 定义响应式数据列表 ---
+//全部和四大板块
 const defaultList = reactive([]);
 const hjwsList = reactive([]);
 const srzxList = reactive([]);
 const csjgList = reactive([]);
 const szcgList = reactive([]);
-
-// 子系统列表
+//子系统
 const hwzyList = reactive([]);
 const ljqsmList = reactive([]);
 const toiletWarningList = reactive([]);
@@ -5070,9 +5123,14 @@ const szhcsList = reactive([]);
 
 // --- 3. 系统映射表 ---
 const SYSTEM_MAP = new Map([
+  ["全部系统", defaultList],
+  ["环境卫生板块", hjwsList],
+  ["市容秩序板块", srzxList],
+  ["城市景观板块", csjgList],
+  ["数字城管板块", szcgList],
   ["垃圾系统", hwzyList],
   ["垃圾分类系统", ljqsmList],
-  ["厕所系统", toiletWarningList],
+  ["智慧公厕管家", toiletWarningList],
   ["餐饮油烟系统", cyyyList],
   ["调度指挥系统", ddzhList],
   ["共享单车系统", gxdcList],
@@ -5092,7 +5150,71 @@ const ALL_LISTS = [
   gxdcList, yczlList, jgzmList, zmgjList, ljdpList,
   tcwtList, cgaiList, wllzList, szhcsList
 ];
+const handlePageChange = (newPage) => {
+  warningPagination.pageNo = newPage;
+  getSystemWarningData(); // 重新加载数据
+};
+//分页信息
+const currentSystemName = ref('');
+const warningPagination = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  total: 200
+});
+const handleLightClick = async (systemName) => {
+  currentSystemName.value = systemName;
+  console.log(`切换到系统: ${systemName}`);
+  warningPagination.pageNo = 1;
+  await getSystemWarningData();
+};
+// 通用加载数据函数
+const getSystemWarningData = async () => {
+  const sysName = currentSystemName.value;
+  if (!sysName) return;
 
+  const targetList = SYSTEM_MAP.get(sysName);
+  if (!targetList) return;
+
+  const API_URL = "/api/event-query/getSystemWarningData";
+
+  // 开启 loading (建议在 UI 上绑定)
+  loading.value = true;
+  try {
+    const resp = await axios.get(API_URL, {
+      headers: { Authorization: `Bearer ${params.token}` },
+      params: {
+        pageNo: warningPagination.pageNo,
+        pageSize: warningPagination.pageSize,
+        systemName: sysName // 【后端必须支持此参数】
+      }
+    });
+    const pageData = resp.data?.data;
+    console.log("pageData:"+pageData);
+    const records = pageData?.records || [];
+    
+    // 1. 更新总条数 (给分页组件用)
+    warningPagination.total = pageData?.total || 0;
+    console.log("warningPagination.total:"+warningPagination.total);
+
+    // 2. 【关键】清空并替换为当前页数据 (真分页是“看哪页存哪页”)
+    targetList.length = 0; 
+    
+    // 格式化数据
+    const formattedEvents = records.map(item => ({
+      event_time: item.eventTime,
+      site_name: item.eventSource,
+      Accident_cause: item.eventCause,
+      event_id: item.id,
+    }));
+
+    targetList.push(...formattedEvents);
+
+  } catch (error) {
+    console.error("数据加载失败:", error);
+  }finally {
+    loading.value = false;
+  }
+};
 // --- 4. 数据处理逻辑 ---
 const changeColor = async () => {
   const API_URL = "/api/event-query/getNeedHandleEvent";
@@ -5104,10 +5226,22 @@ const changeColor = async () => {
   try {
     const resp = await axios.get(API_URL, {
       headers: { Authorization: `Bearer ${token}` },
+      params: {
+        pageNo: warningPagination.pageNo,
+        pageSize: warningPagination.pageSize
+      }
     });
-    const data = resp.data.data || [];
+
+    const mpPage = resp.data.data || {};
+    console.log("获取到的待处理事件数据:", mpPage);
+    const data = mpPage.records || []; // 注意这里是 records
+    console.log("待处理事件列表数据:", data);
+    warningPagination.total = mpPage.total || 0;  // 更新总数
     // 用于环境卫生板块去重的临时集合
     const tempHjws = [];
+
+
+
     data.forEach(item => {
       const event = {
         event_time: item.eventTime,
@@ -5148,9 +5282,9 @@ const changeColor = async () => {
   }
 };
 
-changeColor();
+// changeColor();
 setInterval(() => {
-    changeColor();
+    // changeColor();
     queryAllWarning(warningStart, warningEnd, 1);
 }, 360000);
 
@@ -5985,13 +6119,8 @@ const getPermissonApplicationListList = async (pageNum) => {
         page_Count = Math.ceil(listLength / 10);
 
         current_Page.value = pageNum;
-
-        // 6. DOM 操作（建议改为响应式控制）
-        const div = document.getElementById("permissonAlert");
-        if (div) { // 检查 DOM 元素是否存在
-            // 建议：使用 Vue 的 v-if="permissonApplicationList.length !== 0" 来控制
-            div.style.display = (listLength === 0) ? "none" : "block";
-        }
+        // 6. 控制权限申请提示显示
+        showPermissionAlert.value = permissonApplicationList.value.length > 0;
 
     } catch (error) {
         console.error("获取权限申请列表失败:", error);
@@ -6184,49 +6313,63 @@ const getPermission = (pageNum) => {
   currentPage.value = pageNum;
 };
 
-const handleDelete = (row) => {
-  currentRowPage = Math.ceil((row.index - 1) / 10);
-  var div = document.getElementById("permissonAlert");
-  if (permissonApplicationList.value.length != 0) {
-    div.style.display = "flex";
-  } else {
-    ElMessageBox.confirm("是否删除该人员?", "提示", {
+const showPermissionAlert = ref(false);
+const handleDelete = async (row) => {
+  // 1. 逻辑检查：如果列表不为空，通过数据控制显示 Alert
+  if (permissonApplicationList.value && permissonApplicationList.value.length > 0) {
+    showPermissionAlert.value = true; 
+    return; // 阻止后续逻辑
+  }
+  // 如果需要隐藏 Alert（可选）
+  showPermissionAlert.value = false;
+
+  try {
+    // 2. 弹出确认框 (await 写法更清晰)
+    await ElMessageBox.confirm("是否确认删除该人员?", "警告", {
       confirmButtonText: "确认",
       cancelButtonText: "取消",
-      type: "提示",
-    })
-      .then(() => {
-        axios({
-          url: "/api/auth/delete_user/" + row.telephone,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + params.token,
-          },
-          method: "get",
-        }).then(function (resp) {
-          loading.value = true;
-          getPermissionList(currentRowPage, searchName.value, searchPhone.value);
-          ElMessage({
-            type: "success",
-            message: "删除成功！",
-          });
-        });
-      })
-      .catch(() => {
-        ElMessage({
-          type: "info",
-          message: "取消删除！",
-        });
-      });
+      type: "warning", // 修改为 warning，会出现黄色感叹号，更符合删除场景
+      draggable: true,
+    });
+
+    // 用户点击确认后继续执行
+    loading.value = true;
+
+    // 3. 发送请求
+    // 注意：RESTful 规范通常用 delete 方法，但为了适配你的后端，这里保留了 get
+    await axios({
+      url: `/api/auth/delete_user/${row.telephone}`, // 使用模板字符串
+      method: "get", 
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${params.token}`,
+      },
+    });
+
+    // 4. 删除成功后的逻辑
+    ElMessage.success("删除成功！");
+    
+    // 修复页码计算：如果是 ref 必须加 .value，且通常直接用当前页即可
+    // 如果需要计算逻辑： currentRowPage.value = Math.ceil(...)
+    getPermissionList(currentRowPage.value, searchName.value, searchPhone.value);
+
+  } catch (error) {
+    // 5. 错误处理
+    if (error === 'cancel') {
+      ElMessage.info("已取消删除");
+    } else {
+      console.error(error);
+      ElMessage.error("删除失败，请稍后重试");
+    }
+  } finally {
+    // 无论成功还是失败，最后都关闭 loading
+    loading.value = false;
   }
 };
-
-
 
 // --- 1. 基础数据定义 ---
 const formLoading = ref(false);
 const permissionFormRef = ref(null);
-const showPermissonAlert = ref(false);
 const handleEvent = ref(false); // 标记当前是否处于编辑状态
 const permissonName = ref('');
 const permissonTelephone = ref('');
@@ -6320,7 +6463,7 @@ const handleClick = async (row) => {
   permissonName.value = row.username || row.realName;
   permissonTelephone.value = row.telephone;
   handleEvent.value = true;
-  showPermissonAlert.value = false;
+  showPermissionAlert.value = false;
 
   try {
     // --- 第一步：获取真实已有的权限 ---
