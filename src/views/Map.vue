@@ -12,217 +12,192 @@
       </template>
       <template #warning>
         <div class="text-week">
-          <div id="dotClass" title="运行正常" @click="fault_details">
-            <div id="lamp" style="display: none"></div>
+          <div 
+            :style="{cursor:'pointer'}" 
+            id="dotClass"
+            :title="isLightOn ? '出现异常！请点击查看详情！' : '点击查看详情！'" 
+            @click="defaultVisible = true;handleLightClick('全部系统');"
+          >
+            <div 
+              id="lamp" 
+              :style="!isLightOn 
+                ? 'background-color: #11e1b0; background-image: none; animation: none;' 
+                : ''"
+            ></div>
           </div>
+          <!-- 事故详情对话框 -->
           <el-dialog
             v-model="defaultVisible"
-            title="事故详情"
-            @close="handleClose"
           >
-            <div
-              style="text-align: center; font-size: x-large; font-weight: bold"
-            >
-              未处理的事件
+            <!-- 未处理的事件 -->
+            <div>
+              <text style="display: block; text-align: center; font-size: x-large; font-weight: bold">
+                未处理的事件
+              </text>
+              <AlarmDetailsDialog
+                :default-list="defaultList"
+                :event-history-list="EventHistoryList"
+                :change-value="changeValue"
+                :warning-current-page="warningPagination.pageNo"
+                :warning-total-records="warningPagination.total"
+                :disabled-date="disabledDate"
+                :shortcuts="shortcuts"
+                @warning-handle-click="warningHandleClick"
+                @change-date="changeDate"
+                @current-change="handlePageChange"
+              />
             </div>
-            <el-table
-              :data="defaultList"
-              style="width: 100%"
-              size="large"
-              class="data-table"
-            >
-              <el-table-column
-                prop="event_id"
-                label="事件编号"
-                min-width="80"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="event_time"
-                label="事件时间"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="site_name"
-                label="事件来源"
-                min-width="80"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="Accident_cause"
-                label="事件详情"
-                min-width="200"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column>
-                <template #default="scope">
-                  <el-button
-                    size="small"
-                    type="danger"
-                    @click="warningHandleClick(scope.$index, scope.row)"
-                    >处理</el-button
+            <!-- 历史告警事件 -->
+            <div>
+              <text style="display: block; text-align: center; font-size: x-large; font-weight: bold">
+                历史告警事件
+              </text>
+              <div>
+                <el-date-picker
+                  v-model="changeValue"
+                  type="daterange"
+                  unlink-panels
+                  range-separator="到"
+                  start-placeholder="选择开始时间"
+                  end-placeholder="选择结束时间"
+                  :disabled-date="disabledDate"
+                  :shortcuts="shortcuts"
+                  @change="changeDate"
+                  size="large"
+                  style="margin: 0.5rem 0 0.5rem"
+                />
+                <el-table
+                  :data="
+                    EventHistoryList.slice((warningCurrentPage - 1) * 5, warningCurrentPage * 5)
+                  "
+                  style="width: 100%"
+                  size="large"
+                  class="data-table"
+                >
+                  <el-table-column
+                    prop="event_id"
+                    label="事件编号"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
                   >
-                </template>
-              </el-table-column>
-            </el-table>
+                  </el-table-column>
+                  <el-table-column
+                    prop="event_source"
+                    label="事件来源"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="event_cause"
+                    label="事件详情"
+                    min-width="450"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  />
+                  <el-table-column
+                    prop="event_disposed"
+                    label="事件是否已处理"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="event_time"
+                    label="发生时间"
+                    min-width="250"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
 
-            <div
-              style="text-align: center; font-size: x-large; font-weight: bold"
-            >
-              历史告警事件
+                  <el-table-column
+                    prop="administrator"
+                    label="派发人"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="instruction_time"
+                    label="指令下达时间"
+                    min-width="250"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="administrator_phone"
+                    label="派发人电话"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="instruction_content"
+                    label="指令内容"
+                    min-width="450"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="event_handler"
+                    label="事件处理人"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="handler_phone"
+                    label="处理人电话"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="handler_work"
+                    label="处理人工作单位"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                </el-table>
+                <div class="float-warningEnd">
+                  <el-pagination
+                    background
+                    layout="->,total, prev, pager, next, jumper"
+                    :total="warningTotalRecords"
+                    :current-page="warningCurrentPage"
+                    :page-size="5"
+                    @current-change="getTransport"
+                  />
+                </div>
+              </div>
             </div>
-            <el-date-picker
-              v-model="changeValue"
-              type="daterange"
-              unlink-panels
-              range-separator="到"
-              start-placeholder="选择开始时间"
-              end-placeholder="选择结束时间"
-              :disabled-date="disabledDate"
-              :shortcuts="shortcuts"
-              @change="changeDate"
-              size="large"
-              style="margin: 0.5rem 0 0.5rem"
-            />
-            <el-table
-              :data="
-                EventHistoryList.slice((warningCurrentPage - 1) * 5, warningCurrentPage * 5)
-              "
-              style="width: 100%"
-              size="large"
-              class="data-table"
-            >
-              <el-table-column
-                prop="event_id"
-                label="事件编号"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_source"
-                label="事件来源"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_cause"
-                label="事件详情"
-                min-width="450"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              />
-              <el-table-column
-                prop="event_disposed"
-                label="事件是否已处理"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_time"
-                label="发生时间"
-                min-width="250"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
 
-              <el-table-column
-                prop="administrator"
-                label="派发人"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="instruction_time"
-                label="指令下达时间"
-                min-width="250"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="administrator_phone"
-                label="派发人电话"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="instruction_content"
-                label="指令内容"
-                min-width="450"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="event_handler"
-                label="事件处理人"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="handler_phone"
-                label="处理人电话"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-              <el-table-column
-                prop="handler_work"
-                label="处理人工作单位"
-                min-width="150"
-                header-align="center"
-                align="center"
-                :show-overflow-tooltip="true"
-              >
-              </el-table-column>
-            </el-table>
-            <div class="float-warningEnd">
-              <el-pagination
-                background
-                layout="->,total, prev, pager, next, jumper"
-                :total="warningTotalRecords"
-                :current-page="warningCurrentPage"
-                :page-size="5"
-                @current-change="getTransport"
-              />
-            </div>
           </el-dialog>
-
+          <!-- 事故处理对话框 -->
           <el-dialog
             v-model="warningHandleEvent"
             title="事故处理"
@@ -254,22 +229,6 @@
                     :value="JSON.stringify(item)"
                   /> </el-select
               ></el-form-item>
-
-              <!-- <el-form-item label="处置人姓名：" prop="name">
-                <el-input v-model="warningRuleForm.name" autocomplete="off"></el-input>
-              </el-form-item>
-              <el-form-item label="处置人电话号码：" prop="phone">
-                <el-input
-                  v-model="warningRuleForm.phone"
-                  autocomplete="off"
-                ></el-input>
-              </el-form-item>
-              <el-form-item label="工作单位：" prop="place">
-                <el-input
-                  v-model="warningRuleForm.place"
-                  autocomplete="off"
-                ></el-input>
-              </el-form-item> -->
               <el-form-item label="处置指令内容：" prop="content">
                 <el-input
                   v-model="warningRuleForm.content"
@@ -2390,6 +2349,8 @@ import moment from "moment";
 
 import geoDistrit from "@/assets/510106geo.json";
 import { useStore } from "vuex"
+import AlarmDetailsDialog from './home/components/AlarmDetailsDialog.vue'
+
 const store = useStore()
 
 const zoom = ref(12);
@@ -2761,7 +2722,6 @@ function changeDate() {
 }
 
 const warningRuleFormRef = ref(null);
-const defaultList = reactive([]);
 const EventHistoryList = reactive([]);
 const defaultVisible = ref(false);
 const warningHandleEvent = ref(false);
@@ -2838,13 +2798,7 @@ const warningSubmitForm = async () => {
       });
       alert("提交成功！");
       warningHandleEvent.value = false;
-      // defaultList.pop(rowIndex);
-      // for(let i = 0;i < defaultList.length; i++){
-      // if(defaultList[i].event_id == event_uuid.value){
-      //   defaultList.pop(defaultList[i-1])
-      //     }
-      //  }
-      changeColor();
+
     } else {
       alert("提交失败！");
       return false;
@@ -2871,6 +2825,9 @@ const fault_details = () => {
     defaultVisible.value = true;
   }
 };
+
+
+//#region --- 获取告警事件数据 ---
 const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
   axios({
     url: "/api/event-query/getAllGarbageEvent",
@@ -2904,7 +2861,6 @@ const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
     }
     EventHistoryList.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
     warningTotalRecords.value = EventHistoryList.length;
-    // warningPageCount = parseInt(EventHistoryList.length) % 5;
     warningCurrentPage.value = pageNum;
   });
 };
@@ -2913,54 +2869,101 @@ const getTransport = (pageNum) => {
   // 当前页
   warningCurrentPage.value = pageNum;
 };
-const changeColor = () => {
-  queryAllWarning(warningStart, warningEnd, 1);
-  axios({
-    // url: "/api/lzj/getWarning",
-    url: "/api/event-query/getNeedHandleEvent",
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
-  }).then(function (resp) {
-    defaultList.splice(0, defaultList.length);
-    var data = resp.data.data;
-    for (var key in data) {
-      var default_site = {
-        event_time: data[key].eventTime,
-        site_name: data[key].eventSource,
-        Accident_cause: data[key].eventCause,
-        event_id: data[key].id,
-      };
-      defaultList.push(default_site);
+// #endregion
+
+
+// #region ---  系统灯控制代码 ---
+  //亮灯状态
+  const isLightOn = ref(false);
+  const initSystemLights = async () => {
+    try {
+      // 假设后端返回格式: { "data": { "垃圾系统": true, "城管ai系统": false, ... } }
+      const resp = await axios.get("/api/event-query/getSystemStatus", {
+        headers: { Authorization: `Bearer ${params.token}` }
+      });
+      const statusMap = resp.data?.data || {};
+      // 根据返回的数据设置灯的状态
+      isLightOn.value = Object.values(statusMap).some(status => status === true);
+    } catch (error) {
+      console.error("获取系统状态失败:", error);
     }
-
-    // var default_site = {
-    //   site_name: "西华",
-    //   Accident_cause: "数据服务器断开！",
-    // };
-    // defaultList.push(default_site);
-
-
-    // if (defaultList.length == 5) {
-    //   cause.value = "数据采集服务器断开！";
-    // }
-    // 出现事故
-    if (defaultList.length != 0) {
-      document.getElementById("dotClass").title = "出现异常！请点击查看详情！";
-      document.getElementById("dotClass").style.backgroundColor = "#E12911";
-      document.getElementById("lamp").style.display = "block";
-    } else {
-      document.getElementById("dotClass").style.backgroundColor = "#11e1b0";
-      document.getElementById("lamp").style.display = "none";
-    }
+  };
+  onMounted(() => {
+    initSystemLights();
   });
-};
-changeColor();
-setInterval(changeColor, 60000);
+// #endregion
 
-// =========================================================
-//切换地图显示
+
+// #region --- 点击灯加载未处理事件数据 ---
+
+const defaultList = reactive([]);
+const SYSTEM_MAP = new Map([
+  ["全部系统", defaultList],
+]);
+const handlePageChange = (newPage) => {
+  warningPagination.pageNo = newPage;
+  getSystemWarningData(); // 重新加载数据
+};
+//分页信息
+const currentSystemName = ref('');
+const warningPagination = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  total: 200
+});
+const handleLightClick = async (systemName) => {
+  currentSystemName.value = systemName;
+  warningPagination.pageNo = 1;
+  await getSystemWarningData();
+};
+// 通用加载数据函数
+const getSystemWarningData = async () => {
+  const sysName = currentSystemName.value;
+  if (!sysName) return;
+
+  const targetList = SYSTEM_MAP.get(sysName);
+  if (!targetList) return;
+
+  const API_URL = "/api/event-query/getSystemWarningData";
+
+  // 开启 loading (建议在 UI 上绑定)
+  // loading.value = true;
+  try {
+    const resp = await axios.get(API_URL, {
+      headers: { Authorization: `Bearer ${params.token}` },
+      params: {
+        pageNo: warningPagination.pageNo,
+        pageSize: warningPagination.pageSize,
+        systemName: sysName // 【后端必须支持此参数】
+      }
+    });
+    const pageData = resp.data?.data;
+    const records = pageData?.records || [];
+    
+    // 1. 更新总条数 (给分页组件用)
+    warningPagination.total = pageData?.total || 0;
+
+    // 2. 【关键】清空并替换为当前页数据 (真分页是“看哪页存哪页”)
+    targetList.length = 0; 
+    
+    // 格式化数据
+    const formattedEvents = records.map(item => ({
+      event_time: item.eventTime,
+      site_name: item.eventSource,
+      Accident_cause: item.eventCause,
+      event_id: item.id,
+    }));
+
+    targetList.push(...formattedEvents);
+
+  } catch (error) {
+    console.error("数据加载失败:", error);
+  }
+};
+// #endregion
+
+
+
 function changeArea() {
   polygonVisible.value = !polygonVisible.value;
   jinniuVisible.value = !jinniuVisible.value;

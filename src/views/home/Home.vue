@@ -23,25 +23,175 @@
           ></div>
         </div>
         <!-- 事故详情对话框 -->
-        <el-dialog
-          v-model="defaultVisible"
-          title="事故详情"
-          width="min(90%, 1200px)"
-          @close="handleClose"
-        >
-          <AlarmDetailsDialog
-            :default-list="defaultList"
-            :event-history-list="EventHistoryList"
-            :change-value="changeValue"
-            :warning-current-page="warningPagination.pageNo"
-            :warning-total-records="warningPagination.total"
-            :disabled-date="disabledDate"
-            :shortcuts="shortcuts"
-            @warning-handle-click="warningHandleClick"
-            @change-date="changeDate"
-            @current-change="handlePageChange"
-          />
-        </el-dialog>
+          <el-dialog
+            v-model="defaultVisible"
+          >
+            <!-- 未处理的事件 -->
+            <div>
+              <text style="display: block; text-align: center; font-size: x-large; font-weight: bold">
+                未处理的事件
+              </text>
+              <AlarmDetailsDialog
+                :default-list="defaultList"
+                :event-history-list="EventHistoryList"
+                :change-value="changeValue"
+                :warning-current-page="warningPagination.pageNo"
+                :warning-total-records="warningPagination.total"
+                :disabled-date="disabledDate"
+                :shortcuts="shortcuts"
+                @warning-handle-click="warningHandleClick"
+                @change-date="changeDate"
+                @current-change="handlePageChange"
+              />
+            </div>
+            <!-- 历史告警事件 -->
+            <div>
+              <text style="display: block; text-align: center; font-size: x-large; font-weight: bold">
+                历史告警事件
+              </text>
+              <div>
+                <el-date-picker
+                  v-model="changeValue"
+                  type="daterange"
+                  unlink-panels
+                  range-separator="到"
+                  start-placeholder="选择开始时间"
+                  end-placeholder="选择结束时间"
+                  :disabled-date="disabledDate"
+                  :shortcuts="shortcuts"
+                  @change="changeDate"
+                  size="large"
+                  style="margin: 0.5rem 0 0.5rem"
+                />
+                <el-table
+                  :data="
+                    EventHistoryList.slice((warningCurrentPage - 1) * 5, warningCurrentPage * 5)
+                  "
+                  style="width: 100%"
+                  size="large"
+                  class="data-table"
+                >
+                  <el-table-column
+                    prop="event_id"
+                    label="事件编号"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="event_source"
+                    label="事件来源"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="event_cause"
+                    label="事件详情"
+                    min-width="450"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  />
+                  <el-table-column
+                    prop="event_disposed"
+                    label="事件是否已处理"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="event_time"
+                    label="发生时间"
+                    min-width="250"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="administrator"
+                    label="派发人"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="instruction_time"
+                    label="指令下达时间"
+                    min-width="250"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="administrator_phone"
+                    label="派发人电话"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="instruction_content"
+                    label="指令内容"
+                    min-width="450"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="event_handler"
+                    label="事件处理人"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="handler_phone"
+                    label="处理人电话"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="handler_work"
+                    label="处理人工作单位"
+                    min-width="150"
+                    header-align="center"
+                    align="center"
+                    :show-overflow-tooltip="true"
+                  >
+                  </el-table-column>
+                </el-table>
+                <div class="float-warningEnd">
+                  <el-pagination
+                    background
+                    layout="->,total, prev, pager, next, jumper"
+                    :total="warningTotalRecords"
+                    :current-page="warningCurrentPage"
+                    :page-size="5"
+                    @current-change="getTransport"
+                  />
+                </div>
+              </div>
+            </div>
+          </el-dialog>
         <!-- 事故处理对话框 -->
         <el-dialog
           v-model="warningHandleEvent"
@@ -737,7 +887,7 @@
                   />
                   <el-table
                       :data="
-            hwzyHistoryList.slice(
+            subSystemLists.hwzy.slice(
               (warningCurrentPage - 1) * 5,
               warningCurrentPage * 5)"
                       style="width: 100%"
@@ -1267,7 +1417,7 @@
                   />
                   <el-table
                       :data="
-                        ljqsmHistoryList.slice(
+                        subSystemLists.ljqsm.slice(
                         (warningCurrentPage - 1) * 5,
                         warningCurrentPage * 5)"
                       style="width: 100%"
@@ -1784,7 +1934,7 @@
                   />
                   <el-table
                       :data="
-                        toiletWarningHistoryList.slice(
+                        subSystemLists.toilet.slice(
                           (warningCurrentPage - 1) * 5,
                           warningCurrentPage * 5)"
                       style="width: 100%"
@@ -4780,52 +4930,349 @@ const getCompanyByPerson = (person) => {
 
 
 
+
+
+// #region  系统灯控制代码
+  //亮灯状态
+  const lightStatus = reactive({
+    "垃圾系统": false,
+    "垃圾分类系统": false,
+    "智慧公厕管家": false,
+    "餐饮油烟系统": false,
+    "调度指挥系统": false,
+    "共享单车系统": false,
+    "扬尘治理系统": false,
+    "景观照明系统": false,
+    "照明管家系统": false,
+    "临街店铺系统": false,
+    "突出问题系统": false,
+    "城管ai系统": false,
+    "网络理政系统": false,
+    "数字城管系统": false
+  });
+  //整体亮灯状态——只要有任意子系统为 true，整体大灯就亮
+  const isLightOn = computed(() => {
+    return isHjwsLightOn || isSrzxLightOn || isCsjgLightOn || isSzcgLightOn;
+  });
+  // 四大板块的亮灯状态——只要板块下的任意子系统为 true，板块大灯就亮
+  const isHjwsLightOn = computed(() => {
+    return lightStatus["垃圾系统"] || lightStatus["垃圾分类系统"] || lightStatus["智慧公厕管家"];
+  });
+  const isSrzxLightOn = computed(() => {
+    return lightStatus["餐饮油烟系统"] || lightStatus["调度指挥系统"] || lightStatus["共享单车系统"] || lightStatus["扬尘治理系统"];
+  });
+  const isCsjgLightOn = computed(() => {
+    return lightStatus["景观照明系统"] || lightStatus["照明管家系统"] || lightStatus["临街店铺系统"];
+  });
+  const isSzcgLightOn = computed(() => {
+    return lightStatus["突出问题系统"] || lightStatus["城管ai系统"] || lightStatus["网络理政系统"] || lightStatus["数字城管系统"];
+  });
+  // --- 初始化系统灯 ---
+  const initSystemLights = async () => {
+    try {
+      // 假设后端返回格式: { "data": { "垃圾系统": true, "城管ai系统": false, ... } }
+      const resp = await axios.get("/api/event-query/getSystemStatus", {
+        headers: { Authorization: `Bearer ${params.token}` }
+      });
+      const statusMap = resp.data?.data || {};
+
+      // 更新lightStatus
+      Object.keys(statusMap).forEach(key => {
+        if (key in lightStatus) {
+          lightStatus[key] = statusMap[key];
+        }
+      });
+    } catch (error) {
+      console.error("获取系统状态失败:", error);
+    }
+  };
+  initSystemLights();
 // #endregion
 
 
-
-let warningStart = moment("2025-01-01").format("YYYY-MM-DD");
-let warningEnd = moment().format("YYYY-MM-DD");
-let logStart = moment().startOf("month").format("YYYY-MM-DD");
-let logEnd = moment().add(1, "days").format("YYYY-MM-DD");
-let changeValue = ref(["", ""]);
-let changeValueLog = ref(["", ""]);
-// 禁选今天以后的日期以及没有数据的
-const disabledDate = (time) => {
-  return (
-    time.getTime() > new Date().getTime()
-  );
-};
-function changeDate() {
-  warningStart = moment(changeValue.value[0]).format("YYYY-MM-DD");
-  warningEnd = moment(changeValue.value[1]).format("YYYY-MM-DD");
-}
-function changeDateLog() {
-  logStart = moment(changeValueLog.value[0]).format("YYYY-MM-DD");
-  logEnd = moment(changeValueLog.value[1]).add(1, "days").format("YYYY-MM-DD");
-  // warningEnd =  new Date();
-  getClickLogList(selectedSys.value, logStart, logEnd, 1);
-}
-
-const warningRuleFormRef = ref(null);
-const EventHistoryList = reactive([]);
+// #region  点击灯加载未处理事件数据
+//1. 定义响应式数据列表 ---
 const defaultVisible = ref(false);
+const hwzyVisible = ref(false);
+const ljqsmVisible = ref(false);
+const toiletWarningVisible = ref(false);
+const hjwsVisible = ref(false);
+//全部和四大板块
+const defaultList = reactive([]);
+const hjwsList = reactive([]);
+const srzxList = reactive([]);
+const csjgList = reactive([]);
+const szcgList = reactive([]);
+//子系统
+const hwzyList = reactive([]);
+const ljqsmList = reactive([]);
+const toiletWarningList = reactive([]);
+const cyyyList = reactive([]);
+const ddzhList = reactive([]);
+const gxdcList = reactive([]);
+const yczlList = reactive([]);
+const jgzmList = reactive([]);
+const zmgjList = reactive([]);
+const ljdpList = reactive([]);
+const tcwtList = reactive([]);
+const cgaiList = reactive([]);
+const wllzList = reactive([]);
+const szhcsList = reactive([]);
+
+// --- 3. 系统映射表 ---
+const SYSTEM_MAP = new Map([
+  ["全部系统", defaultList],
+  ["环境卫生板块", hjwsList],
+  ["市容秩序板块", srzxList],
+  ["城市景观板块", csjgList],
+  ["数字城管板块", szcgList],
+  ["垃圾系统", hwzyList],
+  ["垃圾分类系统", ljqsmList],
+  ["智慧公厕管家", toiletWarningList],
+  ["餐饮油烟系统", cyyyList],
+  ["调度指挥系统", ddzhList],
+  ["共享单车系统", gxdcList],
+  ["扬尘治理系统", yczlList],
+  ["景观照明系统", jgzmList],
+  ["照明管家系统", zmgjList],
+  ["临街店铺系统", ljdpList],
+  ["突出问题系统", tcwtList],
+  ["城管ai系统", cgaiList],
+  ["网络理政系统", wllzList],
+  ["数字城管系统", szhcsList],
+]);
+
+const handlePageChange = (newPage) => {
+  warningPagination.pageNo = newPage;
+  getSystemWarningData(); // 重新加载数据
+};
+//分页信息
+const currentSystemName = ref('');
+const warningPagination = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  total: 200
+});
+const handleLightClick = async (systemName) => {
+  currentSystemName.value = systemName;
+  await getSystemWarningData();
+};
+// 通用加载数据函数
+const getSystemWarningData = async () => {
+  const sysName = currentSystemName.value;
+  if (!sysName) return;
+
+  const targetList = SYSTEM_MAP.get(sysName);
+  if (!targetList) return;
+
+  const API_URL = "/api/event-query/getSystemWarningData";
+
+  // 开启 loading (建议在 UI 上绑定)
+  loading.value = true;
+  try {
+    const resp = await axios.get(API_URL, {
+      headers: { Authorization: `Bearer ${params.token}` },
+      params: {
+        pageNo: warningPagination.pageNo,
+        pageSize: warningPagination.pageSize,
+        systemName: sysName // 【后端必须支持此参数】
+      }
+    });
+    const pageData = resp.data?.data;
+    const records = pageData?.records || [];
+    
+    // 1. 更新总条数 (给分页组件用)
+    warningPagination.total = pageData?.total || 0;
+
+    // 2. 【关键】清空并替换为当前页数据 (真分页是“看哪页存哪页”)
+    targetList.length = 0; 
+    
+    // 格式化数据
+    const formattedEvents = records.map(item => ({
+      event_time: item.eventTime,
+      site_name: item.eventSource,
+      Accident_cause: item.eventCause,
+      event_id: item.id,
+    }));
+
+    targetList.push(...formattedEvents);
+
+  } catch (error) {
+    console.error("数据加载失败:", error);
+  }finally {
+    loading.value = false;
+  }
+};
+// #endregion
+
+
+// #region  获取历史告警事件列表
+// 原始全量列表
+const EventHistoryList = ref([]);
+const warningCurrentPage = ref(1);
+const warningTotalRecords = ref(0);
+// 系统分类配置映射：系统名 -> 对应的子列表Key
+const systemCategoryMap = {
+  "垃圾系统": "hwzy", "垃圾分类系统": "ljqsm", "厕所系统": "toilet",
+  "餐饮油烟系统": "cyyy", "调度指挥系统": "ddzh", "共享单车系统": "gxdc", "扬尘治理系统": "yczl",
+  "景观照明系统": "jgzm", "照明管家系统": "zmgj", "临街店铺系统": "ljdp",
+  "突出问题系统": "tcwt", "城管ai系统": "cgai", "网络理政系统": "wllz", "数字城管系统": "szhcs"
+};
+
+// 存储各子系统的列表数据 (使用一个大对象代替十几个单独的数组)
+const subSystemLists = reactive({
+  hwzy: [], ljqsm: [], toilet: [],
+  cyyy: [], ddzh: [], gxdc: [], yczl: [],
+  jgzm: [], zmgj: [], ljdp: [],
+  tcwt: [], cgai: [], wllz: [], szhcs: []
+});
+
+// 使用 computed 自动聚合四大板块 (数据源变更时自动更新，无需手动 push)
+const hjwsHistoryList = computed(() => [...subSystemLists.hwzy, ...subSystemLists.ljqsm, ...subSystemLists.toilet]);
+const srzxHistoryList = computed(() => [...subSystemLists.cyyy, ...subSystemLists.ddzh, ...subSystemLists.gxdc, ...subSystemLists.yczl]);
+const csjgHistoryList = computed(() => [...subSystemLists.jgzm, ...subSystemLists.zmgj, ...subSystemLists.ljdp]);
+const szcgHistoryList = computed(() => [...subSystemLists.tcwt, ...subSystemLists.cgai, ...subSystemLists.wllz, ...subSystemLists.szhcs]);
+
+// 查询告警列表函数
+const queryAllWarning = async (startTime, endTime, pageNum) => {
+  try {
+    const resp = await axios.get("/api/event-query/getAllGarbageEvent", {
+      headers: { Authorization: "Bearer " + (typeof params !== 'undefined' ? params.token : '') },
+      params: { startTime, endTime },
+    });
+
+    const data = resp.data.data || [];
+    
+    // 1. 清空所有列表 (利用 Object.keys 遍历清空)
+    EventHistoryList.value = [];
+    Object.keys(subSystemLists).forEach(key => subSystemLists[key] = []);
+
+    // 2. 临时数组用于收集数据，避免循环中频繁响应式更新
+    const tempList = [];
+    const tempSubLists = {}; 
+    // 初始化临时子列表容器
+    Object.keys(subSystemLists).forEach(k => tempSubLists[k] = []);
+
+    // 3. 遍历数据
+    data.forEach(item => {
+      const formattedItem = {
+        event_source: item.eventSource,
+        event_cause: item.eventCause,
+        administrator: item.administrator,
+        administrator_phone: item.administratorPhone,
+        instruction_time: item.instructionTime,
+        instruction_content: item.instructionContent,
+        event_handler: item.eventHandler,
+        handler_phone: item.handlerPhone,
+        handler_work: item.handlerWork,
+        event_id: item.id,
+        event_time: item.eventTime,
+        event_disposed: item.disposedSign,
+        // 保留原始系统名以便不时之需
+        systemName: item.systemName 
+      };
+
+      tempList.push(formattedItem);
+
+      // 利用映射表匹配系统，替代 Switch Case
+      const listKey = systemCategoryMap[item.systemName];
+      if (listKey && tempSubLists[listKey]) {
+        tempSubLists[listKey].push(formattedItem);
+      }
+    });
+
+    // 4. 排序
+    tempList.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
+
+    // 5. 统一赋值 (减少触发响应式更新的次数)
+    EventHistoryList.value = tempList;
+    Object.keys(tempSubLists).forEach(key => {
+      subSystemLists[key] = tempSubLists[key];
+    });
+
+    warningTotalRecords.value = tempList.length;
+    warningCurrentPage.value = pageNum;
+
+  } catch (error) {
+    console.error("获取告警列表失败", error);
+  }
+};
+const getTransport = (pageNum) => {
+  warningCurrentPage.value = pageNum;
+};
+
+onMounted(() => {
+  queryAllWarning(dateQuery.warningStart, dateQuery.warningEnd, 1);
+});
+setInterval(() => {
+  queryAllWarning(dateQuery.warningStart, dateQuery.warningEnd, 1);
+}, 360000);
+// #endregion
+
+
+// #region  查询日期处理逻辑
+// 统一管理日期查询参数
+const dateQuery = reactive({
+  warningStart: moment("2025-01-01").format("YYYY-MM-DD"),
+  warningEnd: moment().format("YYYY-MM-DD"),
+  logStart: moment().startOf("month").format("YYYY-MM-DD"),
+  logEnd: moment().add(1, "days").format("YYYY-MM-DD"),
+});
+// 日期选择器绑定值
+const changeValue = ref(["", ""]);
+const changeValueLog = ref(["", ""]);
+// 日期变更
+const disabledDate = (time) => time.getTime() > Date.now();
+
+const changeDate = () => {
+  if (changeValue.value?.length === 2) {
+    dateQuery.warningStart = moment(changeValue.value[0]).format("YYYY-MM-DD");
+    dateQuery.warningEnd = moment(changeValue.value[1]).format("YYYY-MM-DD");
+    // 这里如果需要触发查询，应该手动调用 queryAllWarning
+    queryAllWarning(dateQuery.warningStart, dateQuery.warningEnd, 1);
+  }
+};
+const changeDateLog = () => {
+  if (changeValueLog.value?.length === 2) {
+    dateQuery.logStart = moment(changeValueLog.value[0]).format("YYYY-MM-DD");
+    dateQuery.logEnd = moment(changeValueLog.value[1]).add(1, "days").format("YYYY-MM-DD");
+    // 假设 getClickLogList 在外部定义
+    if (typeof getClickLogList === 'function') {
+      getClickLogList(selectedSys.value, dateQuery.logStart, dateQuery.logEnd, 1);
+    }
+  }
+};
+// #endregion
+
+
+// #region  告警处理表单提交
+
 const warningHandleEvent = ref(false);
 const warningToken = ref("");
 const event_uuid = ref("");
 const rowIndex = ref("");
-// const instructTime = ref("");
+
+const warningRuleFormRef = ref(null);
 const warningRuleForm = reactive({
   name: "",
   phone: "",
   place: "",
   content: "",
 });
-
 const warningRules = reactive({
   info: [{ required: "true", message: "处置人信息不能为空", trigger: "blur" }],
   content: [{ required: "true", message: "指令内容不能为空", trigger: "blur" }],
 });
+
+const warningHandleClick = (index, row) => {
+  event_uuid.value = row.event_id;
+  rowIndex.value = index;
+  warningHandleEvent.value = true;
+  warningRuleForm.phone = "";
+  warningRuleForm.name = "";
+  warningRuleForm.place = "";
+  warningRuleForm.content = "";
+};
 
 const warningSubmitForm = async (el) => {
   const formEl = Array.isArray(el) ? el[0] : el;
@@ -4910,8 +5357,8 @@ const warningSubmitForm = async (el) => {
       warningHandleEvent.value = false // 关闭弹窗
       
       // 如果你需要重置表单
-      // formEl.resetFields() 
-      
+      handleLightClick(currentSystemName.value);
+      queryAllWarning(dateQuery.warningStart, dateQuery.warningEnd, warningCurrentPage.value);
 
     } catch (error) {
       console.error('接口请求失败:', error)
@@ -4920,313 +5367,9 @@ const warningSubmitForm = async (el) => {
   })
 }
 
-const warningHandleClick = (index, row) => {
-  event_uuid.value = row.event_id;
-  rowIndex.value = index;
-  warningHandleEvent.value = true;
-  warningRuleForm.phone = "";
-  warningRuleForm.name = "";
-  warningRuleForm.place = "";
-  warningRuleForm.content = "";
-};
-
-
-//四大板块的历史告警事件列表
-const hjwsHistoryList = reactive([]);
-const srzxHistoryList = reactive([]);
-const csjgHistoryList = reactive([]);
-const szcgHistoryList = reactive([]);
-//每个子系统的历史告警事件列表
-const hwzyHistoryList = reactive([]);
-const ljqsmHistoryList = reactive([]);
-const toiletWarningHistoryList = reactive([]);
-const cyyyHistoryList = reactive([]);
-const ddzhHistoryList = reactive([]);
-const gxdcHistoryList = reactive([]);
-const yczlHistoryList = reactive([]);
-const jgzmHistoryList = reactive([]);
-const zmgjHistoryList = reactive([]);
-const ljdpHistoryList = reactive([]);
-const tcwtHistoryList = reactive([]);
-const cgaiHistoryList = reactive([]);
-const wllzHistoryList = reactive([]);
-const szhcsHistoryList = reactive([]);
-const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
-  axios({
-    url: "/api/event-query/getAllGarbageEvent",
-    method: "get",
-    headers: {
-      Authorization: "Bearer " + params.token,
-    },
-    params: {
-      startTime: warningStartTime,
-      endTime: warningEndTime,
-    },
-  }).then(function (resp) {
-    var data = resp.data.data;
-    EventHistoryList.splice(0, EventHistoryList.length);
-    for (var key in data) {
-      var default_site = {
-        event_source: data[key].eventSource,
-        event_cause: data[key].eventCause,
-        administrator: data[key].administrator,
-        administrator_phone: data[key].administratorPhone,
-        instruction_time: data[key].instructionTime,
-        instruction_content: data[key].instructionContent,
-        event_handler: data[key].eventHandler,
-        handler_phone: data[key].handlerPhone,
-        handler_work: data[key].handlerWork,
-        event_id: data[key].id,
-        event_time: data[key].eventTime,
-        event_disposed: data[key].disposedSign,
-      };
-      EventHistoryList.push(default_site);
-      switch (data[key].systemName) {
-        case "垃圾系统":
-          hwzyHistoryList.push(default_site);
-          break;
-        case "垃圾分类系统":
-          ljqsmHistoryList.push(default_site);
-          break;
-        case "厕所系统":
-          toiletWarningHistoryList.push(default_site);
-          break;
-        case "餐饮油烟系统":
-          cyyyHistoryList.push(default_site);
-          break;
-        case "调度指挥系统":
-          ddzhHistoryList.push(default_site);
-          break;
-        case "共享单车系统":
-          gxdcHistoryList.push(default_site);
-          break;
-        case "扬尘治理系统":
-          yczlHistoryList.push(default_site);
-          break;
-        case "景观照明系统":
-          jgzmHistoryList.push(default_site);
-          break;
-        case "照明管家系统":
-          zmgjHistoryList.push(default_site);
-          break;
-        case "临街店铺系统":
-          ljdpHistoryList.push(default_site);
-          break;
-        case "突出问题系统":
-          tcwtHistoryList.push(default_site);
-          break;
-        case "城管ai系统":
-          cgaiHistoryList.push(default_site);
-          break;
-        case "网络理政系统":
-          wllzHistoryList.push(default_site);
-          break;
-        case "数字城管系统":
-          szhcsHistoryList.push(default_site);
-          break;
-        default:
-          //未匹配到的系统名处理
-          break;
-      }
-    }
-    hjwsHistoryList.push(...hwzyHistoryList, ...ljqsmHistoryList, ...toiletWarningHistoryList);
-    srzxHistoryList.push(...cyyyHistoryList, ...ddzhHistoryList, ...gxdcHistoryList, ...yczlHistoryList);
-    csjgHistoryList.push(...jgzmHistoryList, ...zmgjHistoryList, ...ljdpHistoryList);
-    szcgHistoryList.push(...tcwtHistoryList, ...cgaiHistoryList, ...wllzHistoryList, ...szhcsHistoryList);
-    EventHistoryList.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
-    warningTotalRecords.value = EventHistoryList.length;
-    // warningPageCount = parseInt(EventHistoryList.length) % 5;
-    warningCurrentPage.value = pageNum;
-  });
-};
-
-const hwzyVisible = ref(false);
-const ljqsmVisible = ref(false);
-const toiletWarningVisible = ref(false);
-const hjwsVisible = ref(false);
-const warningTotalRecords = ref(0);
-
-
-// #region ---  系统灯控制代码 ---
-  //亮灯状态
-  const lightStatus = reactive({
-    "垃圾系统": false,
-    "垃圾分类系统": false,
-    "智慧公厕管家": false,
-    "餐饮油烟系统": false,
-    "调度指挥系统": false,
-    "共享单车系统": false,
-    "扬尘治理系统": false,
-    "景观照明系统": false,
-    "照明管家系统": false,
-    "临街店铺系统": false,
-    "突出问题系统": false,
-    "城管ai系统": false,
-    "网络理政系统": false,
-    "数字城管系统": false
-  });
-  //整体亮灯状态——只要有任意子系统为 true，整体大灯就亮
-  const isLightOn = computed(() => {
-    return isHjwsLightOn || isSrzxLightOn || isCsjgLightOn || isSzcgLightOn;
-  });
-  // 四大板块的亮灯状态——只要板块下的任意子系统为 true，板块大灯就亮
-  const isHjwsLightOn = computed(() => {
-    return lightStatus["垃圾系统"] || lightStatus["垃圾分类系统"] || lightStatus["智慧公厕管家"];
-  });
-  const isSrzxLightOn = computed(() => {
-    return lightStatus["餐饮油烟系统"] || lightStatus["调度指挥系统"] || lightStatus["共享单车系统"] || lightStatus["扬尘治理系统"];
-  });
-  const isCsjgLightOn = computed(() => {
-    return lightStatus["景观照明系统"] || lightStatus["照明管家系统"] || lightStatus["临街店铺系统"];
-  });
-  const isSzcgLightOn = computed(() => {
-    return lightStatus["突出问题系统"] || lightStatus["城管ai系统"] || lightStatus["网络理政系统"] || lightStatus["数字城管系统"];
-  });
-  // --- 初始化系统灯 ---
-  const initSystemLights = async () => {
-    try {
-      // 假设后端返回格式: { "data": { "垃圾系统": true, "城管ai系统": false, ... } }
-      const resp = await axios.get("/api/event-query/getSystemStatus", {
-        headers: { Authorization: `Bearer ${params.token}` }
-      });
-      const statusMap = resp.data?.data || {};
-
-      // 更新lightStatus
-      Object.keys(statusMap).forEach(key => {
-        if (key in lightStatus) {
-          lightStatus[key] = statusMap[key];
-        }
-      });
-    } catch (error) {
-      console.error("获取系统状态失败:", error);
-    }
-  };
-  initSystemLights();
 // #endregion
 
 
-// #region --- 点击灯加载未处理事件数据 ---
-//1. 定义响应式数据列表 ---
-//全部和四大板块
-const defaultList = reactive([]);
-const hjwsList = reactive([]);
-const srzxList = reactive([]);
-const csjgList = reactive([]);
-const szcgList = reactive([]);
-//子系统
-const hwzyList = reactive([]);
-const ljqsmList = reactive([]);
-const toiletWarningList = reactive([]);
-const cyyyList = reactive([]);
-const ddzhList = reactive([]);
-const gxdcList = reactive([]);
-const yczlList = reactive([]);
-const jgzmList = reactive([]);
-const zmgjList = reactive([]);
-const ljdpList = reactive([]);
-const tcwtList = reactive([]);
-const cgaiList = reactive([]);
-const wllzList = reactive([]);
-const szhcsList = reactive([]);
-
-// --- 3. 系统映射表 ---
-const SYSTEM_MAP = new Map([
-  ["全部系统", defaultList],
-  ["环境卫生板块", hjwsList],
-  ["市容秩序板块", srzxList],
-  ["城市景观板块", csjgList],
-  ["数字城管板块", szcgList],
-  ["垃圾系统", hwzyList],
-  ["垃圾分类系统", ljqsmList],
-  ["智慧公厕管家", toiletWarningList],
-  ["餐饮油烟系统", cyyyList],
-  ["调度指挥系统", ddzhList],
-  ["共享单车系统", gxdcList],
-  ["扬尘治理系统", yczlList],
-  ["景观照明系统", jgzmList],
-  ["照明管家系统", zmgjList],
-  ["临街店铺系统", ljdpList],
-  ["突出问题系统", tcwtList],
-  ["城管ai系统", cgaiList],
-  ["网络理政系统", wllzList],
-  ["数字城管系统", szhcsList],
-]);
-
-const ALL_LISTS = [
-  defaultList, hjwsList, srzxList, csjgList, szcgList,
-  hwzyList, ljqsmList, toiletWarningList, cyyyList, ddzhList,
-  gxdcList, yczlList, jgzmList, zmgjList, ljdpList,
-  tcwtList, cgaiList, wllzList, szhcsList
-];
-const handlePageChange = (newPage) => {
-  warningPagination.pageNo = newPage;
-  getSystemWarningData(); // 重新加载数据
-};
-//分页信息
-const currentSystemName = ref('');
-const warningPagination = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  total: 200
-});
-const handleLightClick = async (systemName) => {
-  currentSystemName.value = systemName;
-  warningPagination.pageNo = 1;
-  await getSystemWarningData();
-};
-// 通用加载数据函数
-const getSystemWarningData = async () => {
-  const sysName = currentSystemName.value;
-  if (!sysName) return;
-
-  const targetList = SYSTEM_MAP.get(sysName);
-  if (!targetList) return;
-
-  const API_URL = "/api/event-query/getSystemWarningData";
-
-  // 开启 loading (建议在 UI 上绑定)
-  loading.value = true;
-  try {
-    const resp = await axios.get(API_URL, {
-      headers: { Authorization: `Bearer ${params.token}` },
-      params: {
-        pageNo: warningPagination.pageNo,
-        pageSize: warningPagination.pageSize,
-        systemName: sysName // 【后端必须支持此参数】
-      }
-    });
-    const pageData = resp.data?.data;
-    const records = pageData?.records || [];
-    
-    // 1. 更新总条数 (给分页组件用)
-    warningPagination.total = pageData?.total || 0;
-
-    // 2. 【关键】清空并替换为当前页数据 (真分页是“看哪页存哪页”)
-    targetList.length = 0; 
-    
-    // 格式化数据
-    const formattedEvents = records.map(item => ({
-      event_time: item.eventTime,
-      site_name: item.eventSource,
-      Accident_cause: item.eventCause,
-      event_id: item.id,
-    }));
-
-    targetList.push(...formattedEvents);
-
-  } catch (error) {
-    console.error("数据加载失败:", error);
-  }finally {
-    loading.value = false;
-  }
-};
-// #endregion
-
-
-
-setInterval(() => {
-    queryAllWarning(warningStart, warningEnd, 1);
-}, 360000);
 
 const init_ljqsm = async () => {
   axios({
@@ -5374,7 +5517,6 @@ const submitAddForm = async () => {
           return false;
         }
       }
-      // instructTime.value = moment().format("YYYY-MM-DD HH:mm:ss");
 
       axios({
         url: "/api/auth/register",
@@ -5585,19 +5727,19 @@ const sysOptions = [
 ];
 
 const handleSelectSysChange= () => {
-  getClickLogList(selectedSys.value, logStart, logEnd, 1);
+  getClickLogList(selectedSys.value, dateQuery.logStart, dateQuery.logEnd, 1);
 };
 
 const showClickLog = async () => {
   try {
     clickLogDialog.value = true;
-    getClickLogList(selectedSys.value, logStart, logEnd, 1);
+    getClickLogList(selectedSys.value, dateQuery.logStart, dateQuery.logEnd, 1);
   } catch (error) {
     console.log("showClickLog:  " + error);
   }
 };
 const exportExcelOfClickLog = () => {
-  var URL = "/api/click-log/excel?start=" + logStart + "&end=" + logEnd;
+  var URL = "/api/click-log/excel?start=" + dateQuery.logStart + "&end=" + dateQuery.logEnd;
 
   axios({
     url: URL,
@@ -5614,7 +5756,7 @@ const exportExcelOfClickLog = () => {
 
       // let contentDisposition = res.headers['content-disposition'];
       // let filename = decodeURIComponent(contentDisposition.split("filename=")[1]);
-      let filename = logStart + "至" + logEnd + "城市管家点击日志.xlsx";
+      let filename = dateQuery.logStart + "至" + dateQuery.logEnd + "城市管家点击日志.xlsx";
       // 创建 a标签 执行下载
       let downloadElement = document.createElement("a");
       let href = window.URL.createObjectURL(blob); //创建下载的链接
@@ -5816,7 +5958,7 @@ const getClickLogApplication = (pageNum) => {
       selectedSys.value == "临街店铺管家" ||
       selectedSys.value == "餐饮油烟管家" ||
       selectedSys.value == "调度指挥管家") {
-    getClickLogList(selectedSys.value, logStart, logEnd, pageNum);
+    getClickLogList(selectedSys.value, dateQuery.logStart, dateQuery.logEnd, pageNum);
   } else {
     logListView.splice(0, logListView.length, ...clickLogList.slice(
       (pageNum - 1) * 10,

@@ -21,7 +21,6 @@ export default defineConfig({
 
   server: {
     port: 8080, // 保持端口一致
-    open: true, // 自动打开浏览器
     
     // 3. 对应原本的 devServer.proxy (语法翻译)
     proxy: {
