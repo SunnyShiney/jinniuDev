@@ -3048,7 +3048,7 @@
                           <div class="list_container">
                             <div class="list_title">@零售类店铺数量</div>
                             <div class="list_body">
-                              <li v-for="(project, index) in retailCount">
+                              <li v-for="(project, index) in retailCount" :key="index">
                                 {{ project }}
                               </li>
                             </div>
@@ -3056,7 +3056,7 @@
                           <div class="list_container">
                             <div class="list_title">@餐饮类店铺数量</div>
                             <div class="list_body">
-                              <li v-for="(project, index) in cateringCount">
+                              <li v-for="(project, index) in cateringCount" :key="index">
                                 {{ project }}
                               </li>
                             </div>
@@ -3064,7 +3064,7 @@
                           <div class="list_container">
                             <div class="list_title">@服务类店铺数量</div>
                             <div class="list_body">
-                              <li v-for="(project, index) in serviceCount">
+                              <li v-for="(project, index) in serviceCount" :key="index">
                                 {{ project }}
                               </li>
                             </div>
@@ -3072,7 +3072,7 @@
                           <div class="list_container">
                             <div class="list_title">@其他行业店铺数量</div>
                             <div class="list_body">
-                              <li v-for="(project, index) in otherCount">
+                              <li v-for="(project, index) in otherCount" :key="index">
                                 {{ project }}
                               </li>
                             </div>
@@ -3202,9 +3202,7 @@
                           <div class="list_container">
                             <div class="list_title">@报警照明设备数</div>
                             <div class="list_body">
-                              <li
-                                v-for="(project, index) in jgzm_alarm_projrect"
-                              >
+                              <li v-for="(project, index) in jgzm_alarm_projrect" :key="index">
                                 {{ project }}
                               </li>
                             </div>
@@ -3212,9 +3210,7 @@
                           <div class="list_container">
                             <div class="list_title">@昨日电量统计（KWh）</div>
                             <div class="list_body">
-                              <li
-                                v-for="(project, index) in jgzm_day_consumption"
-                              >
+                              <li v-for="(project, index) in jgzm_day_consumption" :key="index">
                                 {{ project }}
                               </li>
                             </div>
@@ -4799,31 +4795,16 @@ const tableData = [
 ];
 
 
-
-// #region  获取预警人员列表
-const warningPersonList = ref([]);
-const getAllWarningPersonList = async () => {
-  try {
-    const resp = await axios({
-      url: "/api/auth/allWarningPersonList",
-      method: "get",
-      headers: {
-        Authorization: "Bearer " + params.token,
-      },
-    });
-    warningPersonList.value = resp.data.data;
-  } catch (err) {
-    console.error("获取人员信息失败：", err);
-  }
+const warningFormatResult = (person) => {
+  if (!person) return '';
+  // 注意：这里必须使用 real_name, telephone, department (下划线)
+  // 之前的 undefined 是因为你可能写成了 person.name 或 person.realName
+  return `${person.real_name} - ${person.telephone} - ${person.department}`;
 };
-onMounted(() => {
-  getAllWarningPersonList();
-});
 
-
-const warningFormatResult = (result) => {
-  return `${result.name} - ${result.phone} - ${result.company}`;
-};
+// const warningFormatResult = (result) => {
+//   return `${result.name} - ${result.phone} - ${result.company}`;
+// };
 
 // 1. 定义人员/公司映射配置 (核心优化: 外部化配置)
 // Key: 手机号 (telephone) 或 姓名 (realName)
@@ -5245,6 +5226,28 @@ const changeDateLog = () => {
 // #endregion
 
 
+// #region  获取预警人员列表
+const warningPersonList = ref([]);
+const getAllWarningPersonList = async () => {
+  try {
+    const resp = await axios({
+      url: "/api/auth/allWarningPersonList",
+      method: "get",
+      headers: {
+        Authorization: "Bearer " + params.token,
+      },
+    });
+    warningPersonList.value = resp.data.data;
+  } catch (err) {
+    console.error("获取人员信息失败：", err);
+  }
+};
+onMounted(() => {
+  getAllWarningPersonList();
+});
+// #endregion
+
+
 // #region  告警处理表单提交
 
 const warningHandleEvent = ref(false);
@@ -5642,67 +5645,7 @@ let page_Count_clickLog = 0;
 const permissionForm = ref(null);
 const peopleAdd = ref(false);
 const applicationId = ref("");
-const radioGxdc = ref([]);
-const radioHwzy = ref([]);
-const radioLjsj = ref([]);
-const radioCgAI = ref([]);
-const radioCgsyd = ref([]);
-const radioGgzp = ref([]);
-const radioYczl = ref([]);
-const radioSzhcs = ref([]);
-const radioJgzm = ref([]);
-const radioShlj = ref([]);
-const radioNewZmgj = ref([]);
-const radioZhxz = ref([]);
-const radioDdzh = ref([]);
-const radioCclj = ref([]);
-const radioCyyy = ref([]);
-const permissonGxdc = ref("");
-const oldRadioGxdc = ref([]);
-const checkGxdc = ref(false);
-const permissonHwzy = ref("");
-const oldRadioHwzy = ref([]);
-const checkHwzy = ref(false);
-const permissonLjsj = ref("");
-const oldRadioLjsj = ref([]);
-const checkLjsj = ref(false);
-const permissonCgAI = ref("");
-const oldRadioCgAI = ref([]);
-const checkCgAI = ref(false);
-const permissonCgsyd = ref("");
-const oldRadioCgsyd = ref([]);
-const checkCgsyd = ref(false);
-const permissonGgzp = ref("");
-const oldRadioGgzp = ref([]);
-const checkGgzp = ref(false);
-const permissonYczl = ref("");
-const oldRadioYczl = ref([]);
-const checkYczl = ref(false);
-const permissonSzhcs = ref("");
-const oldRadioSzhcs = ref([]);
-const checkSzhcs = ref(false);
-const permissonJgzm = ref("");
-const oldRadioJgzm = ref([]);
-const checkJgzm = ref(false);
-const permissonNewZmgj = ref("");
-const oldRadioNewZmgj = ref([]);
-const checkNewZmgj = ref(false);
-const permissonShlj = ref("");
-const oldRadioShlj = ref([]);
-const checkShlj = ref(false);
-const permissonZhxz = ref("");
-const oldRadioZhxz = ref([]);
-const checkZhxz = ref(false);
-const permissonDdzh = ref("");
-const oldRadioDdzh = ref([]);
-const checkDdzh = ref(false);
-const permissonCclj = ref("");
-const oldRadioCclj = ref([]);
-const checkCclj = ref(false);
-const permissonCyyy = ref("");
-const oldRadioCyyy = ref([]);
-const checkCyyy = ref(false);
-//
+
 
 const clickLogDialog = ref(false);
 const selectedSys = ref("城市管家");
@@ -8273,21 +8216,6 @@ const echartInit = () => {
       xAxis: {
         type: "category",
         data: xLabels,
-        // data: [
-        //   tableData[0].areaname,
-        //   tableData[1].areaname,
-        //   tableData[2].areaname,
-        //   tableData[3].areaname,
-        //   tableData[4].areaname,
-        //   tableData[5].areaname,
-        //   tableData[6].areaname,
-        //   tableData[7].areaname,
-        //   tableData[8].areaname,
-        //   tableData[9].areaname,
-        //   tableData[10].areaname,
-        //   tableData[11].areaname,
-        //   tableData[12].areaname,
-        // ],
         axisTick: {
           alignWithLabel: true,
         },
@@ -8303,21 +8231,6 @@ const echartInit = () => {
       series: [
         {
           data: yValues,
-          // data: [
-          //   tableData[0].value,
-          //   tableData[1].value,
-          //   tableData[2].value,
-          //   tableData[3].value,
-          //   tableData[4].value,
-          //   tableData[5].value,
-          //   tableData[6].value,
-          //   tableData[7].value,
-          //   tableData[8].value,
-          //   tableData[9].value,
-          //   tableData[10].value,
-          //   tableData[11].value,
-          //   tableData[12].value,
-          // ],
           type: "bar",
           barWidth: '10%',
           showBackground: true,
@@ -8448,123 +8361,6 @@ const echartInit = () => {
 
     myChart_yyxt2.setOption(option_yyxt2);
   });
-  // getTouSU().then((data) => {
-  //   if (data.tsLastNow.length < 12) {
-  //     for (let i = 0; i < 20; i++) {
-  //       var tmp = { count: 0 };
-  //       data.tsLastNow.push(tmp);
-  //     }
-  //   }
-  //   var option_yyxt2 = {
-  //     title: {
-  //       text: "油烟投诉趋势图",
-  //       textStyle: {
-  //         color: "#ccc",
-  //       },
-  //     },
-  //     tooltip: {
-  //       trigger: "axis",
-  //     },
-  //     legend: {
-  //       textStyle: {
-  //         color: "#ccc",
-  //       },
-  //       data: ["2021", "2022", "2023"],
-  //     },
-  //     grid: {
-  //       left: "3%",
-  //       right: "4%",
-  //       bottom: "3%",
-  //       containLabel: true,
-  //     },
-  //     toolbox: {
-  //       feature: {
-  //         saveAsImage: {},
-  //       },
-  //     },
-  //     xAxis: {
-  //       type: "category",
-  //       boundaryGap: false,
-  //       data: [
-  //         "01",
-  //         "02",
-  //         "03",
-  //         "04",
-  //         "05",
-  //         "06",
-  //         "07",
-  //         "08",
-  //         "09",
-  //         "10",
-  //         "11",
-  //         "12",
-  //       ],
-  //     },
-  //     yAxis: {
-  //       type: "value",
-  //     },
-  //     series: [
-  //       {
-  //         name: "2021",
-  //         type: "line",
-  //
-  //         data: [
-  //           data.tsLastTow[0].count,
-  //           data.tsLastTow[1].count,
-  //           data.tsLastTow[2].count,
-  //           data.tsLastTow[3].count,
-  //           data.tsLastTow[4].count,
-  //           data.tsLastTow[5].count,
-  //           data.tsLastTow[6].count,
-  //           data.tsLastTow[7].count,
-  //           data.tsLastTow[8].count,
-  //           data.tsLastTow[9].count,
-  //           data.tsLastTow[10].count,
-  //           data.tsLastTow[11].count,
-  //         ],
-  //       },
-  //       {
-  //         name: "2022",
-  //         type: "line",
-  //
-  //         data: [
-  //           data.tsLast[0].count,
-  //           data.tsLast[1].count,
-  //           data.tsLast[2].count,
-  //           data.tsLast[3].count,
-  //           data.tsLast[4].count,
-  //           data.tsLast[5].count,
-  //           data.tsLast[6].count,
-  //           data.tsLast[7].count,
-  //           data.tsLast[8].count,
-  //           data.tsLast[9].count,
-  //           data.tsLast[10].count,
-  //           data.tsLast[11].count,
-  //         ],
-  //       },
-  //       {
-  //         name: "2023",
-  //         type: "line",
-  //
-  //         data: [
-  //           data.tsLastNow[0].count,
-  //           data.tsLastNow[1].count,
-  //           data.tsLastNow[2].count,
-  //           data.tsLastNow[3].count,
-  //           data.tsLastNow[4].count,
-  //           data.tsLastNow[5].count,
-  //           data.tsLastNow[6].count,
-  //           data.tsLastNow[7].count,
-  //           data.tsLastNow[8].count,
-  //           data.tsLastNow[9].count,
-  //           data.tsLastNow[10].count,
-  //           data.tsLastNow[11].count,
-  //         ],
-  //       },
-  //     ],
-  //   };
-  //   myChart_yyxt2.setOption(option_yyxt2);
-  // });
 
   getCompanyType().then((data) => {
     var option_yyxt4 = {

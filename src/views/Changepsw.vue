@@ -39,13 +39,11 @@ import { ElMessage, ElDialog, tabBarProps } from "element-plus";
 import { params } from "@/store/store.js";
 import { getLogin } from "@/api/home.js";
 import axios from "axios";
+import { Base64 } from 'js-base64';
 
 const confirmPassword = ref("");
-const Base64 = require("js-base64").Base64;
-// const params = reactive({
-//   username: "",
-//   password: "123"
-// })
+// const Base64 = require("js-base64").Base64;
+
 onMounted(() => {
   params.password = "";
   if (localStorage.getItem("username"))
