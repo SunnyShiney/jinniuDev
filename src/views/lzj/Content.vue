@@ -54,13 +54,11 @@
               <el-sub-menu :index="idx + ''" :key="idx" collapse="true">
                 <template #title>
                   <div class="menu-img-default menu-img" :style="getIcon(item.icon)"></div>
-                  <!-- <el-image :src="require('@/assets/yyxt/' + item.icon)" class="menu-img"/> -->
                   <span style="font-size:20px">{{ item.title }}</span>
                 </template>
                 <el-menu-item v-for="(subitem, subidx) in item.submenu" :index="idx + '-' + subidx" :key="subidx"
                   @click="displayContent(subitem.to)">
                   <div class="menu-img-default menu-img" :style="getIcon(item.icon)"></div>
-                  <!-- <el-image :src="require('@/assets/yyxt/' + item.icon)" class="menu-img"/> -->
                   <span style="font-size:20px">{{ subitem.title }}</span>
                 </el-menu-item>
               </el-sub-menu>
@@ -68,7 +66,6 @@
             <template v-else>
               <el-menu-item :index="idx" :key="idx" @click="displayContent(item.to)">
                 <div class="menu-img-default menu-img" :style="getIcon(item.icon)"></div>
-                <!-- <el-image :src="require('@/assets/yyxt/' + item.icon)" class="menu-img"/> -->
                 <span style="font-size:20px">{{ item.title }}</span>
               </el-menu-item>
             </template>

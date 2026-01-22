@@ -46,7 +46,7 @@
 
         <el-image
           class="text-logo"
-          :src="require('@/assets/home/logo-title.jpg')"
+          :src="textLogo"
           fit="scale-down"
         ></el-image>
         <!-- <div class="classification" v-if="showDepts">
@@ -476,7 +476,7 @@
 
         <el-image
           class="banner"
-          :src="require('@/assets/home/banner.jpg')"
+          :src="banner"
           style=""
         >
         </el-image>
@@ -529,6 +529,10 @@ import {
 import axios from "axios";
 import { useStore } from "vuex";
 import moment from "moment";
+
+import textLogo from '@/assets/home/logo-title.jpg';
+import banner from '@/assets/home/banner.jpg';  
+
 const store = useStore();
 
 const data = ref([]);

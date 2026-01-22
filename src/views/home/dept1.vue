@@ -46,7 +46,7 @@
 
         <el-image
           class="text-logo"
-          :src="require('@/assets/home/logo-title.jpg')"
+          :src="textLogo"
           fit="scale-down"
         ></el-image>
         <div class="classification" v-if="showDepts">
@@ -652,7 +652,7 @@
       </el-main>
       <el-image
         class="banner"
-        :src="require('@/assets/home/banner.jpg')"
+        :src="banner"
         style=""
       >
       </el-image>
@@ -695,6 +695,11 @@ import { params } from "@/store/store.js";
 import { getGroup } from "@/api/ddzh";
 import axios from "axios";
 import { useStore } from "vuex";
+
+import textLogo from '@/assets/home/logo-title.jpg'
+import banner from '@/assets/home/banner.jpg'
+
+
 const store = useStore();
 
 import {

@@ -43,7 +43,6 @@
               <el-sub-menu :index="idx+''" :key="idx">
                 <template #title>
                   <el-icon><component :is="icons[item.icon]"></component></el-icon>
-                  <!-- <el-image :src="require('@/assets/yyxt/' + item.icon)" class="menu-img"/> -->
                   <span style="font-size:20px">{{item.title}}</span>
                 </template>
                 <el-menu-item
@@ -52,7 +51,6 @@
                     :key="subidx"
                     @click="displayContent(subitem.to)">
                   <el-icon><component :is="icons[subitem.icon]"/></el-icon>
-                  <!-- <el-image :src="require('@/assets/yyxt/' + item.icon)" class="menu-img"/> -->
                   <span style="font-size:20px">{{subitem.title}}</span>
                 </el-menu-item>
               </el-sub-menu>
@@ -60,7 +58,6 @@
             <template v-else>
               <el-menu-item :index="idx" :key="idx" @click="displayContent(item.to)">
                 <el-icon><component :is="icons[item.icon]"/></el-icon>
-                <!-- <el-image :src="require('@/assets/yyxt/' + item.icon)" class="menu-img"/> -->
                 <span style="font-size:20px">{{item.title}}</span>
               </el-menu-item>
             </template>

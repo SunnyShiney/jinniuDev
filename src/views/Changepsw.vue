@@ -42,14 +42,11 @@ import axios from "axios";
 import { Base64 } from 'js-base64';
 
 const confirmPassword = ref("");
-// const Base64 = require("js-base64").Base64;
 
 onMounted(() => {
   params.password = "";
   if (localStorage.getItem("username"))
     params.username = localStorage.getItem("username");
-//   if (localStorage.getItem("password"))
-//     params.password = localStorage.getItem("password");
 });
 const rememberUser = ref(false);
 const changeRememberUser = () => {

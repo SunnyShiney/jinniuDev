@@ -1,17 +1,7 @@
 <template>
 
   <el-card class="card" shadow="hover" :body-style="{ padding: '0px' }">
-    <!-- <template #header>
-      <ul v-if="url">
-        <div class="header">
-          <el-button class="el-button-succeed" type="text" @click="toSystem()">{{systemName}}</el-button>
-        </div>
-      </ul>
-      <div class="header" style="font-size:20px" v-else>
-        <el-button class="el-button-null" type="text" disabled plain @click="toSystem()">{{systemName}}</el-button>
-      </div>
-
-    </template> -->
+    
     <el-image v-if="image" class="image" :src="require('@/assets/home/' + image)"> </el-image>
     <el-image class="image" v-else :src="require('@/assets/home/img-jmhj.jpg')"></el-image>
 
@@ -29,13 +19,9 @@
 
 
     <div class="infoContainer" style="background-color:#1677D9;color:white">
-      <!-- logo -->
-      <!-- <div>
-        <el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large"></el-avatar>
-        </div> -->
+
       <!-- 汇总数据列表 -->
       <div>
-        <!-- <el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large" ></el-avatar> -->
         <ul v-if="infoList.length != 0" class="infoList">
           <li v-for="item in infoList">{{ item.infoKey + ": " + item.infoVal }}</li>
 

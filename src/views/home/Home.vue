@@ -2403,11 +2403,6 @@
             shadow="hover"
             :body-style="{ padding: '0px' }"
           >
-            <!-- <el-image
-              class="image"
-              :src="require('@/assets/home/img-ddzh2.jpg')"
-            >
-            </el-image> -->
             <ul v-if="item.url">
               <div class="header">
                 <el-button
@@ -2458,13 +2453,8 @@
               class="infoContainer"
               style="background-color: #2775b6; color: white"
             >
-              <!-- logo -->
-              <!-- <div>
-<el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large"></el-avatar>
-</div> -->
               <!-- 汇总数据列表 -->
               <div>
-                <!-- <el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large" ></el-avatar> -->
                 <ul class="infoList">
                   <li 
                     v-for="(info, index) in item.data" 
@@ -2611,10 +2601,6 @@
               class="infoContainer"
               style="background-color: #2775b6; color: white"
             >
-              <!-- logo -->
-              <!-- <div>
-<el-avatar class="logo-icon" :src="require('@/assets/home/'+logo)" size="large"></el-avatar>
-</div> -->
               <!-- 汇总数据列表 -->
               <div>
                 <ul class="infoList">

@@ -284,10 +284,7 @@
       </template>
     </Header>
   </el-container>
-  <!-- <el-header class="navHeader">
-    <el-image class="text-title" :src="require('@/assets/home/logo-title.jpg')"></el-image>
 
-  </el-header> -->
   <MapContent />
 
   <el-amap
@@ -2738,9 +2735,6 @@ const warningRuleForm = reactive({
 
 const warningRules = reactive({
   info: [{ required: "true", message: "处置人信息不能为空", trigger: "blur" }],
-  // name: [{ required: "true", message: "姓名不能为空", trigger: "blur" }],
-  // phone: [{ required: "true", message: "电话不能为空", trigger: "blur" }],
-  // place: [{ required: "true", message: "工作单位不能为空", trigger: "blur" }],
   content: [{ required: "true", message: "指令内容不能为空", trigger: "blur" }],
 });
 

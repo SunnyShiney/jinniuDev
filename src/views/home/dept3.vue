@@ -46,7 +46,7 @@
 
         <el-image
           class="text-logo"
-          :src="require('@/assets/home/logo-title.jpg')"
+          :src="textLogo"
           fit="scale-down"
         ></el-image>
         <div class="classification" v-if="showDepts">
@@ -162,26 +162,26 @@
           <el-image
             v-if="zero_selected == true"
             class="bg"
-            :src="require('@/assets/images/szcg/3.png')"
+            :src="szcgImg3"
             alt=""
           ></el-image>
           <el-image
             v-if="one_selected == true"
             class="bg"
-            :src="require('@/assets/images/szcg/1.png')"
+            :src="szcgImg1"
             alt=""
             fit="cover"
           ></el-image>
           <el-image
             v-if="two_selected == true"
             class="bg"
-            :src="require('@/assets/images/szcg/2.png')"
+            :src="szcgImg2"
             alt=""
           ></el-image>
           <el-image
             v-if="three_selected == true"
             class="bg"
-            :src="require('@/assets/images/szcg/3.png')"
+            :src="szcgImg3"
             alt=""
           ></el-image>
         </div>
@@ -189,7 +189,7 @@
           <el-image
             v-if="zero_selected == true"
             class="number"
-            :src="require('@/assets/images/szcg/number1.png')"
+            :src="szcgNumber1Img"
             alt=""
             fit="cover"
           >
@@ -212,7 +212,7 @@
             v-if="one_selected == true"
             class="number"
             style="margin-left: 400px"
-            :src="require('@/assets/images/szcg/number2.png')"
+            :src="szcgNumber2Img"
             alt=""
             fit="cover"
           >
@@ -241,7 +241,7 @@
           <el-image
             v-if="three_selected == true"
             class="number"
-            :src="require('@/assets/images/szcg/number4-1.png')"
+            :src="szcgNumber41Img"
             alt=""
             style="margin-left: 400px"
           ></el-image>
@@ -269,7 +269,7 @@
           <el-image
             v-if="two_selected == true"
             class="number"
-            :src="require('@/assets/images/szcg/number3.png')"
+            :src="szcgNumber3Img"
             style="margin-left: 400px"
             fit="cover"
             alt=""
@@ -412,7 +412,7 @@
       </el-main>
       <el-image
         class="banner"
-        :src="require('@/assets/home/banner.jpg')"
+        :src="banner"
         style=""
       >
       </el-image>
@@ -455,12 +455,24 @@ import { getMainTcwt, getAllEvents, getTrend } from "@/api/tcwt";
 import { getRdfx } from "@/api/szcg.js";
 import * as echarts from "echarts";
 import { useStore } from "vuex";
-const store = useStore();
 
 import { getMainAI } from "@/api/ai";
 import { getAiUrl } from "@/api/ai";
 import axios from "axios";
 import moment from "moment";
+
+import textLogo from '@/assets/home/logo-title.jpg'
+import banner from '@/assets/home/banner.jpg'
+import szcgImg3 from '@/assets/images/szcg/3.png'
+import szcgImg1 from '@/assets/images/szcg/1.png'
+import szcgImg2 from '@/assets/images/szcg/2.png'
+import szcgNumber1Img from '@/assets/images/szcg/number1.png'
+import szcgNumber2Img from '@/assets/images/szcg/number2.png'
+import szcgNumber3Img from '@/assets/images/szcg/number3.png'
+import szcgNumber41Img from '@/assets/images/szcg/number4-1.png'
+
+
+const store = useStore();
 const syd = reactive({ url: "" });
 const token = ref("");
 const sydUrl = ref(

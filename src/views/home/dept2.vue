@@ -46,7 +46,7 @@
 
         <el-image
           class="text-logo"
-          :src="require('@/assets/home/logo-title.jpg')"
+          :src="textLogo"
           fit="scale-down"
         ></el-image>
         <div class="classification" v-if="showDepts">
@@ -146,7 +146,7 @@
           >
             <div v-if="item.systemName == '景观照明管家'" style="display: flex">
               <el-image
-                :src="require('@/assets/jgzm/' + idx + '-1.jpg')"
+                :src="getJgzmImage(idx)"
                 style="width: 30%"
                 fit="scale-down"
               >
@@ -170,23 +170,6 @@
                 >
 
                 <div style="padding: 5px">
-<!--                  <template v-for="tableItem in tableData_jbgl">-->
-<!--                    <el-table-->
-<!--                      :data="tableItem.data"-->
-<!--                      class="table"-->
-<!--                      :fit="false"-->
-<!--                      :row-style="{ height: '80px' }"-->
-<!--                      :cell-style="cellstyle"-->
-<!--                      max-height="300"-->
-<!--                    >-->
-<!--                      <el-table-column-->
-<!--                        v-for="i in tableItem.headerNames.length"-->
-<!--                        :label="tableItem.headerNames[i - 1]"-->
-<!--                        :prop="tableItem.dataNames[i - 1]"-->
-<!--                        width="200"-->
-<!--                      />-->
-<!--                    </el-table>-->
-<!--                  </template>-->
 
                   <el-table
                       :data="tableData_jgzm"
@@ -232,15 +215,7 @@
             巡查/更新统计
           </div>
         </div>
-        <!-- <div class="jgzmInfo">
- 
-          <el-image
-            fit="scale-down"
-            :src="require('@/assets/jgzm/6-1.jpg')"
-            style="width: 30%; float: right; position: relative;"
-          >
-          </el-image>
-        </div> -->
+
 
         <div class="jgzmInfo" style="height: 40vh">
           <div class="table-container">
@@ -266,7 +241,7 @@
           <div class="image-container">
             <!-- 右侧图片 -->
             <el-image
-              :src="require('@/assets/jgzm/6-1.jpg')"
+              :src="jgzm61Img"
               style="width: 80%; margin-right: 15%; height: 35vh"
             ></el-image>
           </div>
@@ -274,49 +249,14 @@
         <div class="jgzmInfo">
           <div id="container_ggzp1" style="width: 100%; height: 50vh"></div>
         </div>
-        <!-- <template v-for="(item, idx) in choosedSystems">
-                    <div class="jgzmInfo" v-if="item.deptId == 2" :key="idx" :systemName="item.systemName" :url="item.url"
-                        :logo="item.systemLogo" :infoList="item.data" :image="item.image" :to="item.to"
-                        :deptId="item.deptId">
-
-                        <div v-if="item.systemName == '临街店铺管家'" style="display: flex;background-color:#e6e6e6;">
-
-                            <div style="padding:5px ;margin-top:2%;font-size: 20px;margin-left: 2%;">
-                                <el-button v-if="item.url" class="el-button-succeed" type="text" @click="toSystem(item)"
-                                    style="margin-top:10px;margin-left:10%">{{ item.systemName }}</el-button>
-                                <div style="margin-top: 1%;">
-                                    <li v-for="item in item.data" style="font-size: 20px;padding: 5px;">
-                                        {{ item.infoKey + ": " + item.infoVal }}
-                                    </li>
-                                </div>
-                            </div>
-                            <el-image fit="scale-down" :src="require('@/assets/jgzm/' + idx + '-1.jpg')"
-                                style="width:30%;float: right;margin-left: 50%;">
-                            </el-image>
-                        </div>
-
-                    </div>
-
-                </template> -->
       </el-main>
       <el-image
         class="banner"
-        :src="require('@/assets/home/banner.jpg')"
+        :src="banner"
         style=""
       >
       </el-image>
     </el-container>
-    <!-- 底部信息栏 -->
-    <!-- <el-container>
-      <el-footer class="footer">
-        <div class="foot-info">
-          
-          <li>Copyright 2022 http://zhxzzfj.XXXX.gov.cn All Rights Reserved</li>
-          <li>川公网安备 XXXXXXXXXXX号 ICP备案：蜀ICP备XXXXXXXX号 网站标识码：XXXXXXXXXX</li>
-          <li>主办：成都市金牛区综合行政执法局 地址：金牛区某街道某门牌号　电话：XXXX-XXXXXX</li>
-        </div>
-      </el-footer>
-    </el-container> -->
   </el-container>
 </template>
 
@@ -343,6 +283,15 @@ import { getMain } from "@/api/ggzp.js";
 import * as echarts from "echarts";
 import axios from "axios";
 import { useStore } from "vuex";
+
+import textLogo from '@/assets/home/logo-title.jpg'
+import banner from '@/assets/home/banner.jpg'
+import jgzm61Img from '@/assets/jgzm/6-1.jpg'
+
+const getJgzmImage = (index) => {
+  return new URL(`/src/assets/jgzm/${index}-1.jpg`, import.meta.url).href;
+};
+
 const store = useStore();
 
 const maxTableHeight = "35vh";
