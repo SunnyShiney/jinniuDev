@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="login-container">
     <div class="login-header">
       <div class="login-header-title">成都市金牛区综合行政执法局</div>
@@ -77,6 +77,102 @@
         </el-form-item>
         
       </el-form>
+    </div>
+  </div>
+</template> -->
+
+<template>
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-header-title">成都市金牛区综合行政执法局</div>
+    </div>
+
+    <div class="login-box">
+      <img class="login-box-logo" alt="城市管家" src="@/assets/login/login-logo.png" />
+      <div class="login-box-title">城市管家</div>
+      
+      <el-form
+        ref="loginFormRef"
+        :model="loginForm"
+        :rules="rules"
+        class="login-form"
+        @keyup.enter="login(loginFormRef)"
+      >
+        <el-form-item prop="username" class="form-item-username">
+          <el-input 
+            v-model="loginForm.username" 
+            placeholder="请输入用户名" 
+            size="large"
+            clearable
+            class="username-input-el"
+          />
+        </el-form-item>
+        
+        <el-form-item prop="password" class="form-item-password">
+          <el-input 
+            v-model="loginForm.password" 
+            type="password" 
+            placeholder="请输入密码" 
+            size="large"
+            show-password
+            class="password-input-el"
+          />
+        </el-form-item>
+        
+        <el-form-item prop="captchaCode" class="form-item-captcha">
+          <el-input 
+            v-model="loginForm.captchaCode" 
+            placeholder="请输入验证码" 
+            class="captcha-input-el"
+            size="large"
+            @keyup.enter="login(loginFormRef)"
+          />
+          <CaptchaComponent ref="captchaRef" class="captcha-component"/>
+        </el-form-item>
+
+        <div class="form-bottom-actions">
+          <div class="remember-password-group">
+            <input
+              class="remember-password-checkbox"
+              type="checkbox"
+              v-model="rememberUser"
+            />
+            <span class="remember-password-text-label">记住密码</span>
+          </div>
+          <el-button
+            class="forget-password-btn"
+            plain
+            link
+            color="#ffffff"
+            @click="forgetPassword"
+          >忘记密码？</el-button>
+        </div>
+
+        <el-form-item class="form-item-login-btn">
+          <el-button 
+            class="login-btn" 
+            type="primary" 
+            color="#0B9ED9" 
+            @click="login(loginFormRef)"
+            size="large"
+          >
+            登录
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+
+    <div class="login-footer">
+      <div class="footer-content">
+        <!-- <p>Copyright http://beian.miit.gov.cn/ All Rights Reserved</p> -->
+        <p>版权所有：成都市金牛区综合行政执法局（成都市金牛区城市管理局）</p>
+        <p>
+          <span>备案号：蜀ICP备2021001478号-2</span>
+          <span class="divider">|</span>
+          <span>链接：http://beian.miit.gov.cn/</span>
+        </p>
+        <!-- <p>主办：成都市金牛区综合行政执法局 &nbsp;&nbsp; 地址：金牛区某街道某门牌号 &nbsp;&nbsp; 电话：XXXX-XXXXXX</p> -->
+      </div>
     </div>
   </div>
 </template>
@@ -409,4 +505,48 @@ const forgetPassword = () => {
 .login-form :deep(.el-input__suffix-inner) {
     color: #fff;
 }
+
+/* #region 底部信息栏核心样式 */
+
+.login-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 20px 0;
+  text-align: center;
+  z-index: 10;
+}
+
+.footer-content {
+  /* 使用 flex 布局让文字排版更整齐 */
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.footer-content p {
+  margin: 0;
+  font-size: 12px;
+  /* 颜色建议使用这种半透明白色，适应大多数政府深色背景登录页 */
+  color: rgba(255, 255, 255, 0.7); 
+  /* 如果背景是浅色，请改为 color: #666; */
+  line-height: 1.8;
+}
+
+.divider {
+  margin: 0 10px;
+  opacity: 0.5;
+}
+
+/* 响应式处理：屏幕太矮时防止底部遮挡登录框 */
+@media screen and (max-height: 700px) {
+  .login-footer {
+    display: none; /* 或者 position: static 并调整 container 为 auto height */
+  }
+}
+
+/* #endregion */
+
+
+
 </style>

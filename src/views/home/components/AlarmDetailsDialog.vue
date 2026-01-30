@@ -1,40 +1,34 @@
 <template>
   <div class="dialog-content">
+    <div class="dialog-header">
+      {{ title }}
+    </div>
+
     <el-table 
       :data="defaultList" 
       border 
       stripe 
-      height="500px" 
+      max-height="600px" 
       style="width: 100%"
-      :header-cell-style="{ background: '#f5f7fa', color: '#606266' }"
+      :header-cell-style="{ background: '#f5f7fa', color: '#606266', fontWeight: 'bold' }"
     >
-      <el-table-column type="index" label="序号" width="60" align="center" />
-      
-      <el-table-column prop="event_time" label="发生时间" width="180" align="center" sortable />
-      
-      <el-table-column prop="site_name" label="告警类型/站点" width="150" align="center">
+      <el-table-column type="index" label="序号" width="60" align="center" :resizable="false"/>
+      <el-table-column prop="event_time" label="发生时间" width="200" align="center" sortable :resizable="false"/>
+      <el-table-column prop="site_name" label="告警类型/站点" width="160" align="center" :resizable="false">
         <template #default="scope">
-          <el-tag :type="scope.row.site_name === '点位告警' ? 'warning' : 'danger'">
-            {{ scope.row.site_name }}
+           <el-tag :type="getTagType(scope.row.site_name)" effect="light" round>
+            {{ scope.row.site_name || '未知类型' }}
           </el-tag>
         </template>
       </el-table-column>
-      
-      <el-table-column prop="Accident_cause" label="事故详情说明" show-overflow-tooltip />
-
-      <el-table-column label="操作" width="100" align="center" fixed="right">
+      <el-table-column prop="Accident_cause" label="事故详情说明" min-width="240" align="center" show-overflow-tooltip :resizable="false"/>
+      <el-table-column label="操作" width="100" align="center" fixed="right" :resizable="false">
         <template #default="scope">
-          <el-button 
-            type="primary" 
-            link 
-            size="small"
-            @click="onProcessClick(scope.$index, scope.row)"
-          >
+          <el-button type="primary" link size="small" style="font-weight: bold" @click="onProcessClick(scope.$index, scope.row)">
             处理
           </el-button>
         </template>
       </el-table-column>
-
     </el-table>
 
     <div class="pagination-container">
@@ -54,8 +48,10 @@
 <script setup>
 // Props 定义
 const props = defineProps({
+  // ✅ 2. 定义 title 属性，默认值可设为空或你常用的值
+  title: { type: String, default: '未处理的事件' },
+
   defaultList: { type: Array, default: () => [] },
-  eventHistoryList: Array,
   changeValue: [String, Number],
   warningCurrentPage: { type: Number, default: 1 },
   warningTotalRecords: { type: Number, default: 0 },
@@ -66,22 +62,17 @@ const props = defineProps({
 // Emits 定义
 const emit = defineEmits(['warning-handle-click', 'change-date', 'current-change'])
 
-// 翻页事件
-const handlePageChange = (val) => {
-  emit('current-change', val)
+// Methods 保持不变
+const handlePageChange = (val) => emit('current-change', val)
+const getTagType = (name) => {
+  if (!name) return 'info';
+  if (name.includes('点位')) return 'warning';
+  else if (name.includes('处置') || name.includes('车辆')) return 'danger';
+  else if (name.includes('已处理')) return 'success';
+  return '';
 }
-
-// 🔥 新增：点击“处理”按钮的事件
-const onProcessClick = (index, row) => { // 1. 这里必须接收两个参数
-
-  // 2. 防御性判断：检查 row 是否存在
-  if (!row) {
-    console.error('错误：当前行数据为空 (undefined)，无法处理！')
-    return
-  }
-
-  // 3. 关键：同时把 index 和 row 发送给父组件
-  // 必须保持顺序，因为父组件是按 (index, row) 接收的
+const onProcessClick = (index, row) => {
+  if (!row) return;
   emit('warning-handle-click', index, { ...row }) 
 }
 </script>
@@ -90,9 +81,21 @@ const onProcessClick = (index, row) => { // 1. 这里必须接收两个参数
 .dialog-content {
   padding: 10px;
 }
+
+/* ✅ 3. 将原先 <text> 的样式移到这里 */
+.dialog-header {
+  display: block; 
+  text-align: center; 
+  font-size: x-large; 
+  font-weight: bold;
+  margin-bottom: 15px; /* 增加下方间距，不让表格紧贴标题 */
+  color: #303133;      /* 建议加个深灰色，比纯黑好看 */
+}
+
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
 }
 </style>

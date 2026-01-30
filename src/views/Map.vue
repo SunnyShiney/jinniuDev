@@ -2329,8 +2329,8 @@
 <script setup>
 import "element-plus/theme-chalk/display.css";
 import { ArrowDown, Close, Pointer } from "@element-plus/icons-vue";
-import { ref, reactive, computed, onBeforeMount, onMounted } from "vue";
-import { ElMessage } from "element-plus";
+import { ref, reactive,watch,nextTick, computed, onBeforeMount, onMounted } from "vue";
+import { ElMessage,ElMessageBox} from "element-plus";
 import { useRouter } from "vue-router";
 import { params } from "@/store/store.js";
 
@@ -2705,121 +2705,9 @@ let warningPageCount = 0;
 
 let warningStart = moment("2023-03-01").format("YYYY-MM-DD");
 let warningEnd = moment().format("YYYY-MM-DD");
-let changeValue = ref(["", ""]);
-// 禁选今天以后的日期以及没有数据的
-const disabledDate = (time) => {
-  return (
-    time.getTime() > new Date().getTime()
-  );
-};
-function changeDate() {
-  warningStart = moment(changeValue.value[0]).format("YYYY-MM-DD");
-  warningEnd = moment(changeValue.value[1]).format("YYYY-MM-DD");
-  queryAllWarning(warningStart, warningEnd, 1);
-}
 
-const warningRuleFormRef = ref(null);
 const EventHistoryList = reactive([]);
 const defaultVisible = ref(false);
-const warningHandleEvent = ref(false);
-const warningToken = ref("");
-const event_uuid = ref("");
-const rowIndex = ref("");
-// const instructTime = ref("");
-const warningRuleForm = reactive({
-  name: "",
-  phone: "",
-  place: "",
-  content: "",
-});
-
-const warningRules = reactive({
-  info: [{ required: "true", message: "处置人信息不能为空", trigger: "blur" }],
-  content: [{ required: "true", message: "指令内容不能为空", trigger: "blur" }],
-});
-
-const warningSubmitForm = async () => {
-  const selectedValue = JSON.parse(warningRuleForm.info);
-
-  if (!warningRuleFormRef) return;
-
-  warningRuleFormRef.value.validate((valid) => {
-    if (valid) {
-      var telph = selectedValue.phone;
-      var res = confirm("确认提交？");
-      if (res) {
-        var re = /^1[3,4,5,6,7,8,9][0-9]{9}$/;
-        if (re.test(telph) == false) {
-          alert("电话号码输入有误！");
-          return false;
-        }
-      }
-      // instructTime.value = moment().format("YYYY-MM-DD HH:mm:ss");
-
-      axios({
-        url: "/ddzh/ws-message/single/web",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: warningToken.value,
-        },
-        data: JSON.stringify({
-          patrolTelephone: selectedValue.phone,
-          message: warningRuleForm.content,
-        }),
-        method: "post",
-      }).then(function (resp) {
-      });
-
-      axios({
-        url: "/api/event-query/updateHandleEvent",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + params.token,
-        },
-        method: "POST",
-        data: JSON.parse(
-          JSON.stringify({
-            id: event_uuid.value,
-            eventHandler: selectedValue.name,
-            handlerPhone: selectedValue.phone,
-            handlerWork: selectedValue.company,
-            instructionContent: warningRuleForm.content,
-          })
-        ),
-        method: "post",
-      }).then(function (resp) {
-        systemData.out.println("event_uuid:" + event_uuid);
-      });
-      alert("提交成功！");
-      warningHandleEvent.value = false;
-
-    } else {
-      alert("提交失败！");
-      return false;
-    }
-  });
-};
-
-const warningHandleClick = (index, row) => {
-  event_uuid.value = row.event_id;
-  rowIndex.value = index;
-  warningHandleEvent.value = true;
-  warningRuleForm.phone = "";
-  warningRuleForm.name = "";
-  warningRuleForm.place = "";
-  warningRuleForm.content = "";
-};
-const fault_details = () => {
-  var div = document.getElementById("dotClass");
-  if (div.style.backgroundColor == "rgb(17, 225, 176)") {
-    defaultVisible.value = true;
-  }
-  // 出现事故
-  if (div.style.backgroundColor == "rgb(225, 41, 17)") {
-    defaultVisible.value = true;
-  }
-};
-
 
 //#region --- 获取告警事件数据 ---
 const queryAllWarning = (warningStartTime, warningEndTime, pageNum) => {
@@ -2956,6 +2844,182 @@ const getSystemWarningData = async () => {
 };
 // #endregion
 
+
+// #region  查询日期处理逻辑
+// 统一管理日期查询参数
+const dateQuery = reactive({
+  warningStart: moment("2025-01-01").format("YYYY-MM-DD"),
+  warningEnd: moment().format("YYYY-MM-DD"),
+  logStart: moment().startOf("month").format("YYYY-MM-DD"),
+  logEnd: moment().add(1, "days").format("YYYY-MM-DD"),
+});
+// 日期选择器绑定值
+const changeValue = ref(["", ""]);
+const changeValueLog = ref(["", ""]);
+// 日期变更
+const disabledDate = (time) => time.getTime() > Date.now();
+
+const changeDate = () => {
+  if (changeValue.value?.length === 2) {
+    dateQuery.warningStart = moment(changeValue.value[0]).format("YYYY-MM-DD");
+    dateQuery.warningEnd = moment(changeValue.value[1]).format("YYYY-MM-DD");
+    // 这里如果需要触发查询，应该手动调用 queryAllWarning
+    queryAllWarning(dateQuery.warningStart, dateQuery.warningEnd, 1);
+  }
+};
+const changeDateLog = () => {
+  if (changeValueLog.value?.length === 2) {
+    dateQuery.logStart = moment(changeValueLog.value[0]).format("YYYY-MM-DD");
+    dateQuery.logEnd = moment(changeValueLog.value[1]).add(1, "days").format("YYYY-MM-DD");
+    // 假设 getClickLogList 在外部定义
+    if (typeof getClickLogList === 'function') {
+      getClickLogList(selectedSys.value, dateQuery.logStart, dateQuery.logEnd, 1);
+    }
+  }
+};
+// #endregion
+
+
+// #region 告警处理表单提交
+
+const warningHandleEvent = ref(false);
+const warningToken = ref("");
+const event_uuid = ref("");
+const rowIndex = ref("");
+const warningRuleFormRef = ref(null); // 建议变量名和 DOM 里的 ref="warningRuleFormRef" 保持一致
+
+// 1. 优化定义：显式声明 info，确保响应式结构清晰
+const warningRuleForm = reactive({
+  info: "",    // 对应下拉框选中的 JSON 字符串
+  name: "",    // 对应 real_name
+  phone: "",   // 对应 telephone
+  place: "",   // 对应 department
+  content: "", // 指令内容
+});
+
+const warningRules = reactive({
+  info: [{ required: true, message: "处置人信息不能为空", trigger: "change" }], // 改为 change 更合适
+  content: [{ required: true, message: "指令内容不能为空", trigger: "blur" }],
+});
+
+// 2. 新增：监听 info 变化，自动填充 name, phone, place
+// 这样你的 warningRuleForm 的四个字段就会有数据了
+watch(() => warningRuleForm.info, (newVal) => {
+  console.log("处置人信息变化:", newVal);
+  if (newVal) {
+    try {
+      // 尝试解析 JSON 字符串
+      const parsedObj = typeof newVal === 'string' ? JSON.parse(newVal) : newVal;
+      
+      warningRuleForm.name = parsedObj.name || "";
+      warningRuleForm.phone = parsedObj.phone || "";  
+      warningRuleForm.place = parsedObj.company || "";
+    } catch (e) {
+      console.error("处置人信息解析失败", e);
+      resetUserInfo();
+    }
+  } else {
+    resetUserInfo();
+  }
+});
+
+// 辅助函数：清空人员信息
+const resetUserInfo = () => {
+  warningRuleForm.name = "";
+  warningRuleForm.phone = "";
+  warningRuleForm.place = "";
+};
+
+const warningHandleClick = (index, row) => {
+  event_uuid.value = row.event_id;
+  rowIndex.value = index;
+  warningHandleEvent.value = true;
+  
+  // 重置表单
+  nextTick(() => {
+    warningRuleForm.info = ""; // 只要清空 info，watch 会自动清空 name/phone/place
+    warningRuleForm.content = "";
+    if (warningRuleFormRef.value) {
+        warningRuleFormRef.value.resetFields();
+    }
+  });
+};
+
+const warningSubmitForm = async (el) => {
+  const formEl = Array.isArray(el) ? el[0] : el;
+  if (!formEl) return;
+
+  await formEl.validate(async (valid) => {
+    if (!valid) return;
+
+    // 3. 校验逻辑优化：直接使用 form 里的 phone，无需再次 parse
+    console.log("提交的表单数据:", warningRuleForm);
+    const phoneReg = /^1[3-9]\d{9}$/;
+    if (!warningRuleForm.phone || !phoneReg.test(warningRuleForm.phone)) {
+      ElMessage.error('处置人电话号码缺失或格式有误！');
+      return;
+    }
+
+    try {
+      await ElMessageBox.confirm('确认提交处置指令吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      });
+    } catch {
+      return;
+    }
+
+    const commonHeaders = {
+      'Content-Type': 'application/json',
+      Authorization: warningToken.value 
+    };
+
+    // 4. 请求参数修正：使用已经映射好的 warningRuleForm 字段
+    // 注意：根据截图，telephone 才是正确的字段名，但在发给后端时
+    // 需要确认后端接收的是 mobile 还是 telephone。这里沿用你代码里的 mobile。
+
+    // 构造三个请求的 Promise
+    // 请求A: ws-message
+    // const reqSocket = axios.post('/ddzh/ws-message/single/web', {
+    //     patrolTelephone: selectedValue.phone,
+    //     message: warningRuleForm.content,
+    //   }, { headers: commonHeaders })
+    
+    // 请求B: 发送短信
+    const reqSms = axios.post('api/sms/sendMessage', {
+        mobile: warningRuleForm.phone, // 直接用
+        message: warningRuleForm.content,
+      }, { headers: commonHeaders });
+
+    // 请求C: 更新事件处理状态
+    const reqUpdate = axios.post('/api/event-query/updateHandleEvent', {
+        id: event_uuid.value,
+        eventHandler: warningRuleForm.name,  // 直接用
+        handlerPhone: warningRuleForm.phone, // 直接用
+        handlerWork: warningRuleForm.place,  // 直接用 (假设 department 对应 place/handlerWork)
+        instructionContent: warningRuleForm.content,
+      }, { 
+        headers: {
+          ...commonHeaders,
+          // 如果 params 未定义，请确保这里能取到值，或者从外部 props 传入
+          Authorization: typeof params !== 'undefined' ? ("Bearer " + params.token) : warningToken.value 
+        }
+      });
+
+    try {
+      await Promise.all([reqUpdate, reqSms]);
+      ElMessage.success('提交成功！');
+      warningHandleEvent.value = false;
+      handleLightClick(currentSystemName.value);
+      queryAllWarning(dateQuery.warningStart, dateQuery.warningEnd, warningCurrentPage.value);
+    } catch (error) {
+      console.error('接口请求失败:', error);
+      ElMessage.error('提交失败，请检查网络或联系管理员');
+    }
+  });
+};
+// #endregion
 
 
 function changeArea() {
